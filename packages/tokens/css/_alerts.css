@@ -1,0 +1,11 @@
+:root {
+  --vox-alert-success-bg: rgba(24, 126, 88, 0.28);
+  --vox-alert-success-text: #b7f4d8;
+  --vox-alert-success-border: rgba(140, 239, 198, 0.22);
+  --vox-alert-error-bg: rgba(134, 39, 74, 0.34);
+  --vox-alert-error-text: #ffd0e4;
+  --vox-alert-error-border: rgba(255, 181, 213, 0.18);
+  --vox-alert-pending-bg: rgba(104, 62, 86, 0.35);
+  --vox-alert-pending-text: #f3c8de;
+  --vox-alert-pending-border: rgba(210, 178, 200, 0.28);
+}

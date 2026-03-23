@@ -1,0 +1,13 @@
+:root {
+  --vox-status-running: #ec89b8;
+  --vox-status-running-bg: rgba(236, 137, 184, 0.1);
+  --vox-status-complete: #78c88c;
+  --vox-status-complete-bg: rgba(120, 200, 140, 0.07);
+  --vox-status-error: #f06464;
+  --vox-status-error-bg: rgba(240, 100, 100, 0.06);
+  --vox-status-aborted: #95928b;
+  --vox-status-aborted-bg: rgba(149, 146, 139, 0.07);
+
+  --color-danger: #e53935;
+  --color-success: #22c55e;
+}

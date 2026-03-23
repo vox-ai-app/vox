@@ -1,5 +1,5 @@
 {
-  "name": "vox-local",
+  "name": "vox",
   "version": "1.0.0",
   "description": "Open-source local-model desktop app for Vox",
   "main": "./out/main/index.js",
@@ -8,17 +8,22 @@
   "homepage": "https://www.vox-ai.chat",
   "repository": {
     "type": "git",
-    "url": "https://github.com/info-arnav/vox-local.git"
+    "url": "https://github.com/info-arnav/vox.git"
   },
   "bugs": {
-    "url": "https://github.com/info-arnav/vox-local/issues"
+    "url": "https://github.com/info-arnav/vox/issues"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
     "start": "electron-vite preview",
     "dev": "electron-vite dev",
     "build": "electron-vite build",
+    "build:packages": "npm run build --workspaces --if-present",
+    "release": "changeset publish",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
@@ -31,6 +36,8 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@info-arnav/vox-tokens": "^0.1.0",
+    "@info-arnav/vox-ui": "^0.1.0",
     "electron-updater": "^6.3.9"
   },
   "devDependencies": {

@@ -1,0 +1,95 @@
+.app-toast-layer {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.app-toast {
+  pointer-events: all;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--vox-bg-elevated, #262624);
+  border: 1px solid var(--vox-border-soft, rgba(255, 255, 255, 0.08));
+  box-shadow: var(--vox-card-shadow, 0 2px 8px rgba(0, 0, 0, 0.35));
+  animation: toastIn 0.28s cubic-bezier(0.28, 0, 0.14, 1);
+  overflow: hidden;
+  min-width: 240px;
+  max-width: 380px;
+}
+
+.app-toast-exit {
+  animation: toastOut 0.3s ease forwards;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+
+.app-toast-msg {
+  margin: 0;
+  flex: 1;
+  font-size: 0.84rem;
+  color: var(--vox-text-primary, #f0ece6);
+  line-height: 1.4;
+}
+
+.app-toast-close {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--vox-text-muted, #5c5a56);
+  cursor: pointer;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-toast-close:hover {
+  color: var(--vox-text-primary, #f0ece6);
+}
+
+.app-toast-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--vox-accent, #ec89b8);
+  animation: toastBar 5.5s linear forwards;
+}
+
+@keyframes toastBar {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.app-toast-error .app-toast-bar {
+  background: var(--vox-status-error, #f06464);
+}
+
+.app-toast-success .app-toast-bar {
+  background: var(--vox-status-complete, #78c88c);
+}

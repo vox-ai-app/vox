@@ -1,0 +1,27 @@
+:root {
+  --vox-bg-base: #1a1918;
+  --vox-bg-surface: #1f1e1c;
+  --vox-bg-elevated: #262624;
+  --vox-bg-input: rgba(255, 255, 255, 0.06);
+  --vox-bg-overlay: #242422;
+  --vox-bg-overlay-collapsed: #21211e;
+
+  --vox-text-primary: #f0ece6;
+  --vox-text-secondary: #8a8680;
+  --vox-text-muted: #5c5a56;
+  --vox-text-on-accent: #2f2229;
+
+  --vox-border-soft: rgba(255, 255, 255, 0.08);
+  --vox-border-medium: rgba(255, 255, 255, 0.12);
+  --vox-border-strong: rgba(236, 137, 184, 0.5);
+
+  --vox-accent: #ec89b8;
+  --vox-accent-soft: rgba(236, 137, 184, 0.1);
+  --vox-accent-medium: rgba(236, 137, 184, 0.25);
+  --vox-accent-border: rgba(236, 137, 184, 0.18);
+
+  --brand-start: #ec89b8;
+  --brand-ink: #2f2229;
+  --text-primary: #f0ece6;
+  --text-muted: #5c5a56;
+}

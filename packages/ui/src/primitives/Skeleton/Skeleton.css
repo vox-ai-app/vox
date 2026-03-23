@@ -1,0 +1,78 @@
+.workspace-skeleton-line {
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  animation: vox-skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+.workspace-skeleton-wordmark {
+  width: 48px;
+  height: 12px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  animation: vox-skeleton-pulse 1.6s ease-in-out infinite;
+  margin: 0 8px 8px;
+}
+
+.workspace-skeleton-nav-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 12px;
+}
+
+.workspace-skeleton-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  animation: vox-skeleton-pulse 1.6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.workspace-skeleton-user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+}
+
+.workspace-skeleton-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  animation: vox-skeleton-pulse 1.6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.workspace-skeleton-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: flex-end;
+}
+
+.workspace-skeleton-chat-area {
+  flex: 1;
+}
+
+.workspace-skeleton-composer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.workspace-skeleton-composer-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  animation: vox-skeleton-pulse 1.6s ease-in-out infinite;
+  flex-shrink: 0;
+}

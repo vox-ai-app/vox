@@ -1,0 +1,35 @@
+:root {
+  --vox-duration-fast: 120ms;
+  --vox-duration-normal: 200ms;
+  --vox-duration-slow: 300ms;
+  --vox-ease-out: cubic-bezier(0.28, 0, 0.14, 1);
+  --vox-ease-in-out: cubic-bezier(0.87, 0, 0.13, 1);
+}
+
+@keyframes vox-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes vox-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes vox-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}

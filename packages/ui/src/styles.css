@@ -1,0 +1,10 @@
+/* @info-arnav/vox-ui — aggregate stylesheet */
+/* Import this once in your app entry point */
+
+/* Primitives */
+@import './primitives/Drawer/Drawer.css';
+@import './primitives/Toast/Toast.css';
+@import './primitives/Skeleton/Skeleton.css';
+@import './primitives/CopyButton/CopyButton.css';
+@import './primitives/ExpandableMarkdown/ExpandableMarkdown.css';
+@import './primitives/IconButton/IconButton.css';

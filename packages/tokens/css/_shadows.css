@@ -1,0 +1,6 @@
+:root {
+  --vox-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 20px 42px rgba(3, 3, 5, 0.45);
+  --vox-popover-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
+  --vox-overlay-card-shadow: 0 8px 28px rgba(0, 0, 0, 0.35), 0 1px 6px rgba(0, 0, 0, 0.25);
+}

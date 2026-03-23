@@ -1,0 +1,59 @@
+{
+  "name": "@info-arnav/vox-ui",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Shared UI components for the Vox design system",
+  "main": "./src/index.js",
+  "private": false,
+  "exports": {
+    ".": "./src/index.js",
+    "./primitives": "./src/primitives/index.js",
+    "./composites": "./src/composites/index.js",
+    "./layouts": "./src/layouts/index.js",
+    "./hooks": "./src/hooks/index.js",
+    "./utils": "./src/utils/index.js",
+    "./styles.css": "./src/styles.css"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "exports": {
+      ".": "./dist/index.js",
+      "./primitives": "./dist/primitives/index.js",
+      "./composites": "./dist/composites/index.js",
+      "./layouts": "./dist/layouts/index.js",
+      "./hooks": "./dist/hooks/index.js",
+      "./utils": "./dist/utils/index.js",
+      "./styles.css": "./dist/styles.css"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/info-arnav/vox"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@info-arnav/vox-tokens": "^0.1.0"
+  },
+  "dependencies": {
+    "lucide-react": "^0.575.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.0"
+  },
+  "devDependencies": {
+    "vite": "^7.2.6",
+    "@vitejs/plugin-react": "^5.1.1"
+  }
+}

@@ -1,0 +1,21 @@
+:root {
+  --vox-surface-hover: rgba(255, 255, 255, 0.05);
+  --vox-surface-active: rgba(255, 255, 255, 0.08);
+  --vox-surface-primary: #2e2d2b;
+  --vox-surface-secondary: #34332f;
+
+  --vox-user-bubble: rgba(236, 137, 184, 0.1);
+  --vox-user-bubble-border: rgba(236, 137, 184, 0.15);
+  --vox-user-bubble-text: #f0ece6;
+
+  --vox-tool-bg: #2e2d2b;
+  --vox-tool-border: rgba(255, 255, 255, 0.08);
+  --vox-tool-running-border: rgba(236, 137, 184, 0.3);
+  --vox-tool-running-bg: rgba(236, 137, 184, 0.05);
+
+  --vox-timeline-line: rgba(255, 255, 255, 0.08);
+  --vox-timeline-node: rgba(236, 137, 184, 0.2);
+
+  --vox-code-bg: #1a1918;
+  --vox-placeholder: #5c5a56;
+}

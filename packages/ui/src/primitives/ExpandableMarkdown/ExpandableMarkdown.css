@@ -1,0 +1,14 @@
+.activity-tool-expand {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.72rem;
+  color: rgba(236, 137, 184, 0.6);
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+
+.activity-tool-expand:hover {
+  color: rgba(236, 137, 184, 0.9);
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@info-arnav/vox-tokens",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "private": false,
+  "description": "Design tokens for the Vox design system",
+  "main": "./js/index.js",
+  "exports": {
+    ".": "./js/index.js",
+    "./css": "./css/index.css",
+    "./css/*": "./css/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/info-arnav/vox"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "files": [
+    "css",
+    "js",
+    "LICENSE"
+  ]
+}

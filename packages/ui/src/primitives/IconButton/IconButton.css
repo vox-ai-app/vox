@@ -1,0 +1,61 @@
+.workspace-icon-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--vox-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.workspace-icon-button:hover,
+.workspace-icon-button:focus-visible {
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--vox-text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.workspace-icon-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.workspace-send-button {
+  border-radius: 10px;
+  color: #1f1e1c;
+  border-color: transparent;
+  background: #ec89b8;
+}
+
+.workspace-send-button:hover:not(:disabled),
+.workspace-send-button:focus-visible:not(:disabled) {
+  color: #1f1e1c;
+  border-color: transparent;
+  background: #ec89b8;
+  opacity: 0.88;
+}
+
+.workspace-send-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.workspace-stop-button {
+  color: #f07070;
+  background: transparent;
+  border: 1px solid rgba(240, 112, 112, 0.2);
+}
+
+.workspace-stop-button:hover:not(:disabled),
+.workspace-stop-button:focus-visible:not(:disabled) {
+  background: rgba(240, 112, 112, 0.08);
+  border-color: rgba(240, 112, 112, 0.35);
+  color: #f07070;
+}

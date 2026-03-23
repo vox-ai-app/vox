@@ -1,0 +1,26 @@
+.chat-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--vox-border-soft, rgba(255, 255, 255, 0.08));
+  background: transparent;
+  color: var(--vox-text-muted, #5c5a56);
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 120ms, border-color 120ms, background 120ms;
+  font-family: inherit;
+}
+
+.chat-copy-btn:hover {
+  color: var(--vox-text-primary, #f0ece6);
+  border-color: var(--vox-border-medium, rgba(255, 255, 255, 0.12));
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.chat-copy-btn-copied {
+  color: var(--vox-status-complete, #78c88c);
+  border-color: rgba(120, 200, 140, 0.25);
+}
