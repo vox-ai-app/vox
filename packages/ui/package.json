@@ -52,7 +52,7 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
-    "lucide-react": "^0.575.0",
+    "lucide-react": "^1.0.1",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.0"
   },
