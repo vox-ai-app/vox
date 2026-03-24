@@ -48,6 +48,6 @@
     "docx": "^9.6.0",
     "html-to-text": "^9.0.5",
     "pdf-lib": "^1.17.1",
-    "pptxgenjs": "^3.12.0"
+    "pptxgenjs": "^4.0.1"
   }
 }
