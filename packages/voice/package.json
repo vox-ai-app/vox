@@ -1,6 +1,6 @@
 {
   "name": "@info-arnav/vox-voice",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "license": "MIT",
   "description": "ONNX wake-word detection, voice window, and voice lifecycle for Vox",

@@ -31,10 +31,9 @@ const startWakeWord = async () => {
     })
     worker.on('message', (msg) => {
       if (msg.type === 'detected') {
-        _onDetected()
-        worker?.postMessage({
-          type: 'pause'
-        })
+        if (_onDetected() !== false) {
+          worker?.postMessage({ type: 'pause' })
+        }
       } else if (msg.type === 'error') {
         _onError(new Error(msg.message || 'Wake word worker error'))
         _log.error('[voice] worker error:', msg.message)

@@ -1,6 +1,6 @@
 {
   "name": "@info-arnav/vox-tools",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "license": "MIT",
   "description": "Tool infrastructure, builtins, docs, and definitions for Vox",

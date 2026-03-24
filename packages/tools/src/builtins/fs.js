@@ -3,6 +3,14 @@ import os from 'os'
 import path from 'path'
 import { randomUUID } from 'crypto'
 import { clampNumber } from '../schema.js'
+
+let _documentParser = null
+let _parsedExtensions = new Set()
+
+export const setDocumentParser = (fn, extensions) => {
+  _documentParser = fn
+  _parsedExtensions = extensions instanceof Set ? extensions : new Set(extensions || [])
+}
 function resolveLocalPath(inputPath) {
   const raw = String(inputPath || '').trim()
   if (!raw) throw new Error('Path is required.')
@@ -185,25 +193,64 @@ async function readLocalFile(args) {
     .trim()
     .toLowerCase()
   const encoding = enc === 'base64' ? 'base64' : 'utf8'
+  const reqMaxChars = Number(args?.maxChars)
+  const reqMaxBytes = Number(args?.maxBytes)
+  const maxChars =
+    Number.isFinite(reqMaxChars) && reqMaxChars > 0
+      ? Math.min(Math.floor(reqMaxChars), 120000)
+      : 60000
+  const maxBytes =
+    Number.isFinite(reqMaxBytes) && reqMaxBytes > 0
+      ? Math.min(Math.floor(reqMaxBytes), 500000)
+      : 120000
+  const ext = path.extname(targetPath).toLowerCase()
   const fileStats = await fs.stat(targetPath)
-  const fileBuffer = await fs.readFile(targetPath)
-  if (encoding === 'base64') {
+  if (encoding !== 'base64' && _documentParser && _parsedExtensions.has(ext)) {
+    const readResult = await _documentParser(targetPath)
+    if (readResult?.unsupported) {
+      return {
+        path: targetPath,
+        content: '',
+        encoding: 'utf8',
+        format: ext.slice(1),
+        truncated: false,
+        size: fileStats.size,
+        modifiedAt: fileStats.mtime.toISOString(),
+        message: readResult.unsupportedReason || `Could not extract text from ${ext}.`
+      }
+    }
+    const fullText = String(readResult?.text || '')
+    const content = fullText.slice(0, maxChars)
     return {
       path: targetPath,
-      content: fileBuffer.toString('base64'),
+      content,
+      encoding: 'utf8',
+      format: ext.slice(1),
+      truncated: readResult?.truncated || fullText.length > maxChars,
+      size: fileStats.size,
+      modifiedAt: fileStats.mtime.toISOString()
+    }
+  }
+  const fileBuffer = await fs.readFile(targetPath)
+  if (encoding === 'base64') {
+    const buf = fileBuffer.subarray(0, maxBytes)
+    return {
+      path: targetPath,
+      content: buf.toString('base64'),
       encoding,
-      truncated: false,
-      returnedBytes: fileBuffer.length,
+      truncated: fileBuffer.length > buf.length,
+      returnedBytes: buf.length,
       size: fileStats.size,
       modifiedAt: fileStats.mtime.toISOString()
     }
   }
   const text = fileBuffer.toString('utf8')
+  const truncated = text.slice(0, maxChars)
   return {
     path: targetPath,
-    content: text,
+    content: truncated,
     encoding,
-    truncated: false,
+    truncated: text.length > truncated.length,
     size: fileStats.size,
     modifiedAt: fileStats.mtime.toISOString()
   }

@@ -7,6 +7,18 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.0.2] - 2026-03-24
+
+### Added
+
+- `@info-arnav/vox-tools` — `setDocumentParser(fn, extensions)` injectable on `builtins/fs` to enable rich document parsing (PDF, DOCX, PPTX, etc.) inside `read_local_file`.
+
+### Fixed
+
+- `@info-arnav/vox-voice` — Wake word worker now only pauses when `_onDetected()` returns a non-false value, allowing callers to reject activation without stalling detection.
+
+---
+
 ## [1.0.1] - 2026-03-24
 
 ### Changed
