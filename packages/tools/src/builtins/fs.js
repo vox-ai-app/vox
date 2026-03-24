@@ -69,7 +69,7 @@ const writeFileDef = {
 const readFileDef = {
   name: 'read_local_file',
   description:
-    "Read a local file from the user's machine. Returns text content (utf8) or base64 for binary files.",
+    "Read a local file from the user's machine. Returns text content (utf8) or base64 for binary files. Supports pagination via offset/length — call again with a higher offset to read more.",
   parameters: {
     type: 'object',
     properties: {
@@ -77,13 +77,15 @@ const readFileDef = {
         type: 'string',
         description: 'Target file path. Supports absolute paths and ~/ shortcuts.'
       },
-      maxChars: {
+      offset: {
         type: 'integer',
-        description: 'Maximum characters to return in utf8 mode (default 60000, max 120000).'
+        description:
+          'Character offset (utf8) or byte offset (base64) to start reading from. Default 0.'
       },
-      maxBytes: {
+      length: {
         type: 'integer',
-        description: 'Maximum bytes to return in base64 mode (default 120000, max 500000).'
+        description:
+          'Number of characters (utf8, default 30000, max 60000) or bytes (base64, default 120000, max 500000) to return.'
       },
       encoding: {
         type: 'string',
@@ -193,19 +195,14 @@ async function readLocalFile(args) {
     .trim()
     .toLowerCase()
   const encoding = enc === 'base64' ? 'base64' : 'utf8'
-  const reqMaxChars = Number(args?.maxChars)
-  const reqMaxBytes = Number(args?.maxBytes)
-  const maxChars =
-    Number.isFinite(reqMaxChars) && reqMaxChars > 0
-      ? Math.min(Math.floor(reqMaxChars), 120000)
-      : 60000
-  const maxBytes =
-    Number.isFinite(reqMaxBytes) && reqMaxBytes > 0
-      ? Math.min(Math.floor(reqMaxBytes), 500000)
-      : 120000
+  const reqOffset = Number(args?.offset)
+  const offset = Number.isFinite(reqOffset) && reqOffset > 0 ? Math.floor(reqOffset) : 0
   const ext = path.extname(targetPath).toLowerCase()
   const fileStats = await fs.stat(targetPath)
   if (encoding !== 'base64' && _documentParser && _parsedExtensions.has(ext)) {
+    const reqLen = Number(args?.length)
+    const length =
+      Number.isFinite(reqLen) && reqLen > 0 ? Math.min(Math.floor(reqLen), 60000) : 30000
     const readResult = await _documentParser(targetPath)
     if (readResult?.unsupported) {
       return {
@@ -213,44 +210,59 @@ async function readLocalFile(args) {
         content: '',
         encoding: 'utf8',
         format: ext.slice(1),
-        truncated: false,
         size: fileStats.size,
         modifiedAt: fileStats.mtime.toISOString(),
         message: readResult.unsupportedReason || `Could not extract text from ${ext}.`
       }
     }
     const fullText = String(readResult?.text || '')
-    const content = fullText.slice(0, maxChars)
+    const content = fullText.slice(offset, offset + length)
+    const remaining = Math.max(0, fullText.length - offset - content.length)
     return {
       path: targetPath,
       content,
       encoding: 'utf8',
       format: ext.slice(1),
-      truncated: readResult?.truncated || fullText.length > maxChars,
+      offset,
+      length: content.length,
+      remaining,
+      total: fullText.length,
       size: fileStats.size,
       modifiedAt: fileStats.mtime.toISOString()
     }
   }
   const fileBuffer = await fs.readFile(targetPath)
   if (encoding === 'base64') {
-    const buf = fileBuffer.subarray(0, maxBytes)
+    const reqLen = Number(args?.length)
+    const length =
+      Number.isFinite(reqLen) && reqLen > 0 ? Math.min(Math.floor(reqLen), 500000) : 120000
+    const buf = fileBuffer.subarray(offset, offset + length)
+    const remaining = Math.max(0, fileBuffer.length - offset - buf.length)
     return {
       path: targetPath,
       content: buf.toString('base64'),
       encoding,
-      truncated: fileBuffer.length > buf.length,
-      returnedBytes: buf.length,
+      offset,
+      length: buf.length,
+      remaining,
+      total: fileBuffer.length,
       size: fileStats.size,
       modifiedAt: fileStats.mtime.toISOString()
     }
   }
   const text = fileBuffer.toString('utf8')
-  const truncated = text.slice(0, maxChars)
+  const reqLen = Number(args?.length)
+  const length = Number.isFinite(reqLen) && reqLen > 0 ? Math.min(Math.floor(reqLen), 60000) : 30000
+  const content = text.slice(offset, offset + length)
+  const remaining = Math.max(0, text.length - offset - content.length)
   return {
     path: targetPath,
-    content: truncated,
+    content,
     encoding,
-    truncated: text.length > truncated.length,
+    offset,
+    length: content.length,
+    remaining,
+    total: text.length,
     size: fileStats.size,
     modifiedAt: fileStats.mtime.toISOString()
   }

@@ -118,6 +118,10 @@ export const readIndexedFileForTool = async (payload = {}) => {
     throw new Error('Path is required.')
   }
   const normalizedPath = path.resolve(rawPath)
+  const reqOffset = Number(payload?.offset)
+  const offset = Number.isFinite(reqOffset) && reqOffset > 0 ? Math.floor(reqOffset) : 0
+  const reqLen = Number(payload?.length)
+  const length = Number.isFinite(reqLen) && reqLen > 0 ? Math.min(Math.floor(reqLen), 60000) : 30000
   await openKnowledgeDb()
   const row = dbGetEntry(normalizedPath)
   const entry = row
@@ -138,7 +142,6 @@ export const readIndexedFileForTool = async (payload = {}) => {
       path: normalizedPath,
       kind: fileKind || entry.kind || 'unknown',
       content: '',
-      truncated: false,
       message: 'File format not supported for text extraction.'
     }
   }
@@ -148,7 +151,6 @@ export const readIndexedFileForTool = async (payload = {}) => {
       path: normalizedPath,
       kind: fileKind,
       content: '',
-      truncated: false,
       message: readResult.unsupportedReason || 'File format not supported for text extraction.',
       indexedAt: entry.indexedAt || null
     }
@@ -158,17 +160,21 @@ export const readIndexedFileForTool = async (payload = {}) => {
       path: normalizedPath,
       kind: fileKind,
       content: '',
-      truncated: false,
       message: 'Text extraction failed: file appears to be binary.',
       indexedAt: entry.indexedAt || null
     }
   }
   const fullText = String(readResult?.text || '')
+  const content = fullText.slice(offset, offset + length)
+  const remaining = Math.max(0, fullText.length - offset - content.length)
   return {
     path: normalizedPath,
     kind: fileKind,
-    content: fullText,
-    truncated: Boolean(readResult?.truncated),
+    content,
+    offset,
+    length: content.length,
+    remaining,
+    total: fullText.length,
     indexedAt: entry.indexedAt || null
   }
 }

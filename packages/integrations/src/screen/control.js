@@ -121,9 +121,10 @@ export const getMousePosition = (_, { signal } = {}) =>
       y: y ?? 0
     }
   })
-export const getUiElements = ({ app } = {}, { signal } = {}) =>
+export const getUiElements = ({ app, maxElements } = {}, { signal } = {}) =>
   enqueueScreen(async () => {
     ensureAccessibility()
+    const limit = Math.max(1, Math.min(1000, Number(maxElements) || 200))
     let script = UI_ELEMENTS_SCRIPT
     if (app) {
       script = UI_ELEMENTS_SCRIPT.replace(
@@ -140,7 +141,14 @@ export const getUiElements = ({ app } = {}, { signal } = {}) =>
         },
         signal
       )
-      return JSON.parse(stdout.trim())
+      const all = JSON.parse(stdout.trim())
+      const elements = Array.isArray(all) ? all : (all?.elements ?? [])
+      const total = elements.length
+      return {
+        elements: elements.slice(0, limit),
+        total,
+        truncated: total > limit
+      }
     } catch (err) {
       throw new Error(`UI element inspection failed: ${err?.message || err}`)
     } finally {

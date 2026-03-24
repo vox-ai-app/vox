@@ -59,8 +59,10 @@ async function runLocalCommand(args, { signal } = {}) {
       (error, stdout, stderr) => {
         if (signal) signal.removeEventListener('abort', onAbort)
         const durationMs = Date.now() - startedAt
-        const safeStdout = String(stdout || '').slice(0, maxOutputChars)
-        const safeStderr = String(stderr || '').slice(0, maxOutputChars)
+        const stdoutFull = String(stdout || '')
+        const stderrFull = String(stderr || '')
+        const safeStdout = stdoutFull.slice(0, maxOutputChars)
+        const safeStderr = stderrFull.slice(0, maxOutputChars)
         if (!error) {
           resolve({
             command,
@@ -69,7 +71,9 @@ async function runLocalCommand(args, { signal } = {}) {
             timedOut: false,
             durationMs,
             stdout: safeStdout,
-            stderr: safeStderr
+            stderr: safeStderr,
+            stdoutTruncated: stdoutFull.length > safeStdout.length,
+            stderrTruncated: stderrFull.length > safeStderr.length
           })
           return
         }
@@ -90,7 +94,9 @@ async function runLocalCommand(args, { signal } = {}) {
           stdout: safeStdout,
           stderr: wasAborted
             ? 'Aborted by user'
-            : safeStderr || String(error?.message || 'Command failed')
+            : safeStderr || String(error?.message || 'Command failed'),
+          stdoutTruncated: stdoutFull.length > safeStdout.length,
+          stderrTruncated: wasAborted ? false : stderrFull.length > safeStderr.length
         })
       }
     )

@@ -192,6 +192,10 @@ export const SCREEN_TOOL_DEFINITIONS = [
           type: 'string',
           description:
             'Name of the macOS app process to inspect (e.g. "Safari", "Mail", "Finder"). If omitted, inspects whichever app is currently in the foreground.'
+        },
+        maxElements: {
+          type: 'integer',
+          description: 'Maximum number of UI elements to return (default 200, max 1000).'
         }
       }
     }

@@ -28,7 +28,7 @@ export const KNOWLEDGE_TOOL_DEFINITIONS = [
   {
     name: 'read_indexed_file',
     description:
-      'Read file data by absolute path, restricted to indexed files only. Returns extracted text for supported formats.',
+      'Read file data by absolute path, restricted to indexed files only. Returns extracted text for supported formats. Supports pagination via offset/length — call again with a higher offset to read more.',
     parameters: {
       type: 'object',
       properties: {
@@ -36,9 +36,13 @@ export const KNOWLEDGE_TOOL_DEFINITIONS = [
           type: 'string',
           description: 'Absolute file path present in indexed files.'
         },
-        maxChars: {
+        offset: {
           type: 'integer',
-          description: 'Maximum characters to return (default 60000, max 120000).'
+          description: 'Character offset to start reading from. Default 0.'
+        },
+        length: {
+          type: 'integer',
+          description: 'Number of characters to return (default 30000, max 60000).'
         }
       },
       required: ['path']
