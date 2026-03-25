@@ -1,11 +1,13 @@
 # Contributing to Vox
 
+Vox is a local-first AI assistant built on Electron. The core packages (MCP, tools, voice, indexing, UI) are platform-agnostic. The macOS-specific parts live in `vox-integrations` — that's where platform parity work happens, and it's one of the best places to contribute.
+
 ## Prerequisites
 
-- macOS (the app and all integrations are macOS-only)
 - Node.js 20+
 - npm 10+
 - Ollama or LMStudio running locally
+- macOS to run the app itself (for now — see [Platform support](#platform-support) below)
 
 ## Monorepo setup
 
@@ -20,6 +22,7 @@ vox/
 │   ├── integrations/     @vox-ai-app/vox-integrations
 │   ├── voice/            @vox-ai-app/vox-voice
 │   ├── indexing/         @vox-ai-app/vox-indexing
+│   ├── parser/           @vox-ai-app/vox-parser
 │   └── ui/               @vox-ai-app/vox-ui
 └── package.json
 ```
@@ -40,10 +43,34 @@ vox-mcp
 
 vox-voice     (standalone — wake word + voice window)
 vox-indexing  (standalone — file indexing runtime)
+vox-parser    (standalone — document parsing)
 vox-ui        (standalone — React components)
 ```
 
 When changing a package that others depend on, bump its version and update the dependent's `package.json` too.
+
+## Platform support
+
+The app currently runs on macOS. This is not a permanent constraint — it reflects where the integrations exist today, not a limitation of the architecture.
+
+**What is platform-specific:**
+- `vox-integrations` — screen control, Mail, iMessage (all use macOS APIs: osascript, Accessibility, SQLite DBs)
+- The Electron app's permission requests (microphone, screen recording, etc.)
+
+**What is already cross-platform:**
+- `vox-mcp`, `vox-tools`, `vox-voice`, `vox-indexing`, `vox-parser`, `vox-ui` — all pure Node.js / React, no OS-specific code
+
+**How to add Windows or Linux support:**
+
+The integrations package uses a factory pattern. Each capability (screen, mail, etc.) exports a platform factory. Adding a new platform means creating a new implementation directory alongside the existing `mac/` one:
+
+```
+packages/integrations/src/screen/control/
+├── mac/        ← exists today
+└── windows/    ← add this
+```
+
+The factory in `src/screen/index.js` selects the right implementation at runtime based on `process.platform`. No other packages need to change.
 
 ## Running a single package in isolation
 
