@@ -7,6 +7,17 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.0.1] - 2026-03-25
+
+### Added
+
+- `@vox-ai-app/vox-indexing/process` now exposes `setOnStatusChange(fn)` to subscribe to runtime status updates from the indexing utility process.
+
+### Changed
+
+- Indexing runtime status updates are now forwarded from the child process to the host process.
+- Status notifications are debounced (~100ms) before emission to reduce high-frequency update noise.
+
 ## [1.0.0] - 2026-03-24
 
 ### Added

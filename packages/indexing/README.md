@@ -85,6 +85,20 @@ registerIndexingIpc()
 //            indexing:get-indexed-children, indexing:reset-state
 ```
 
+### Process status subscription (advanced)
+
+For apps that want push-based status updates from the utility process:
+
+```js
+import { setOnStatusChange } from '@vox-ai-app/vox-indexing/process'
+
+setOnStatusChange((status) => {
+  // status shape matches getIndexingStatus()
+  // updates are coalesced (~100ms) to avoid noisy bursts
+  console.log(status)
+})
+```
+
 ## Supported file types
 
 `.pdf`, `.docx`, `.pptx`, `.xlsx`, `.odt`, `.odp`, `.ods`, `.rtf`, and plain text files.
