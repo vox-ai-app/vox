@@ -1,0 +1,131 @@
+.app-toast-layer {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.app-toast {
+  pointer-events: all;
+  min-width: 280px;
+  max-width: 400px;
+  background: #2c2b28;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-left: 3px solid rgba(149, 146, 139, 0.6);
+  border-radius: 12px;
+  padding: 11px 12px 13px;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  animation: appToastIn 0.22s ease forwards;
+}
+
+.app-toast-exit {
+  animation: appToastOut 0.28s ease forwards;
+}
+
+.app-toast-error {
+  border-left-color: #e0809d;
+}
+
+.app-toast-success {
+  border-left-color: #76c29f;
+}
+
+.app-toast-info {
+  border-left-color: rgba(149, 146, 139, 0.75);
+}
+
+.app-toast-msg {
+  grid-column: 1;
+  margin: 0;
+  color: var(--vox-text-primary);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  align-self: center;
+}
+
+.app-toast-close {
+  grid-column: 2;
+  align-self: start;
+  background: transparent;
+  border: none;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--vox-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.app-toast-close:hover {
+  color: var(--vox-text-primary);
+}
+
+.app-toast-bar {
+  grid-column: 1 / -1;
+  display: block;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(149, 146, 139, 0.3);
+  transform-origin: left;
+  animation: appToastBarDrain 5.5s linear forwards;
+}
+
+.app-toast-error .app-toast-bar {
+  background: rgba(224, 128, 157, 0.5);
+}
+
+.app-toast-success .app-toast-bar {
+  background: rgba(118, 194, 159, 0.5);
+}
+
+@keyframes appToastIn {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes appToastOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+    max-height: 120px;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(18px);
+    max-height: 0;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+@keyframes appToastBarDrain {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}

@@ -1,11 +1,11 @@
-# @vox-ai-app/vox-voice
+# @vox-ai-app/voice
 
 ONNX-based wake word detection, keyboard shortcut registration, and voice overlay window for Vox.
 
 ## Install
 
 ```sh
-npm install @vox-ai-app/vox-voice
+npm install @vox-ai-app/voice
 ```
 
 Peer dependencies: `electron >= 28`, `@picovoice/pvrecorder-node >= 1.0.0`, `onnxruntime-node >= 1.18.0`
@@ -27,7 +27,7 @@ import {
   destroyVoiceService,
   setLogger,
   setOnWakeWordDetected
-} from '@vox-ai-app/vox-voice'
+} from '@vox-ai-app/voice'
 
 setLogger(logger)
 setOnWakeWordDetected(() => {
@@ -50,7 +50,7 @@ await destroyVoiceService()
 An always-on-top transparent overlay (400×140px, top-right corner) for displaying voice state.
 
 ```js
-import { createVoiceWindow, getVoiceWindow, destroyVoiceWindow } from '@vox-ai-app/vox-voice'
+import { createVoiceWindow, getVoiceWindow, destroyVoiceWindow } from '@vox-ai-app/voice'
 
 createVoiceWindow() // creates the window, loads voice.html
 getVoiceWindow() // returns BrowserWindow | null
@@ -60,7 +60,7 @@ destroyVoiceWindow() // destroys it
 ## Wake word control
 
 ```js
-import { pauseWakeWord, resumeWakeWord } from '@vox-ai-app/vox-voice'
+import { pauseWakeWord, resumeWakeWord } from '@vox-ai-app/voice'
 
 pauseWakeWord() // pause detection while user is speaking
 resumeWakeWord() // resume after response
@@ -78,7 +78,7 @@ export default {
       rollupOptions: {
         input: {
           index: 'src/main/index.js',
-          'voice.worker': 'node_modules/@vox-ai-app/vox-voice/src/worker.js'
+          'voice.worker': 'node_modules/@vox-ai-app/voice/src/worker.js'
         }
       }
     }

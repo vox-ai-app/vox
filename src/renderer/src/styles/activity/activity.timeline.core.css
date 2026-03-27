@@ -1,0 +1,124 @@
+.activity-timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-timeline-item {
+  display: flex;
+  gap: 12px;
+  min-height: 32px;
+}
+
+.activity-timeline-item-last .activity-timeline-line {
+  display: none;
+}
+
+.activity-timeline-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 22px;
+}
+
+.activity-timeline-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--vox-border-soft);
+  flex-shrink: 0;
+  color: var(--vox-text-muted);
+}
+
+.activity-timeline-icon-spawn {
+  background: rgba(236, 137, 184, 0.12);
+  border-color: rgba(236, 137, 184, 0.3);
+  color: rgba(236, 137, 184, 0.9);
+}
+
+.activity-timeline-icon-pending {
+  background: rgba(140, 220, 140, 0.08);
+  border-color: rgba(140, 220, 140, 0.2);
+  color: rgba(140, 220, 140, 0.7);
+}
+
+.activity-timeline-icon-working {
+  background: rgba(140, 180, 255, 0.1);
+  border-color: rgba(140, 180, 255, 0.25);
+  color: rgba(140, 180, 255, 0.9);
+  animation: workspaceButtonSpin 1.2s linear infinite;
+}
+
+.activity-step-icon-completed {
+  background: rgba(140, 220, 140, 0.1);
+  border-color: rgba(140, 220, 140, 0.25);
+  color: rgba(140, 220, 140, 0.9);
+}
+
+.activity-step-icon-running {
+  background: rgba(236, 137, 184, 0.1);
+  border-color: rgba(236, 137, 184, 0.25);
+  color: rgba(236, 137, 184, 0.9);
+  animation: workspaceButtonSpin 1.2s linear infinite;
+}
+
+.activity-step-icon-failed,
+.activity-step-icon-aborted {
+  background: rgba(255, 100, 100, 0.1);
+  border-color: rgba(255, 100, 100, 0.25);
+  color: rgba(255, 100, 100, 0.85);
+}
+
+.activity-step-icon-pending,
+.activity-step-icon-skipped {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+  color: var(--vox-text-muted);
+  opacity: 0.6;
+}
+
+.activity-timeline-line {
+  flex: 1;
+  width: 1px;
+  background: var(--vox-border-soft);
+  margin: 4px 0;
+  min-height: 16px;
+}
+
+.activity-timeline-content {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 20px;
+}
+
+.activity-timeline-item-last .activity-timeline-content {
+  padding-bottom: 0;
+}
+
+.activity-timeline-label {
+  margin: 0 0 3px;
+  font-size: 0.88rem;
+  color: var(--vox-text-secondary);
+  line-height: 1.4;
+  padding-top: 3px;
+}
+
+.activity-step-label {
+  color: var(--vox-text-primary);
+  font-size: 0.9rem;
+}
+
+.activity-timeline-sub {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: var(--vox-text-muted);
+}
+
+.activity-step-running {
+  color: rgba(236, 137, 184, 0.75);
+  font-size: 0.78rem;
+}

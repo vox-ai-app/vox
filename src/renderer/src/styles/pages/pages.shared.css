@@ -1,0 +1,254 @@
+.workspace-panel-card {
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.workspace-panel-card h2 {
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(236, 137, 184, 0.12);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--vox-accent);
+}
+
+.workspace-panel-subtitle {
+  display: none;
+}
+
+.workspace-form {
+  margin-top: 14px;
+  display: grid;
+  gap: 16px;
+}
+
+.workspace-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--vox-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.workspace-form input,
+.workspace-form select,
+.workspace-form textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--vox-text-primary);
+  padding: 8px 12px;
+  font-size: 0.94rem;
+  outline: none;
+  font-family: inherit;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.workspace-form input::placeholder,
+.workspace-form textarea::placeholder {
+  color: var(--vox-text-muted);
+}
+
+.workspace-form input,
+.workspace-form select {
+  height: 40px;
+}
+
+.workspace-form input:focus,
+.workspace-form select:focus,
+.workspace-form textarea:focus {
+  border-color: rgba(236, 137, 184, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 3px rgba(236, 137, 184, 0.06);
+}
+
+.workspace-form button {
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--vox-text-primary);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0 18px;
+  font-family: inherit;
+  justify-self: start;
+  transition:
+    border-color 0.12s,
+    background 0.12s,
+    transform 0.1s;
+}
+
+.workspace-form button:hover {
+  border-color: rgba(236, 137, 184, 0.25);
+  background: rgba(236, 137, 184, 0.06);
+}
+
+.workspace-form button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.workspace-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.workspace-inline-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.workspace-inline-actions .secondary-button {
+  width: 100%;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--vox-border-soft);
+  background: var(--vox-bg-elevated);
+  color: var(--vox-text-primary);
+}
+
+.alert {
+  margin: 12px 0 0;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.alert-error {
+  background: var(--vox-alert-error-bg);
+  color: var(--vox-alert-error-text);
+  border-color: var(--vox-alert-error-border);
+  border-left: 3px solid rgba(255, 120, 170, 0.55);
+}
+
+.alert-success {
+  background: var(--vox-alert-success-bg);
+  color: var(--vox-alert-success-text);
+  border-color: var(--vox-alert-success-border);
+}
+
+.alert-pending {
+  background: var(--vox-alert-pending-bg);
+  color: var(--vox-alert-pending-text);
+  border-color: var(--vox-alert-pending-border);
+}
+
+.status-badge {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: var(--vox-alert-pending-bg);
+  color: var(--vox-alert-pending-text);
+}
+
+.status-badge-success {
+  background: var(--vox-alert-success-bg);
+  color: var(--vox-alert-success-text);
+}
+
+.status-badge-pending {
+  background: var(--vox-alert-pending-bg);
+  color: var(--vox-alert-pending-text);
+}
+
+.update-banner {
+  margin: -20px -24px 16px;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(236, 137, 184, 0.04);
+  border-bottom: 1px solid rgba(236, 137, 184, 0.12);
+  position: relative;
+  z-index: 10000;
+  -webkit-app-region: no-drag;
+}
+
+.update-banner-icon {
+  color: var(--vox-accent);
+  flex-shrink: 0;
+}
+
+.update-banner-text {
+  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--vox-text-secondary);
+}
+
+.update-banner-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  background: var(--vox-accent);
+  color: var(--vox-text-on-accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.update-banner-btn:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.update-banner-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.screen-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: var(--vox-bg-base);
+}
+
+.status-card {
+  max-width: 480px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(12px);
+  padding: 36px 32px;
+  display: grid;
+  gap: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+.status-card h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--vox-text-primary);
+}
+
+.status-copy {
+  color: var(--vox-text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}

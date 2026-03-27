@@ -1,0 +1,117 @@
+.activity-step-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.activity-tool-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid var(--vox-border-soft);
+}
+
+.activity-tool-call {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.activity-tool-icon {
+  flex-shrink: 0;
+  color: var(--vox-text-muted);
+  position: relative;
+  top: 1px;
+}
+
+.activity-tool-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--vox-text-secondary);
+}
+
+.activity-tool-param {
+  font-size: 0.76rem;
+  color: var(--vox-text-muted);
+  font-family: monospace;
+  word-break: break-all;
+}
+
+.activity-tool-arg-key {
+  font-size: 0.74rem;
+  color: var(--vox-text-secondary);
+  opacity: 0.7;
+  font-family: monospace;
+}
+
+.activity-tool-args {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+  margin-top: 2px;
+  border-left: 2px solid var(--vox-border-soft);
+}
+
+.activity-tool-arg-row {
+  display: flex;
+  gap: 5px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.activity-tool-arg-val {
+  font-size: 0.74rem;
+  color: var(--vox-text-muted);
+  font-family: monospace;
+  word-break: break-all;
+}
+
+.activity-tool-args-toggle {
+  margin-left: auto;
+}
+
+.activity-tool-result {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.activity-tool-result-arrow {
+  font-size: 0.75rem;
+  color: rgba(140, 220, 140, 0.6);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.activity-tool-result-text {
+  font-size: 0.76rem;
+  color: var(--vox-text-muted);
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.activity-tool-expand {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.72rem;
+  color: rgba(236, 137, 184, 0.6);
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+
+.activity-tool-expand:hover {
+  color: rgba(236, 137, 184, 0.9);
+}

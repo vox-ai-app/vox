@@ -1,74 +1,214 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'path'
+import { promisify } from 'util'
+import { exec } from 'child_process'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
 
-function createWindow() {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+import { logger } from './logger'
+import { emitAll } from './ipc/shared'
+import { getDb, closeDb } from './storage/db'
+import { getSetting, SETTINGS_KEYS } from './config/settings'
+import { registerStoreIpc } from './ipc/store.ipc'
+import { registerIndexingIpc, initIndexingStatusPush } from './ipc/indexing.ipc'
+import { registerChatIpc } from './ipc/chat.ipc'
+import { registerToolsIpc } from './ipc/tools.ipc'
+import { registerModelsIpc } from './ai/models.ipc'
+import { registerMcpIpc } from './mcp/mcp.ipc'
+import { registerImessageIpc } from './imessage/imessage.ipc'
+import { registerVoiceIpc } from './voice/voice.ipc'
+import { registerPowerIpc, setKeepAwake } from './power/power.ipc'
+import { loadModel, destroyWorker } from './ai/llm.bridge'
+import { getActiveModelPath } from './ai/models'
+import { connectAllMcpServers, closeAllMcp } from './mcp/mcp.service'
+import { startWatching, stopWatching } from './imessage/imessage.service'
+import { initVoiceService, destroyVoiceService } from './voice/voice.service'
+import { createVoiceWindow, destroyVoiceWindow } from './voice/voice.window'
+import {
+  createOverlayWindow,
+  destroyOverlayWindow,
+  registerOverlayShortcut
+} from './overlay/overlay.window'
+import { registerOverlayIpc } from './overlay/overlay.ipc'
+import { initVoiceOrchestrator, destroyVoiceOrchestrator } from './voice/voice.orchestrator'
+import { bootIndexingRuntime, shutdownIndexingRuntime } from '@vox-ai-app/indexing'
+import { createTray, destroyTray } from './app/tray'
+
+const execAsync = promisify(exec)
+
+let mainWindow = null
+
+function createMainWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    minWidth: 800,
+    minHeight: 600,
     show: false,
+    title: 'Vox',
+    icon: join(__dirname, '../../resources/icon.png'),
+    titleBarStyle: 'hiddenInset',
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      contextIsolation: true
     }
   })
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
-  })
-
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url)
     return { action: 'deny' }
   })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
+  mainWindow.once('ready-to-show', () => mainWindow.show())
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  return mainWindow
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+export function getMainWindow() {
+  return mainWindow
+}
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
+function registerAllIpc() {
+  registerStoreIpc()
+  registerChatIpc()
+  registerToolsIpc()
+  registerModelsIpc()
+  registerMcpIpc()
+  registerImessageIpc()
+  registerVoiceIpc()
+  registerPowerIpc()
+  registerIndexingIpc()
+  registerOverlayIpc()
+  initIndexingStatusPush()
+}
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
-
-  createWindow()
-
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
-
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+async function bootBackgroundServices() {
+  try {
+    await bootIndexingRuntime()
+    logger.info('[main] Indexing runtime ready')
+  } catch (err) {
+    logger.error('[main] Indexing boot failed:', err)
   }
+
+  try {
+    await connectAllMcpServers()
+  } catch (err) {
+    logger.warn('[main] MCP connect error:', err)
+  }
+}
+
+async function initLlm() {
+  const modelPath = getActiveModelPath()
+
+  if (!modelPath) {
+    logger.info('[main] No model found — showing onboarding')
+    emitAll('models:no-model', {})
+    return
+  }
+
+  try {
+    await loadModel(modelPath)
+  } catch (err) {
+    logger.error('[main] Model load failed:', err)
+    emitAll('models:load-error', { message: err.message })
+  }
+}
+
+app
+  .whenReady()
+  .then(async () => {
+    try {
+      const shell = process.env.SHELL || '/bin/sh'
+      const { stdout } = await execAsync(`${shell} -l -c 'echo $PATH'`)
+      if (stdout.trim()) process.env.PATH = stdout.trim()
+      // eslint-disable-next-line no-empty
+    } catch {}
+
+    process.env.VOX_USER_DATA_PATH = app.getPath('userData')
+    process.env.VOX_APP_PATH = app.getAppPath()
+    process.env.VOX_IS_DEV = is.dev ? '1' : '0'
+
+    electronApp.setAppUserModelId('com.vox.local')
+
+    app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window)
+    })
+
+    getDb()
+
+    registerAllIpc()
+
+    if (getSetting(SETTINGS_KEYS.KEEP_AWAKE)) setKeepAwake(true)
+    const imessagePassphrase = getSetting(SETTINGS_KEYS.IMESSAGE_PASSPHRASE)
+    if (imessagePassphrase) {
+      try {
+        startWatching(imessagePassphrase)
+      } catch (err) {
+        logger.warn('[main] iMessage restore failed:', err)
+      }
+    }
+
+    createMainWindow()
+    createVoiceWindow()
+    createOverlayWindow()
+    registerOverlayShortcut()
+    createTray(getMainWindow, createMainWindow)
+
+    try {
+      initVoiceOrchestrator()
+      await initVoiceService()
+    } catch (err) {
+      logger.warn('[main] Voice init failed:', err)
+    }
+
+    void bootBackgroundServices()
+    void initLlm()
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
+      else mainWindow?.show()
+    })
+  })
+  .catch((err) => {
+    logger.error('[main] App startup failed:', err)
+    try {
+      createMainWindow()
+      // eslint-disable-next-line no-empty
+    } catch {}
+  })
+
+let quitting = false
+
+app.on('before-quit', (e) => {
+  if (quitting) return
+  quitting = true
+  e.preventDefault()
+
+  Promise.all([
+    shutdownIndexingRuntime().catch(() => {}),
+    destroyVoiceService().catch(() => {}),
+    closeAllMcp().catch(() => {}),
+    Promise.resolve()
+      .then(() => stopWatching())
+      .catch(() => {})
+  ]).finally(() => {
+    destroyVoiceOrchestrator()
+    destroyVoiceWindow()
+    destroyOverlayWindow()
+    destroyTray()
+    destroyWorker()
+    closeDb()
+    app.quit()
+  })
 })
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit()
+})

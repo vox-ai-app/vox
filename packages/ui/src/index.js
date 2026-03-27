@@ -1,7 +1,5 @@
-/* Aggregate CSS — extracted by Vite into dist/styles.css */
 import './styles.css'
 
-/* === Primitives === */
 export { default as Drawer } from './primitives/Drawer'
 export { ToastLayer, useToast } from './primitives/Toast'
 export { default as Skeleton } from './primitives/Skeleton'
@@ -9,7 +7,6 @@ export { default as CopyButton } from './primitives/CopyButton'
 export { default as ExpandableMarkdown } from './primitives/ExpandableMarkdown'
 export { default as IconButton } from './primitives/IconButton'
 
-/* === Composites === */
 export { default as ChatMessage, ToolGroup } from './composites/ChatMessage'
 export { default as ChatComposer } from './composites/ChatComposer'
 export { default as ChatEmptyState } from './composites/ChatEmptyState'
@@ -21,15 +18,12 @@ export { ActionItem } from './composites/ActionItem'
 export { default as ExplorerTile } from './composites/ExplorerTile'
 export { default as ExplorerSidebar } from './composites/ExplorerSidebar'
 
-/* === Layouts === */
 export { default as AppShell } from './layouts/AppShell'
 export { default as LeftRail } from './layouts/LeftRail'
 export { default as UserMenu } from './layouts/UserMenu'
 
-/* === Hooks === */
 export { useClickOutside, useEscapeKey, useIntersectionObserver } from './hooks'
 
-/* === Utils === */
 export {
   cn,
   parseToolArgs,
@@ -49,5 +43,4 @@ export {
   getOutcomeBadge
 } from './utils'
 
-/* === Tokens === */
 export { colors, darkColors, getColors } from './tokens/colors.js'

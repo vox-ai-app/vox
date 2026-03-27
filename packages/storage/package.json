@@ -1,0 +1,32 @@
+{
+  "name": "@vox-ai-app/storage",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Local message and config persistence for Vox",
+  "main": "./src/index.js",
+  "private": false,
+  "exports": {
+    ".": "./src/index.js",
+    "./db": "./src/db.js",
+    "./messages": "./src/messages.js",
+    "./config": "./src/config.js",
+    "./tasks": "./src/tasks.js"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vox-ai-app/vox"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {
+    "better-sqlite3": "^12.0.0"
+  }
+}

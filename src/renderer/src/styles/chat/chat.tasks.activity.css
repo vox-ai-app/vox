@@ -1,0 +1,78 @@
+.chat-activity-list {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  max-height: 220px;
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chat-activity-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.chat-activity-item {
+  border-radius: 10px;
+  border: 1px solid var(--vox-border-soft);
+  background: #2f2e2b;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: start;
+}
+
+.chat-activity-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: rgba(149, 146, 139, 0.75);
+}
+
+.chat-activity-dot-task {
+  background: rgba(236, 137, 184, 0.78);
+}
+
+.chat-activity-dot-tool {
+  background: rgba(224, 195, 211, 0.78);
+}
+
+.chat-activity-dot-usage {
+  background: rgba(141, 198, 182, 0.82);
+}
+
+.chat-activity-dot-error {
+  background: rgba(224, 128, 157, 0.82);
+}
+
+.chat-activity-item p,
+.chat-activity-item span {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.chat-activity-item p {
+  color: var(--vox-text-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.chat-activity-item span {
+  display: block;
+  margin-top: 3px;
+  color: var(--vox-text-secondary);
+  font-size: 0.73rem;
+  line-height: 1.3;
+}
+
+.chat-activity-item time {
+  color: var(--vox-text-muted);
+  font-size: 0.67rem;
+  white-space: nowrap;
+}

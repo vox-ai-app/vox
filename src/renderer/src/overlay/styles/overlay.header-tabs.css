@@ -1,0 +1,77 @@
+.overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  -webkit-app-region: drag;
+  cursor: move;
+  flex-shrink: 0;
+}
+
+.overlay-header button {
+  -webkit-app-region: no-drag;
+}
+
+.overlay-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #ec89b8;
+}
+
+.overlay-close-btn {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.overlay-close-btn:hover {
+  color: #f0ece6;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.overlay-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+  padding: 0 16px;
+}
+
+.overlay-tab {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: #5c5a56;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  border-bottom: 2px solid transparent;
+  transition:
+    color 0.12s,
+    border-color 0.12s;
+}
+
+.overlay-tab:hover {
+  color: #8a8680;
+}
+
+.overlay-tab-active {
+  color: #ec89b8;
+  border-bottom-color: #ec89b8;
+}

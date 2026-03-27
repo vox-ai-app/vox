@@ -1,0 +1,3 @@
+export const SILENCE_TIMEOUT_MS = 120000
+export const SAMPLE_RATE = 16000
+export const SCRIPT_BUFFER_SIZE = 4096

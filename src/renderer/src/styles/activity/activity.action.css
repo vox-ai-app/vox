@@ -1,0 +1,192 @@
+.activity-outcome-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 10px;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+}
+
+.activity-outcome-badge-error {
+  background: color-mix(in srgb, var(--color-danger, #e53935) 12%, transparent);
+  color: var(--color-danger, #e53935);
+}
+
+.activity-outcome-badge-timeout {
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+  color: #f59e0b;
+}
+
+.activity-outcome-badge-success {
+  background: color-mix(in srgb, var(--color-success, #22c55e) 12%, transparent);
+  color: var(--color-success, #22c55e);
+}
+
+.activity-repeat-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 5px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--vox-text-muted, #888) 12%, transparent);
+  color: var(--vox-text-muted, #888);
+}
+
+.activity-action-failure .activity-timeline-content {
+  border-left: 2px solid color-mix(in srgb, var(--color-danger, #e53935) 30%, transparent);
+  padding-left: 8px;
+  margin-left: -2px;
+}
+
+.activity-action-failure {
+  opacity: 0.82;
+}
+
+.activity-action-icon-failure {
+  color: color-mix(in srgb, var(--color-danger, #e53935) 70%, var(--vox-text-secondary));
+}
+
+.activity-action-journal {
+  opacity: 0.55;
+}
+
+.activity-action-icon {
+  color: var(--vox-text-secondary);
+}
+
+.activity-action-icon-journal {
+  color: var(--vox-text-muted);
+}
+
+.activity-action-label-journal {
+  font-size: 0.78rem;
+  color: var(--vox-text-muted);
+  font-style: italic;
+}
+
+.activity-action-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.activity-action-header-expandable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.activity-action-header-expandable:hover .activity-timeline-label {
+  color: var(--vox-text-primary);
+}
+
+.activity-action-chevron {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  color: var(--vox-text-secondary);
+  margin-left: auto;
+  transition: color 0.12s ease;
+}
+
+.activity-action-header-expandable:hover .activity-action-chevron {
+  color: var(--vox-text-primary);
+}
+
+.activity-action-details {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.activity-code-commands {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.activity-code-cmd {
+  display: block;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  color: var(--vox-text-primary);
+  background: color-mix(in srgb, var(--vox-text-primary) 5%, transparent);
+  border-radius: 4px;
+  padding: 3px 7px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.activity-code-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.activity-code-stream-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--vox-text-muted);
+}
+
+.activity-code-stream-err .activity-code-stream-label {
+  color: var(--color-danger, #e53935);
+  opacity: 0.7;
+}
+
+.activity-code-stream-pre {
+  margin: 0;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.7rem;
+  color: var(--vox-text-secondary);
+  background: color-mix(in srgb, var(--vox-text-primary) 4%, transparent);
+  border-radius: 4px;
+  padding: 5px 8px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.activity-code-stream-err .activity-code-stream-pre {
+  color: color-mix(in srgb, var(--color-danger, #e53935) 80%, var(--vox-text-secondary));
+  background: color-mix(in srgb, var(--color-danger, #e53935) 5%, transparent);
+}
+
+.activity-tool-arg-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.activity-tool-arg-key {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vox-text-muted);
+  white-space: nowrap;
+}
+
+.activity-tool-arg-val {
+  font-size: 0.72rem;
+  color: var(--vox-text-secondary);
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.activity-action-result {
+  font-size: 0.72rem;
+  color: var(--vox-text-secondary);
+  opacity: 0.8;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

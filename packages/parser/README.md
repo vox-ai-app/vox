@@ -1,17 +1,17 @@
-# @vox-ai-app/vox-parser
+# @vox-ai-app/parser
 
 Document parsing for Vox. Extracts plain text from PDF, DOCX, PPTX, XLSX, ODT, RTF, and XML files.
 
 ## Install
 
 ```sh
-npm install @vox-ai-app/vox-parser
+npm install @vox-ai-app/parser
 ```
 
 ## Usage
 
 ```js
-import { readDocumentFile, PARSED_EXTENSIONS } from '@vox-ai-app/vox-parser'
+import { readDocumentFile, PARSED_EXTENSIONS } from '@vox-ai-app/parser'
 
 // Read any supported document
 const result = await readDocumentFile('/path/to/file.pdf')
@@ -26,13 +26,13 @@ PARSED_EXTENSIONS.has('.docx') // true
 ## Individual parsers
 
 ```js
-import parseDocx from '@vox-ai-app/vox-parser/formats/docx'
-import parsePdf from '@vox-ai-app/vox-parser/formats/pdf'
-import parsePptx from '@vox-ai-app/vox-parser/formats/pptx'
-import parseXlsx from '@vox-ai-app/vox-parser/formats/xlsx'
-import parseOpenDoc from '@vox-ai-app/vox-parser/formats/opendoc'
-import parseRtf from '@vox-ai-app/vox-parser/formats/rtf'
-import parseXml from '@vox-ai-app/vox-parser/formats/xml'
+import parseDocx from '@vox-ai-app/parser/formats/docx'
+import parsePdf from '@vox-ai-app/parser/formats/pdf'
+import parsePptx from '@vox-ai-app/parser/formats/pptx'
+import parseXlsx from '@vox-ai-app/parser/formats/xlsx'
+import parseOpenDoc from '@vox-ai-app/parser/formats/opendoc'
+import parseRtf from '@vox-ai-app/parser/formats/rtf'
+import parseXml from '@vox-ai-app/parser/formats/xml'
 
 const { text } = await parseDocx('/path/to/file.docx', 60_000)
 ```

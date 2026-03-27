@@ -1,4 +1,4 @@
-# @vox-ai-app/vox-integrations
+# @vox-ai-app/integrations
 
 macOS system integrations for Vox: Apple Mail, Screen control, and iMessage. Each integration ships with tool implementations and LLM tool definitions.
 
@@ -7,7 +7,7 @@ Requires macOS. Each integration needs specific system permissions granted by th
 ## Install
 
 ```sh
-npm install @vox-ai-app/vox-integrations
+npm install @vox-ai-app/integrations
 ```
 
 Peer dependency: `electron >= 28`
@@ -16,14 +16,14 @@ Peer dependency: `electron >= 28`
 
 | Export                                        | Contents                      |
 | --------------------------------------------- | ----------------------------- |
-| `@vox-ai-app/vox-integrations`                | All exports                   |
-| `@vox-ai-app/vox-integrations/defs`           | All tool definitions          |
-| `@vox-ai-app/vox-integrations/mail`           | Mail functions                |
-| `@vox-ai-app/vox-integrations/screen`         | Screen capture + control      |
-| `@vox-ai-app/vox-integrations/screen/capture` | Capture only                  |
-| `@vox-ai-app/vox-integrations/screen/control` | Control only                  |
-| `@vox-ai-app/vox-integrations/screen/queue`   | Session acquire/release       |
-| `@vox-ai-app/vox-integrations/imessage`       | iMessage data, reply, service |
+| `@vox-ai-app/integrations`                | All exports                   |
+| `@vox-ai-app/integrations/defs`           | All tool definitions          |
+| `@vox-ai-app/integrations/mail`           | Mail functions                |
+| `@vox-ai-app/integrations/screen`         | Screen capture + control      |
+| `@vox-ai-app/integrations/screen/capture` | Capture only                  |
+| `@vox-ai-app/integrations/screen/control` | Control only                  |
+| `@vox-ai-app/integrations/screen/queue`   | Session acquire/release       |
+| `@vox-ai-app/integrations/imessage`       | iMessage data, reply, service |
 
 ## Mail
 
@@ -35,7 +35,7 @@ import {
   readEmails,
   searchContacts,
   replyToEmail
-} from '@vox-ai-app/vox-integrations/mail'
+} from '@vox-ai-app/integrations/mail'
 
 const emails = await readEmails({ account: 'Work', folder: 'INBOX', limit: 20 })
 await sendEmail({ to: 'user@example.com', subject: 'Hi', body: 'Hello.' })
@@ -45,7 +45,7 @@ await replyToEmail({ messageId: '...', body: 'Thanks!' })
 Tool definitions:
 
 ```js
-import { MAIL_TOOL_DEFINITIONS } from '@vox-ai-app/vox-integrations/defs'
+import { MAIL_TOOL_DEFINITIONS } from '@vox-ai-app/integrations/defs'
 ```
 
 ## Screen
@@ -58,8 +58,8 @@ import {
   clickAt,
   typeText,
   getUiElements
-} from '@vox-ai-app/vox-integrations/screen'
-import { acquireScreen, releaseScreen } from '@vox-ai-app/vox-integrations/screen/queue'
+} from '@vox-ai-app/integrations/screen'
+import { acquireScreen, releaseScreen } from '@vox-ai-app/integrations/screen/queue'
 
 const session = await acquireScreen()
 try {
@@ -74,7 +74,7 @@ try {
 Tool definitions:
 
 ```js
-import { SCREEN_TOOL_DEFINITIONS } from '@vox-ai-app/vox-integrations/defs'
+import { SCREEN_TOOL_DEFINITIONS } from '@vox-ai-app/integrations/defs'
 ```
 
 ## iMessage
@@ -84,7 +84,7 @@ Requires **Full Disk Access** (System Settings → Privacy & Security → Full D
 ### Tool use (read conversations, send messages)
 
 ```js
-import { listConversations, listContacts, sendReply } from '@vox-ai-app/vox-integrations/imessage'
+import { listConversations, listContacts, sendReply } from '@vox-ai-app/integrations/imessage'
 
 const conversations = listConversations()
 const contacts = listContacts()
@@ -94,7 +94,7 @@ await sendReply('+15551234567', 'Hello from Vox!')
 ### Gateway service (AI replies to incoming iMessages)
 
 ```js
-import { createIMessageService } from '@vox-ai-app/vox-integrations/imessage'
+import { createIMessageService } from '@vox-ai-app/integrations/imessage'
 
 const svc = createIMessageService({
   logger,
@@ -117,7 +117,7 @@ svc.start('my-passphrase')
 Tool definitions:
 
 ```js
-import { IMESSAGE_TOOL_DEFINITIONS } from '@vox-ai-app/vox-integrations/defs'
+import { IMESSAGE_TOOL_DEFINITIONS } from '@vox-ai-app/integrations/defs'
 ```
 
 ## License

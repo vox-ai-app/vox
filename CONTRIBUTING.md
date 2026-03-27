@@ -1,6 +1,6 @@
 # Contributing to Vox
 
-Vox is a local-first AI assistant built on Electron. The core packages (MCP, tools, voice, indexing, UI) are platform-agnostic. The macOS-specific parts live in `vox-integrations` — that's where platform parity work happens, and it's one of the best places to contribute.
+Vox is a local-first AI assistant built on Electron. The core packages (MCP, tools, voice, indexing, UI) are platform-agnostic. The macOS-specific parts live in `@vox-ai-app/integrations` — that's where platform parity work happens, and it's one of the best places to contribute.
 
 ## Prerequisites
 
@@ -17,13 +17,13 @@ This is an npm workspaces monorepo. The root `package.json` manages the Electron
 vox/
 ├── src/                  Electron app source (main + renderer)
 ├── packages/
-│   ├── mcp/              @vox-ai-app/vox-mcp
-│   ├── tools/            @vox-ai-app/vox-tools
-│   ├── integrations/     @vox-ai-app/vox-integrations
-│   ├── voice/            @vox-ai-app/vox-voice
-│   ├── indexing/         @vox-ai-app/vox-indexing
-│   ├── parser/           @vox-ai-app/vox-parser
-│   └── ui/               @vox-ai-app/vox-ui
+│   ├── mcp/              @vox-ai-app/mcp
+│   ├── tools/            @vox-ai-app/tools
+│   ├── integrations/     @vox-ai-app/integrations
+│   ├── voice/            @vox-ai-app/voice
+│   ├── indexing/         @vox-ai-app/indexing
+│   ├── parser/           @vox-ai-app/parser
+│   └── ui/               @vox-ai-app/ui
 └── package.json
 ```
 
@@ -37,14 +37,14 @@ npm run dev       # starts the app with hot reload
 ## How packages fit together
 
 ```
-vox-mcp
-  └── vox-tools (registry uses vox-mcp for MCP reconnection)
-        └── vox-integrations (mail/screen/imessage use tools/exec utilities)
+@vox-ai-app/mcp
+  └── @vox-ai-app/tools (registry uses @vox-ai-app/mcp for MCP reconnection)
+        └── @vox-ai-app/integrations (mail/screen/iMessage use tool utilities)
 
-vox-voice     (standalone — wake word + voice window)
-vox-indexing  (standalone — file indexing runtime)
-vox-parser    (standalone — document parsing)
-vox-ui        (standalone — React components)
+@vox-ai-app/voice     (standalone — wake word + voice window)
+@vox-ai-app/indexing  (standalone — file indexing runtime)
+@vox-ai-app/parser    (standalone — document parsing)
+@vox-ai-app/ui        (standalone — React components)
 ```
 
 When changing a package that others depend on, bump its version and update the dependent's `package.json` too.
@@ -54,11 +54,11 @@ When changing a package that others depend on, bump its version and update the d
 The app currently runs on macOS. This is not a permanent constraint — it reflects where the integrations exist today, not a limitation of the architecture.
 
 **What is platform-specific:**
-- `vox-integrations` — screen control, Mail, iMessage (all use macOS APIs: osascript, Accessibility, SQLite DBs)
+- `@vox-ai-app/integrations` — screen control, Mail, iMessage (all use macOS APIs: osascript, Accessibility, SQLite DBs)
 - The Electron app's permission requests (microphone, screen recording, etc.)
 
 **What is already cross-platform:**
-- `vox-mcp`, `vox-tools`, `vox-voice`, `vox-indexing`, `vox-parser`, `vox-ui` — all pure Node.js / React, no OS-specific code
+- `@vox-ai-app/mcp`, `@vox-ai-app/tools`, `@vox-ai-app/voice`, `@vox-ai-app/indexing`, `@vox-ai-app/parser`, `@vox-ai-app/ui` — all pure Node.js / React, no OS-specific code
 
 **How to add Windows or Linux support:**
 
@@ -74,7 +74,7 @@ The factory in `src/screen/index.js` selects the right implementation at runtime
 
 ## Running a single package in isolation
 
-Each package has its own `src/` and is consumed directly from source in dev (no build step needed except `vox-ui`).
+Each package has its own `src/` and is consumed directly from source in dev, except `@vox-ai-app/ui`, which builds to `dist/` before publish.
 
 ```sh
 # lint just one package
@@ -117,16 +117,16 @@ docs(indexing): update README with build config example
 ## Adding a new integration
 
 1. Create `packages/integrations/src/<name>/` with `index.js` as the barrel
-2. Add tool definitions to `packages/integrations/src/defs/<name>.js`
-3. Export both from `packages/integrations/src/defs/index.js` and `src/index.js`
-4. Add the export path to `packages/integrations/package.json` exports
-5. Document in `packages/integrations/README.md`
+2. Add `def.js` and `tools.js` inside `packages/integrations/src/<name>/`
+3. Export the module and its tool definitions from `packages/integrations/src/index.js`
+4. Add the new tool list to `packages/integrations/src/tools.js` and any public path to `packages/integrations/package.json`
+5. Document it in `packages/integrations/README.md`
 
 ## Adding a new builtin tool
 
-1. Implement in `packages/tools/src/builtins/<name>.js`
-2. Add the JSON Schema definition to `packages/tools/src/defs/<name>.js`
-3. Re-export from `packages/tools/src/builtins/index.js` and `src/defs/index.js`
+1. Create `packages/tools/src/tools/<name>/` with `execute.js`, `def.js`, and `index.js`
+2. Export the tool from `packages/tools/src/tools/index.js`
+3. Re-export any public helpers from `packages/tools/src/index.js`
 
 ## Questions
 

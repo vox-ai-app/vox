@@ -1,17 +1,17 @@
-# @vox-ai-app/vox-mcp
+# @vox-ai-app/mcp
 
 MCP (Model Context Protocol) client for Vox. Connects to stdio, SSE, and HTTP MCP servers with session persistence and automatic reconnection.
 
 ## Install
 
 ```sh
-npm install @vox-ai-app/vox-mcp
+npm install @vox-ai-app/mcp
 ```
 
 ## Usage
 
 ```js
-import { connectMcpServer, setLogger } from '@vox-ai-app/vox-mcp'
+import { connectMcpServer, setLogger } from '@vox-ai-app/mcp'
 
 setLogger(logger)
 
@@ -46,7 +46,7 @@ import {
   persistSessionId,
   clearSessionId,
   terminateStaleSession
-} from '@vox-ai-app/vox-mcp'
+} from '@vox-ai-app/mcp'
 ```
 
 ## API

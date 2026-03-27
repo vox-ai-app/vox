@@ -1,0 +1,354 @@
+.settings-page-layout {
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.settings-page-layout::-webkit-scrollbar {
+  display: none;
+}
+
+.settings-page-inner {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.settings-page-inner > * {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 22px 24px;
+  transition: border-color 0.2s;
+}
+
+.settings-page-inner > *:hover {
+  border-color: rgba(255, 255, 255, 0.09);
+}
+
+.settings-name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.settings-form-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.settings-save-button {
+  height: 36px;
+  border-radius: 999px;
+  border: 0;
+  padding: 0 22px;
+  background: var(--brand-start);
+  color: var(--brand-ink);
+  font-weight: 700;
+  font-size: 0.86rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    opacity 120ms,
+    transform 100ms;
+}
+
+.settings-save-button:hover {
+  opacity: 0.88;
+}
+
+.settings-save-button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.settings-save-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.account-panel-card {
+  display: grid;
+  gap: 12px;
+}
+
+.account-panel-meta p {
+  margin: 0;
+  color: var(--vox-text-secondary);
+  font-size: 0.92rem;
+}
+
+.account-panel-meta strong {
+  color: var(--vox-text-primary);
+}
+
+.indexing-control-row {
+  margin-top: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.indexing-control-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.indexing-control-copy p {
+  margin: 0;
+}
+
+.indexing-control-copy p:last-child {
+  color: var(--vox-text-secondary);
+  font-size: 0.86rem;
+  max-width: 52ch;
+}
+
+.imsg-description {
+  margin: -4px 0 18px;
+  font-size: 0.86rem;
+  color: var(--vox-text-muted);
+}
+
+.imsg-error {
+  margin: 0 0 12px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: var(--vox-alert-error-bg);
+  color: var(--vox-alert-error-text);
+  font-size: 0.84rem;
+  border: 1px solid rgba(255, 183, 215, 0.15);
+}
+
+.imsg-active-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--vox-border-soft);
+  border-radius: 12px;
+}
+
+.imsg-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5ecb8a;
+  flex-shrink: 0;
+  animation: imsgPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes imsgPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.imsg-active-meta {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.imsg-active-tag {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5ecb8a;
+}
+
+.imsg-active-name {
+  font-size: 0.94rem;
+  font-weight: 500;
+  color: var(--vox-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.imsg-active-handle {
+  font-size: 0.8rem;
+  color: var(--vox-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.imsg-disconnect-btn {
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--vox-border-soft);
+  background: transparent;
+  color: var(--vox-text-muted);
+  font-size: 0.8rem;
+  font-family: inherit;
+  padding: 0 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    border-color 120ms,
+    color 120ms;
+}
+
+.imsg-disconnect-btn:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--vox-text-secondary);
+}
+
+.imsg-disconnect-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.imsg-setup {
+  display: grid;
+  gap: 0;
+}
+
+.imsg-search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--vox-border-soft);
+  border-radius: 10px;
+  transition: border-color 160ms;
+}
+
+.imsg-search-field--open,
+.imsg-search-field:focus-within {
+  border-color: rgba(236, 137, 184, 0.45);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.imsg-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.94rem;
+  font-family: inherit;
+  color: var(--vox-text-primary);
+}
+
+.imsg-search-input::placeholder {
+  color: var(--vox-text-muted);
+}
+
+.imsg-hint {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  color: var(--vox-text-muted);
+  line-height: 1.5;
+}
+
+.imsg-passphrase-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.imsg-passphrase-row .imsg-search-field {
+  flex: 1;
+}
+
+.imsg-connect-btn {
+  height: 36px;
+  border-radius: 999px;
+  border: 0;
+  padding: 0 22px;
+  background: var(--brand-start);
+  color: var(--brand-ink);
+  font-weight: 700;
+  font-size: 0.86rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 120ms;
+}
+
+.imsg-connect-btn:hover {
+  opacity: 0.88;
+}
+.imsg-connect-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 14px;
+}
+
+.settings-toggle-info {
+  display: grid;
+  gap: 4px;
+}
+
+.settings-toggle-label {
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--vox-text-primary);
+}
+
+.settings-toggle-description {
+  font-size: 0.84rem;
+  color: var(--vox-text-secondary);
+  max-width: 52ch;
+}
+
+.settings-toggle-btn {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: background 180ms;
+  padding: 0;
+}
+
+
+.settings-toggle-btn--on {
+  background: var(--brand-start);
+}
+.settings-toggle-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 180ms;
+  display: block;
+}
+
+.settings-toggle-btn--on .settings-toggle-knob {
+  transform: translateX(18px);
+}

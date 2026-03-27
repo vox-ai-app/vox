@@ -97,6 +97,13 @@
     "LMStudio",
     "Mistral",
     "DeepSeek",
-    "agentic"
+    "agentic",
+    "GGUF",
+    "gguf",
+    "sess",
+    "dtype",
+    "exfiltration",
+    "tform",
+    "nums"
   ]
 }

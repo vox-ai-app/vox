@@ -1,0 +1,232 @@
+.knowledge-page {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  overflow: hidden;
+  padding: 4px 16px 16px;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.knowledge-rail {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  padding: 18px 14px 14px;
+  background: rgba(255, 255, 255, 0.018);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+}
+
+.knowledge-rail-header {
+  margin-bottom: 16px;
+}
+
+.knowledge-rail-title {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--vox-text-secondary);
+}
+
+.knowledge-rail-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.knowledge-rail-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.knowledge-rail-dot-running {
+  background: #8fb2ff;
+}
+
+.knowledge-rail-dot-watching {
+  background: #76c29f;
+}
+
+.knowledge-rail-dot-idle {
+  background: rgba(149, 146, 139, 0.4);
+}
+
+.knowledge-rail-state {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--vox-text-secondary);
+}
+
+.knowledge-folder-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.knowledge-folder-list::-webkit-scrollbar {
+  display: none;
+}
+
+.knowledge-folder-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--vox-border-soft);
+}
+
+.knowledge-folder-row:first-child {
+  border-top: 1px solid var(--vox-border-soft);
+}
+
+.knowledge-folder-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.knowledge-folder-name {
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--vox-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.knowledge-folder-path {
+  font-size: 0.72rem;
+  color: var(--vox-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.knowledge-folder-remove {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--vox-text-secondary);
+  padding: 3px 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+.knowledge-folder-remove:hover {
+  color: #ffd9e6;
+  background: rgba(194, 109, 145, 0.2);
+}
+
+.knowledge-folder-remove:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.knowledge-folder-empty {
+  padding: 10px 0;
+  color: var(--vox-text-secondary);
+  font-size: 0.84rem;
+}
+
+.knowledge-rail-footer {
+  padding-top: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.knowledge-rail-add {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--vox-border-soft);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--vox-text-primary);
+  font-size: 0.84rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 120ms;
+}
+
+.knowledge-rail-add:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.knowledge-rail-add:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.knowledge-rail-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--vox-text-secondary);
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background 120ms,
+    color 120ms;
+}
+
+.knowledge-rail-toggle:hover {
+  color: var(--vox-text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.knowledge-rail-toggle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.knowledge-rail-toggle-pause {
+  color: #ffd9e6;
+}
+
+.knowledge-rail-feedback {
+  margin: 0;
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.knowledge-rail-feedback-error {
+  color: #ffd9e6;
+}
+
+.knowledge-rail-feedback-success {
+  color: #d8f4e7;
+}
+
+.knowledge-explorer {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  position: relative;
+  background: rgba(255, 255, 255, 0.018);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+}

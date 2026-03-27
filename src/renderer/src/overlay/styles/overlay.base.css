@@ -1,0 +1,198 @@
+html,
+body,
+#overlay-root {
+  height: 100%;
+  margin: 0;
+  background: transparent !important;
+  overflow: hidden;
+  user-select: none;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'SF Pro Text',
+    'Segoe UI',
+    system-ui,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.overlay-root {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.overlay-card {
+  background: rgba(36, 36, 34, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
+  height: 100%;
+  pointer-events: auto;
+  position: relative;
+}
+
+.overlay-resize-handle {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 6px;
+  cursor: ns-resize;
+  z-index: 20;
+  -webkit-app-region: no-drag;
+}
+
+.overlay-resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0);
+  transition: background 0.15s;
+}
+
+.overlay-resize-handle:hover::after {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.overlay-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.overlay-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: #8a8680;
+}
+
+.overlay-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  flex: 1;
+}
+
+.overlay-skeleton-row {
+  display: flex;
+}
+
+.overlay-skeleton-row-right {
+  justify-content: flex-end;
+}
+
+.overlay-skeleton-bubble {
+  height: 32px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  animation: overlayShimmer 1.4s ease-in-out infinite;
+}
+
+.overlay-skeleton-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  max-width: 80%;
+}
+
+.overlay-skeleton-line {
+  height: 11px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.04);
+  animation: overlayShimmer 1.4s ease-in-out infinite;
+}
+
+.overlay-skeleton-lines .overlay-skeleton-line:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.overlay-skeleton-lines .overlay-skeleton-line:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.overlay-skeleton-task {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.overlay-skeleton-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+  animation: overlayShimmer 1.4s ease-in-out infinite;
+}
+
+.overlay-skeleton-task-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overlay-skeleton-task-label {
+  height: 12px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.04);
+  animation: overlayShimmer 1.4s ease-in-out infinite;
+}
+
+.overlay-skeleton-task-meta {
+  height: 9px;
+  width: 40%;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  animation: overlayShimmer 1.4s ease-in-out infinite;
+  animation-delay: 0.15s;
+}
+
+@keyframes overlayShimmer {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}

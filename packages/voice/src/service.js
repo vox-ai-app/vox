@@ -5,6 +5,7 @@ import { is } from '@electron-toolkit/utils'
 let _log = console
 let _onDetected = () => {}
 let _onError = () => {}
+let _activateCallback = () => {}
 let worker = null
 let stoppingWorker = false
 let registeredShortcut = null
@@ -31,7 +32,7 @@ const startWakeWord = async () => {
     })
     worker.on('message', (msg) => {
       if (msg.type === 'detected') {
-        if (_onDetected() !== false) {
+        if (_activateCallback() !== false) {
           worker?.postMessage({ type: 'pause' })
         }
       } else if (msg.type === 'error') {
@@ -93,6 +94,7 @@ export const initVoiceService = async ({ onActivate } = {}) => {
     await destroyVoiceService()
   }
   const activate = onActivate ?? (() => _onDetected())
+  _activateCallback = activate
   const registered = globalShortcut.register('CommandOrControl+Alt+V', activate)
   if (registered) {
     registeredShortcut = 'CommandOrControl+Alt+V'

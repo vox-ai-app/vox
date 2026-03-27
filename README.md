@@ -40,7 +40,7 @@ Press `⌘⌥V` or say the wake word to start.
 
 ```sh
 git clone https://github.com/vox-ai-app/vox.git
-cd vox/local-app
+cd vox
 npm install
 npm run dev
 ```
@@ -69,15 +69,15 @@ The monorepo publishes 7 packages. Most are platform-agnostic and usable in any 
 
 | Package                                                       | Platform        | Description                                |
 | ------------------------------------------------------------- | --------------- | ------------------------------------------ |
-| [`@vox-ai-app/vox-mcp`](packages/mcp)                         | any             | MCP client (stdio, SSE, HTTP)              |
-| [`@vox-ai-app/vox-tools`](packages/tools)                     | any             | Registry, builtins, docs, tool definitions |
-| [`@vox-ai-app/vox-integrations`](packages/integrations)       | macOS (for now) | Mail, Screen, iMessage integrations        |
-| [`@vox-ai-app/vox-voice`](packages/voice)                     | any             | Wake word detection and voice window       |
-| [`@vox-ai-app/vox-indexing`](packages/indexing)               | any             | File indexing and full-text search         |
-| [`@vox-ai-app/vox-parser`](packages/parser)                   | any             | Document parsing (PDF, DOCX, PPTX, etc.)  |
-| [`@vox-ai-app/vox-ui`](packages/ui)                           | any             | React UI components and design tokens      |
+| [`@vox-ai-app/mcp`](packages/mcp)                             | any             | MCP client (stdio, SSE, HTTP)              |
+| [`@vox-ai-app/tools`](packages/tools)                         | any             | Registry, builtins, docs, tool definitions |
+| [`@vox-ai-app/integrations`](packages/integrations)           | macOS (for now) | Mail, Screen, iMessage integrations        |
+| [`@vox-ai-app/voice`](packages/voice)                         | any             | Wake word detection and voice window       |
+| [`@vox-ai-app/indexing`](packages/indexing)                   | any             | File indexing and full-text search         |
+| [`@vox-ai-app/parser`](packages/parser)                       | any             | Document parsing (PDF, DOCX, PPTX, etc.)   |
+| [`@vox-ai-app/ui`](packages/ui)                               | any             | React UI components and design tokens      |
 
-`vox-integrations` is the only package with platform-specific code today. Adding Windows or Linux integrations means adding an implementation alongside the existing macOS one — the factory pattern already supports this without touching anything else.
+`@vox-ai-app/integrations` is the only package with platform-specific code today. Adding Windows or Linux integrations means adding an implementation alongside the existing macOS one without changing the rest of the workspace.
 
 ---
 

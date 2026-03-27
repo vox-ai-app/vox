@@ -1,11 +1,11 @@
-# @vox-ai-app/vox-indexing
+# @vox-ai-app/indexing
 
 Local file indexing, full-text search, and document parsing for Vox. Runs in a separate Electron utility process to keep the main process responsive.
 
 ## Install
 
 ```sh
-npm install @vox-ai-app/vox-indexing
+npm install @vox-ai-app/indexing
 ```
 
 Peer dependency: `electron >= 28`
@@ -28,7 +28,7 @@ import {
   getIndexingStatus,
   setLogger,
   setSentryCapture
-} from '@vox-ai-app/vox-indexing'
+} from '@vox-ai-app/indexing'
 
 setLogger(logger)
 setSentryCapture(captureException)
@@ -77,7 +77,7 @@ getIndexingStatus() // current status + progress
 For Electron apps that expose indexing over IPC:
 
 ```js
-import { registerIndexingIpc } from '@vox-ai-app/vox-indexing/ipc'
+import { registerIndexingIpc } from '@vox-ai-app/indexing/ipc'
 
 registerIndexingIpc()
 // Registers: indexing:get-folders, indexing:add-folder, indexing:remove-folder,
@@ -90,7 +90,7 @@ registerIndexingIpc()
 For apps that want push-based status updates from the utility process:
 
 ```js
-import { setOnStatusChange } from '@vox-ai-app/vox-indexing/process'
+import { setOnStatusChange } from '@vox-ai-app/indexing/process'
 
 setOnStatusChange((status) => {
   // status shape matches getIndexingStatus()
@@ -115,8 +115,8 @@ export default {
       rollupOptions: {
         input: {
           index: 'src/main/index.js',
-          'indexing.process': 'node_modules/@vox-ai-app/vox-indexing/src/process/process.js',
-          'indexing.parser.worker': 'node_modules/@vox-ai-app/vox-indexing/src/parser/worker.js'
+          'indexing.process': 'node_modules/@vox-ai-app/indexing/src/process/process.js',
+          'indexing.parser.worker': 'node_modules/@vox-ai-app/indexing/src/parser/worker.js'
         }
       }
     }

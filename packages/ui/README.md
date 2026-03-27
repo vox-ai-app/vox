@@ -1,11 +1,11 @@
-# @vox-ai-app/vox-ui
+# @vox-ai-app/ui
 
 Shared React component library for the Vox design system. Built with Vite, exported as pre-built ESM.
 
 ## Install
 
 ```sh
-npm install @vox-ai-app/vox-ui
+npm install @vox-ai-app/ui
 ```
 
 Peer dependencies: `react >= 19`, `react-dom >= 19`
@@ -15,7 +15,7 @@ Peer dependencies: `react >= 19`, `react-dom >= 19`
 Import the base styles once in your app entry:
 
 ```js
-import '@vox-ai-app/vox-ui/styles.css'
+import '@vox-ai-app/ui/styles.css'
 ```
 
 ## Components
@@ -32,7 +32,7 @@ import {
   Skeleton,
   Toast,
   ExpandableMarkdown
-} from '@vox-ai-app/vox-ui/primitives'
+} from '@vox-ai-app/ui/primitives'
 ```
 
 ### Composites
@@ -51,7 +51,7 @@ import {
   ExplorerSidebar,
   ExplorerTile,
   VoiceOrb
-} from '@vox-ai-app/vox-ui/composites'
+} from '@vox-ai-app/ui/composites'
 ```
 
 ### Layouts
@@ -59,19 +59,19 @@ import {
 Full-page layout shells.
 
 ```js
-import { AppShell, LeftRail, UserMenu } from '@vox-ai-app/vox-ui/layouts'
+import { AppShell, LeftRail, UserMenu } from '@vox-ai-app/ui/layouts'
 ```
 
 ### Hooks
 
 ```js
-import {} from /* hooks */ '@vox-ai-app/vox-ui/hooks'
+import {} from /* hooks */ '@vox-ai-app/ui/hooks'
 ```
 
 ### Utils
 
 ```js
-import { cn } from '@vox-ai-app/vox-ui/utils'
+import { cn } from '@vox-ai-app/ui/utils'
 // cn(...classes) — merges Tailwind class names
 ```
 
@@ -80,18 +80,18 @@ import { cn } from '@vox-ai-app/vox-ui/utils'
 Design tokens as JS constants or CSS custom properties.
 
 ```js
-import { colors } from '@vox-ai-app/vox-ui/tokens'
+import { colors } from '@vox-ai-app/ui/tokens'
 ```
 
 ```css
-@import '@vox-ai-app/vox-ui/tokens.css';
+@import '@vox-ai-app/ui/tokens.css';
 /* exposes --vox-color-* custom properties */
 ```
 
 ## All exports
 
 ```js
-import {} from /* everything */ '@vox-ai-app/vox-ui'
+import {} from /* everything */ '@vox-ai-app/ui'
 ```
 
 ## License

@@ -30,7 +30,7 @@ We will acknowledge your report within 48 hours and aim to release a fix within 
 In scope:
 
 - The Vox Electron app
-- Published npm packages (`@vox-ai-app/vox-*`)
+- Published npm packages (`@vox-ai-app/*`)
 - Remote code execution, privilege escalation, or data exfiltration vectors
 
 Out of scope:

@@ -1,0 +1,38 @@
+.voice-idle-btn {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 9000;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(149, 146, 139, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--vox-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  -webkit-app-region: no-drag;
+}
+
+.voice-idle-btn:hover {
+  background: rgba(236, 137, 184, 0.1);
+  color: rgba(236, 137, 184, 0.88);
+  border-color: rgba(236, 137, 184, 0.28);
+}
+
+.voice-widget {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 9000;
+  animation: voiceFadeIn 0.18s ease;
+  -webkit-app-region: no-drag;
+}
+
+@keyframes voiceFadeIn {
+  from { opacity: 0; transform: translateY(-5px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}

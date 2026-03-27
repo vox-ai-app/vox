@@ -1,0 +1,216 @@
+.knowledge-explorer-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.knowledge-explorer-back {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--vox-text-secondary);
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: color 120ms;
+}
+
+.knowledge-explorer-back:hover {
+  color: var(--vox-text-primary);
+}
+
+.knowledge-explorer-back:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.knowledge-explorer-crumb {
+  flex: 1;
+  min-width: 0;
+}
+
+.knowledge-explorer-crumb h2 {
+  margin: 0;
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--vox-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.knowledge-explorer-crumb p {
+  margin: 1px 0 0;
+  font-size: 0.74rem;
+  color: var(--vox-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.knowledge-explorer-refresh {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--vox-text-secondary);
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: color 120ms;
+}
+
+.knowledge-explorer-refresh:hover {
+  color: var(--vox-text-primary);
+}
+
+.knowledge-explorer-spin {
+  animation: workspaceButtonSpin 0.8s linear infinite;
+}
+
+.knowledge-explorer-content {
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 20px;
+}
+
+.knowledge-explorer-content::-webkit-scrollbar {
+  display: none;
+}
+
+.knowledge-file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--vox-border-soft);
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  background: transparent;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  color: var(--vox-text-primary);
+}
+
+.knowledge-file-row:hover .knowledge-file-name {
+  color: white;
+}
+
+.knowledge-file-row-selected .knowledge-file-name {
+  color: #ec89b8;
+}
+
+.knowledge-file-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.knowledge-file-icon-folder {
+  background: rgba(76, 168, 217, 0.16);
+  color: #9ad4f5;
+}
+
+.knowledge-file-icon-file {
+  background: rgba(149, 146, 139, 0.1);
+  color: var(--vox-text-secondary);
+}
+
+.knowledge-file-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.knowledge-file-name {
+  display: block;
+  font-size: 0.87rem;
+  font-weight: 500;
+  color: var(--vox-text-primary);
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 120ms;
+}
+
+.knowledge-file-sub {
+  font-size: 0.72rem;
+  color: var(--vox-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.knowledge-file-status {
+  flex-shrink: 0;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.69rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.knowledge-file-status-indexed {
+  color: #d8f4e7;
+  border-color: rgba(118, 194, 159, 0.45);
+  background: rgba(53, 110, 86, 0.35);
+}
+
+.knowledge-file-status-pending {
+  color: #f4e8cc;
+  border-color: rgba(210, 178, 107, 0.45);
+  background: rgba(109, 88, 47, 0.35);
+}
+
+.knowledge-file-status-indexing {
+  color: #d4e5ff;
+  border-color: rgba(121, 162, 226, 0.44);
+  background: rgba(58, 82, 126, 0.38);
+}
+
+.knowledge-file-status-not_indexed {
+  color: var(--vox-text-secondary);
+  border-color: var(--vox-border-soft);
+  background: rgba(149, 146, 139, 0.12);
+}
+
+.knowledge-file-status-ignored,
+.knowledge-file-status-out_of_scope {
+  color: #ffd9e6;
+  border-color: rgba(194, 109, 145, 0.46);
+  background: rgba(101, 53, 73, 0.4);
+}
+
+.knowledge-explorer-empty {
+  padding: 20px 0;
+  margin: 0;
+  color: var(--vox-text-secondary);
+  font-size: 0.88rem;
+}
+
+.knowledge-explorer-spinner {
+  padding: 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--vox-text-secondary);
+  font-size: 0.84rem;
+}

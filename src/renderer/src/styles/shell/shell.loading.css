@@ -1,0 +1,167 @@
+.boot-splash {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  background: #1a1918;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+}
+
+.boot-splash-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  padding: 9px;
+  background: rgba(236, 137, 184, 0.14);
+  border: 1px solid rgba(247, 157, 207, 0.22);
+  box-shadow: 0 12px 28px rgba(9, 7, 10, 0.45);
+}
+
+.boot-splash-ring {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 2px solid rgba(236, 137, 184, 0.2);
+  border-top-color: #ec89b8;
+  animation: workspaceButtonSpin 0.75s linear infinite;
+}
+
+.secondary-button {
+  height: 46px;
+  border-radius: 999px;
+  border: 1px solid var(--vox-border-soft);
+  background: var(--vox-bg-elevated);
+  color: var(--vox-text-primary);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0 24px;
+}
+
+.secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.workspace-skeleton-main {
+  border-left: 1px solid var(--vox-border-soft);
+}
+
+.workspace-skeleton-wordmark {
+  height: 11px;
+  width: 28px;
+  border-radius: 999px;
+  background: rgba(149, 146, 139, 0.28);
+  animation: workspaceSkeletonPulse 1.8s ease-in-out infinite;
+  margin: 0 16px;
+}
+
+.workspace-skeleton-nav-row {
+  height: 36px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-left: 2px solid transparent;
+}
+
+.workspace-skeleton-icon {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  background: rgba(149, 146, 139, 0.22);
+  animation: workspaceSkeletonPulse 1.8s ease-in-out infinite;
+}
+
+.workspace-skeleton-user-row {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.workspace-skeleton-avatar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(149, 146, 139, 0.22);
+  animation: workspaceSkeletonPulse 1.8s ease-in-out infinite;
+}
+
+.workspace-skeleton-chat-area {
+  flex: 1;
+}
+
+.workspace-skeleton-composer {
+  flex-shrink: 0;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid var(--vox-border-soft);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.workspace-skeleton-composer-btn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(149, 146, 139, 0.18);
+  animation: workspaceSkeletonPulse 1.8s ease-in-out infinite;
+}
+
+.workspace-skeleton-line {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(149, 146, 139, 0.3);
+  animation: workspaceSkeletonPulse 1.8s ease-in-out infinite;
+}
+
+.workspace-skeleton-line + .workspace-skeleton-line {
+  margin-top: 10px;
+}
+
+.workspace-skeleton-line-wide {
+  width: 86%;
+}
+
+.workspace-skeleton-line-short {
+  width: 40%;
+}
+
+.workspace-skeleton-line-medium {
+  width: 62%;
+}
+
+.workspace-skeleton-line-long {
+  width: 74%;
+}
+
+@keyframes workspaceSkeletonPulse {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes workspaceButtonSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}

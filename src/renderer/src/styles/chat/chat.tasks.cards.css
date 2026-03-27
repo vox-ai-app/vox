@@ -1,0 +1,179 @@
+.chat-task-feed {
+  margin-top: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.chat-task-card {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--vox-border-soft);
+  cursor: default;
+}
+
+.chat-task-card-clickable {
+  cursor: pointer;
+}
+
+.chat-task-card-clickable:hover {
+  opacity: 0.85;
+}
+
+.chat-task-card-running {
+}
+
+.chat-task-card-failed .chat-task-card-instructions,
+.chat-task-card-incomplete .chat-task-card-instructions {
+  color: rgba(255, 100, 100, 0.75);
+}
+
+.chat-task-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.chat-task-card-icon {
+  flex-shrink: 0;
+}
+
+.chat-task-card-icon-running {
+  color: rgba(236, 137, 184, 0.9);
+  animation: workspaceButtonSpin 1.2s linear infinite;
+}
+
+.chat-task-card-icon-completed {
+  color: rgba(140, 220, 140, 0.9);
+}
+
+.chat-task-card-icon-failed,
+.chat-task-card-icon-aborted,
+.chat-task-card-icon-incomplete {
+  color: rgba(255, 100, 100, 0.85);
+}
+
+.chat-task-card-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--vox-text-primary);
+  text-transform: capitalize;
+}
+
+.chat-task-card-step {
+  font-size: 0.78rem;
+  color: var(--vox-text-muted);
+}
+
+.chat-task-card-view-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.78rem;
+  color: var(--vox-text-muted);
+}
+
+.chat-task-card-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+.chat-task-card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--vox-border-soft);
+  background: var(--vox-bg-surface);
+  color: var(--vox-text-secondary);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.chat-task-card-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-task-card-btn:hover:not(:disabled) {
+  border-color: rgba(236, 137, 184, 0.45);
+  color: var(--vox-text-primary);
+}
+
+.chat-task-card-btn-resume {
+  border-color: rgba(236, 137, 184, 0.3);
+  color: rgba(236, 137, 184, 0.9);
+}
+
+.chat-task-card-instructions {
+  margin: 5px 0 0;
+  font-size: 0.85rem;
+  color: var(--vox-text-secondary);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.chat-task-card-progress {
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-task-card-progress-track {
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--vox-border-soft);
+  overflow: hidden;
+}
+
+.chat-task-card-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(236, 137, 184, 0.7);
+  transition: width 0.3s ease;
+}
+
+.chat-task-card-progress-label {
+  font-size: 0.76rem;
+  color: var(--vox-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chat-task-banner {
+  border-radius: 10px;
+  border: 1px solid rgba(236, 137, 184, 0.22);
+  background: rgba(236, 137, 184, 0.07);
+  padding: 7px 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(236, 137, 184, 0.9);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.chat-task-banner span {
+  flex: 1;
+}
+
+.chat-task-banner-view {
+  border: 0;
+  background: transparent;
+  color: rgba(236, 137, 184, 0.75);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chat-task-banner-view:hover {
+  color: rgba(236, 137, 184, 1);
+}

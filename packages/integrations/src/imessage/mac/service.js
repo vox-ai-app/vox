@@ -12,22 +12,6 @@ const REPLY_TIMEOUT_MS = 90_000
 const FDA_ERROR_MESSAGE =
   'Vox needs Full Disk Access to read Messages. Opening System Settings → Privacy & Security → Full Disk Access — please enable it for Vox and try again.'
 
-/**
- * Creates a self-contained iMessage watcher service.
- *
- * @param {object} opts
- * @param {(text: string, handle: string) => Promise<string|null>} opts.onMessage
- *   Called when a passphrase-matched message arrives. Must return the AI reply text (or null to skip reply).
- * @param {(text: string, handle: string) => void} [opts.onTranscript]
- *   Optional: called before onMessage, useful for emitting transcript events upstream.
- * @param {() => void} [opts.onOpenSettings]
- *   Optional: called when Full Disk Access is required. Default opens nothing.
- * @param {{ info: Function, warn: Function, error: Function }} [opts.logger]
- *   Optional: defaults to console.
- * @param {number} [opts.pollIntervalMs]
- *   Poll interval in ms. Default 3000.
- * @returns {{ start, stop, getPassphrase, listConversations, listContacts, openSettings }}
- */
 export const createIMessageService = ({
   onMessage,
   onTranscript,

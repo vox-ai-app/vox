@@ -1,0 +1,62 @@
+:root {
+  --vox-bg-base: #1a1918;
+  --vox-bg-surface: #1f1e1c;
+  --vox-bg-elevated: #262624;
+  --vox-bg-input: rgba(255, 255, 255, 0.06);
+  --vox-bg-overlay: #242422;
+  --vox-bg-overlay-collapsed: #21211e;
+
+  --vox-text-primary: #f0ece6;
+  --vox-text-secondary: #8a8680;
+  --vox-text-muted: #5c5a56;
+  --vox-text-on-accent: #2f2229;
+
+  --vox-border-soft: rgba(255, 255, 255, 0.08);
+  --vox-border-medium: rgba(255, 255, 255, 0.12);
+  --vox-border-strong: rgba(236, 137, 184, 0.5);
+
+  --vox-accent: #ec89b8;
+  --vox-accent-soft: rgba(236, 137, 184, 0.1);
+  --vox-accent-medium: rgba(236, 137, 184, 0.25);
+  --vox-accent-border: rgba(236, 137, 184, 0.18);
+
+  --vox-surface-hover: rgba(255, 255, 255, 0.05);
+  --vox-surface-active: rgba(255, 255, 255, 0.08);
+  --vox-surface-primary: #2e2d2b;
+  --vox-surface-secondary: #34332f;
+
+  --vox-status-running: #ec89b8;
+  --vox-status-running-bg: rgba(236, 137, 184, 0.1);
+  --vox-status-complete: #78c88c;
+  --vox-status-complete-bg: rgba(120, 200, 140, 0.07);
+  --vox-status-error: #f06464;
+  --vox-status-error-bg: rgba(240, 100, 100, 0.06);
+  --vox-status-aborted: #95928b;
+  --vox-status-aborted-bg: rgba(149, 146, 139, 0.07);
+
+  --vox-alert-success-bg: rgba(24, 126, 88, 0.28);
+  --vox-alert-success-text: #b7f4d8;
+  --vox-alert-success-border: rgba(140, 239, 198, 0.22);
+  --vox-alert-error-bg: rgba(134, 39, 74, 0.34);
+  --vox-alert-error-text: #ffd0e4;
+  --vox-alert-error-border: rgba(255, 181, 213, 0.18);
+  --vox-alert-pending-bg: rgba(104, 62, 86, 0.35);
+  --vox-alert-pending-text: #f3c8de;
+  --vox-alert-pending-border: rgba(210, 178, 200, 0.28);
+
+  --vox-user-bubble: rgba(236, 137, 184, 0.1);
+  --vox-user-bubble-border: rgba(236, 137, 184, 0.15);
+  --vox-user-bubble-text: #f0ece6;
+
+  --vox-scroll-thumb: rgba(255, 255, 255, 0.1);
+  --vox-scroll-thumb-hover: rgba(255, 255, 255, 0.18);
+
+  --vox-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 20px 42px rgba(3, 3, 5, 0.45);
+
+  --brand-start: #ec89b8;
+  --brand-ink: #2f2229;
+
+  --text-primary: #f0ece6;
+  --text-muted: #5c5a56;
+}
