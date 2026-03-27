@@ -1,5 +1,5 @@
 {
-  "name": "@vox-ai-app/vox-tools",
+  "name": "@vox-ai-app/tools",
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
@@ -30,8 +30,8 @@
     "electron": ">=28.0.0"
   },
   "dependencies": {
-    "@vox-ai-app/vox-mcp": "^1.0.0",
-    "@vox-ai-app/vox-parser": "^1.0.0",
+    "@vox-ai-app/mcp": "^1.0.0",
+    "@vox-ai-app/parser": "^1.0.0",
     "docx": "^9.6.0",
     "html-to-text": "^9.0.5",
     "pdf-lib": "^1.17.1",

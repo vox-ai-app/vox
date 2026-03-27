@@ -1,7 +1,7 @@
 import { Document, HeadingLevel, Packer, Paragraph, TextRun, AlignmentType } from 'docx'
 import fs from 'fs/promises'
 import path from 'path'
-import { parseDocx } from '@vox-ai-app/vox-parser'
+import { parseDocx } from '@vox-ai-app/parser'
 import {
   clampNumber,
   normalizeHexColor,

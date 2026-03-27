@@ -5,7 +5,7 @@ import {
   EXEC_TIMEOUT,
   writeTempScript,
   cleanupTemp
-} from '@vox-ai-app/vox-tools/exec'
+} from '@vox-ai-app/tools/exec'
 import { ensureAppleMailConfigured } from '../../shared/index.js'
 import { openMailPermissionSettings, checkMailAccess, throwFdaError } from './permission.js'
 import { getAccountMap, findAccount } from './accounts.js'

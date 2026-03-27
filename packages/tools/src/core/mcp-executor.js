@@ -1,4 +1,4 @@
-import { connectMcpServer } from '@vox-ai-app/vox-mcp'
+import { connectMcpServer } from '@vox-ai-app/mcp'
 
 export function isConnectionError(err) {
   const msg = String(err?.message || '')

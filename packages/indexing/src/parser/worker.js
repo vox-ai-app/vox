@@ -1,11 +1,11 @@
 import { parentPort } from 'worker_threads'
 import path from 'path'
-import parsePdf from '@vox-ai-app/vox-parser/formats/pdf'
-import parseDocx from '@vox-ai-app/vox-parser/formats/docx'
-import parsePptx from '@vox-ai-app/vox-parser/formats/pptx'
-import parseXlsx from '@vox-ai-app/vox-parser/formats/xlsx'
-import parseOpenDoc from '@vox-ai-app/vox-parser/formats/opendoc'
-import parseRtf from '@vox-ai-app/vox-parser/formats/rtf'
+import parsePdf from '@vox-ai-app/parser/formats/pdf'
+import parseDocx from '@vox-ai-app/parser/formats/docx'
+import parsePptx from '@vox-ai-app/parser/formats/pptx'
+import parseXlsx from '@vox-ai-app/parser/formats/xlsx'
+import parseOpenDoc from '@vox-ai-app/parser/formats/opendoc'
+import parseRtf from '@vox-ai-app/parser/formats/rtf'
 const PARSERS = {
   '.pdf': parsePdf,
   '.docx': parseDocx,

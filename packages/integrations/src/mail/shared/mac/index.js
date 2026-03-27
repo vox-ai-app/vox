@@ -1,5 +1,5 @@
 import { shell } from 'electron'
-import { execAbortable } from '@vox-ai-app/vox-tools/exec'
+import { execAbortable } from '@vox-ai-app/tools/exec'
 const AUTOMATION_PERMISSION_MESSAGE =
   'Vox needs permission to control Mail. Please grant it in System Settings → Privacy & Security → Automation → Vox → Mail.'
 const APPLE_MAIL_SETUP_MESSAGE =

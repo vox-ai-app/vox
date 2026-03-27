@@ -1,4 +1,4 @@
-import { resolveLocalPath } from '@vox-ai-app/vox-tools'
+import { resolveLocalPath } from '@vox-ai-app/tools'
 import {
   execAbortable,
   esc,
@@ -6,7 +6,7 @@ import {
   writeTempScript,
   cleanupTemp,
   parseTabSeparated
-} from '@vox-ai-app/vox-tools/exec'
+} from '@vox-ai-app/tools/exec'
 import { ensureAppleMailConfigured } from '../../shared/index.js'
 export const sendEmailMac = async (
   { to, cc, bcc, subject, body, attachments, account },

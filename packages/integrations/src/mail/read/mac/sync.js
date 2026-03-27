@@ -1,4 +1,4 @@
-import { execAsync, execAbortable, writeTempScript, cleanupTemp } from '@vox-ai-app/vox-tools/exec'
+import { execAsync, execAbortable, writeTempScript, cleanupTemp } from '@vox-ai-app/tools/exec'
 
 const SYNC_RETRY_DELAY = 2_000
 const SYNC_MAX_RETRIES = 3

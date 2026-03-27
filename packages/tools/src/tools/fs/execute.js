@@ -3,7 +3,7 @@ import os from 'os'
 import path from 'path'
 import { randomUUID } from 'crypto'
 import { clampNumber } from '../../core/schema.js'
-import { readDocumentFile, PARSED_EXTENSIONS } from '@vox-ai-app/vox-parser'
+import { readDocumentFile, PARSED_EXTENSIONS } from '@vox-ai-app/parser'
 import { resolveLocalPath, isBlockedPath } from './path.js'
 export { resolveLocalPath }
 export async function writeLocalFile(args) {

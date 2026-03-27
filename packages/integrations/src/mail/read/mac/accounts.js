@@ -1,4 +1,4 @@
-import { execAbortable, writeTempScript, cleanupTemp } from '@vox-ai-app/vox-tools/exec'
+import { execAbortable, writeTempScript, cleanupTemp } from '@vox-ai-app/tools/exec'
 import { ensureAppleMailConfigured } from '../../shared/index.js'
 
 const ACCOUNT_CACHE_TTL = 60_000

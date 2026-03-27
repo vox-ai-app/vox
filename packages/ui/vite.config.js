@@ -22,8 +22,8 @@ export default defineConfig({
         'react',
         'react-dom',
         'react/jsx-runtime',
-        '@vox-ai-app/vox-tokens',
-        '@vox-ai-app/vox-tokens/css'
+        '@vox-ai-app/tokens',
+        '@vox-ai-app/tokens/css'
       ]
     },
     outDir: 'dist',

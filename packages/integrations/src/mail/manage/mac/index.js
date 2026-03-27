@@ -1,11 +1,11 @@
-import { resolveLocalPath } from '@vox-ai-app/vox-tools'
+import { resolveLocalPath } from '@vox-ai-app/tools'
 import {
   execAbortable,
   esc,
   EXEC_TIMEOUT,
   writeTempScript,
   cleanupTemp
-} from '@vox-ai-app/vox-tools/exec'
+} from '@vox-ai-app/tools/exec'
 import { ensureAppleMailConfigured } from '../../shared/index.js'
 
 const runAs = async (script, signal) => {

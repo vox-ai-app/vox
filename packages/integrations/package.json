@@ -1,5 +1,5 @@
 {
-  "name": "@vox-ai-app/vox-integrations",
+  "name": "@vox-ai-app/integrations",
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
@@ -36,7 +36,7 @@
     "electron": ">=28.0.0"
   },
   "dependencies": {
-    "@vox-ai-app/vox-tools": "^1.0.0",
+    "@vox-ai-app/tools": "^1.0.0",
     "better-sqlite3": "^12.0.0"
   }
 }
