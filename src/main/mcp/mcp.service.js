@@ -2,19 +2,20 @@ import { connectMcpServer as _connect, setLogger } from '@vox-ai-app/mcp/client'
 import { storeGet, storeSet } from '../storage/store'
 import { logger } from '../logger'
 
-function invalidateToolCache() {
-  import('../chat/chat.session.js')
-    .then(({ invalidateToolDefinitions }) => {
-      invalidateToolDefinitions()
-    })
-    .catch(() => {})
-}
-
 setLogger(logger)
 
 const STORE_KEY = 'mcpServers'
 
 const connections = new Map()
+let _toolInvalidationCallback = null
+
+export function setToolInvalidationCallback(fn) {
+  _toolInvalidationCallback = fn
+}
+
+function invalidateToolCache() {
+  _toolInvalidationCallback?.()
+}
 
 export function listMcpServers() {
   return storeGet(STORE_KEY) || []

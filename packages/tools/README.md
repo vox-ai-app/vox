@@ -12,8 +12,8 @@ Peer dependency: `electron >= 28`
 
 ## Exports
 
-| Export                           | Contents           |
-| -------------------------------- | ------------------ |
+| Export                       | Contents           |
+| ---------------------------- | ------------------ |
 | `@vox-ai-app/tools`          | All core exports   |
 | `@vox-ai-app/tools/exec`     | Exec utilities     |
 | `@vox-ai-app/tools/schema`   | Validation helpers |
@@ -62,13 +62,7 @@ await createPresentationDocument({ path: '~/slides.pptx', slides: [...] })
 ## Exec Utilities
 
 ```js
-import {
-  execAsync,
-  execAbortable,
-  esc,
-  writeTempScript,
-  cleanupTemp
-} from '@vox-ai-app/tools/exec'
+import { execAsync, execAbortable, esc, writeTempScript, cleanupTemp } from '@vox-ai-app/tools/exec'
 
 const { stdout } = await execAsync('ls -la', { timeout: 10_000 })
 const { stdout } = await execAbortable('long-cmd', { timeout: 30_000 }, signal)

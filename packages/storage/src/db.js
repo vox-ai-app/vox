@@ -69,6 +69,46 @@ function prepareDb(db) {
     CREATE INDEX IF NOT EXISTS idx_task_activity_task_id
       ON task_activity (task_id, timestamp ASC, id ASC);
   `)
+
+  try {
+    db.exec(`ALTER TABLE tasks ADD COLUMN reported INTEGER NOT NULL DEFAULT 0`)
+  } catch {
+    /* column may already exist */
+  }
+
+  try {
+    db.exec(`
+      CREATE VIRTUAL TABLE IF NOT EXISTS tasks_fts USING fts5(
+        task_id UNINDEXED,
+        instructions,
+        result,
+        tokenize = 'unicode61'
+      )
+    `)
+  } catch {
+    /* table may already exist */
+  }
+
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS knowledge_patterns (
+        id TEXT PRIMARY KEY,
+        trigger TEXT NOT NULL,
+        solution TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    `)
+    db.exec(`
+      CREATE VIRTUAL TABLE IF NOT EXISTS patterns_fts USING fts5(
+        pattern_id UNINDEXED,
+        trigger,
+        solution,
+        tokenize = 'unicode61'
+      )
+    `)
+  } catch {
+    /* tables may already exist */
+  }
 }
 
 export function openDb(dbPath) {

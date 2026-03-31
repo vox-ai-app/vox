@@ -123,8 +123,6 @@ function Parameters({ params, onChange }) {
   )
 }
 
-
-
 function paramsFromSchema(schema) {
   if (!schema) return []
   if (Array.isArray(schema)) return schema

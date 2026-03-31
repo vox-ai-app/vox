@@ -8,13 +8,18 @@ export function createStallDetector() {
 
   return {
     check(journal, planningComplete) {
-      const planUnchanged = journal.currentPlan === lastPlan
+      const currentPlan = journal.currentPlan || ''
+      const planUnchanged = currentPlan === lastPlan
       const completedUnchanged = journal.completed.length === lastCompletedCount
 
       lastCompletedCount = journal.completed.length
-      lastPlan = journal.currentPlan
+      lastPlan = currentPlan
 
       if (!planningComplete) return { stalled: false, stalledFor: 0, nudge: null }
+
+      if (!currentPlan && !journal.completed.length) {
+        return { stalled: false, stalledFor: 0, nudge: null }
+      }
 
       if (planUnchanged && completedUnchanged) {
         stalledFor++

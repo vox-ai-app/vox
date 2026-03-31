@@ -48,6 +48,13 @@ const definition = {
 }
 
 const MAX_CHECKPOINTS = 10
+const MAX_ARRAY_SIZE = 100
+
+function capArray(arr) {
+  if (arr.length > MAX_ARRAY_SIZE) {
+    arr.splice(0, arr.length - MAX_ARRAY_SIZE)
+  }
+}
 
 export function createJournalTool(journal, onUpdate) {
   const checkpoints = []
@@ -89,12 +96,23 @@ export function createJournalTool(journal, onUpdate) {
       if (args.done !== undefined) journal.done = args.done
       if (args.doneReason !== undefined) journal.doneReason = args.doneReason
 
-      if (Array.isArray(args.thoughts)) journal.thoughts.push(...args.thoughts)
-      if (Array.isArray(args.discoveries)) journal.discoveries.push(...args.discoveries)
-      if (Array.isArray(args.completed)) journal.completed.push(...args.completed)
+      if (Array.isArray(args.thoughts)) {
+        journal.thoughts.push(...args.thoughts)
+        capArray(journal.thoughts)
+      }
+      if (Array.isArray(args.discoveries)) {
+        journal.discoveries.push(...args.discoveries)
+        capArray(journal.discoveries)
+      }
+      if (Array.isArray(args.completed)) {
+        journal.completed.push(...args.completed)
+        capArray(journal.completed)
+      }
       if (Array.isArray(args.blockers)) {
         journal.blockers.push(...args.blockers)
         journal.blockersEncountered.push(...args.blockers)
+        capArray(journal.blockers)
+        capArray(journal.blockersEncountered)
       }
       if (args.clearBlockers) journal.blockers = []
 

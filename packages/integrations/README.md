@@ -14,8 +14,8 @@ Peer dependency: `electron >= 28`
 
 ## Exports
 
-| Export                                        | Contents                      |
-| --------------------------------------------- | ----------------------------- |
+| Export                                    | Contents                      |
+| ----------------------------------------- | ----------------------------- |
 | `@vox-ai-app/integrations`                | All exports                   |
 | `@vox-ai-app/integrations/defs`           | All tool definitions          |
 | `@vox-ai-app/integrations/mail`           | Mail functions                |
@@ -30,12 +30,7 @@ Peer dependency: `electron >= 28`
 Requires **Automation permission** for Mail (System Settings → Privacy & Security → Automation).
 
 ```js
-import {
-  sendEmail,
-  readEmails,
-  searchContacts,
-  replyToEmail
-} from '@vox-ai-app/integrations/mail'
+import { sendEmail, readEmails, searchContacts, replyToEmail } from '@vox-ai-app/integrations/mail'
 
 const emails = await readEmails({ account: 'Work', folder: 'INBOX', limit: 20 })
 await sendEmail({ to: 'user@example.com', subject: 'Hi', body: 'Hello.' })

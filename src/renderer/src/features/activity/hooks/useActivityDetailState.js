@@ -24,11 +24,11 @@ function getLatestThought(taskEvents, isRunning) {
 }
 
 function buildGroupedPairs(taskEvents, lastProgressTime, isRunning) {
-  if (!isRunning) return []
+  if (taskEvents.length === 0) return []
 
   const calls = taskEvents.filter((event) => {
     if (event.type !== 'tool_call' && event.type !== 'task.request') return false
-    if (!lastProgressTime) return true
+    if (!isRunning || !lastProgressTime) return true
     const eventTime = event.at || event.timestamp
     return eventTime && eventTime > lastProgressTime
   })
@@ -94,19 +94,24 @@ export function useActivityDetailState({ taskId, liveTask, taskEvents }) {
   const label = TASK_STATUS_LABEL[effectiveStatus] || effectiveStatus
   const liveCurrentPlan = liveTask?.currentPlan || ''
 
+  const effectiveTaskEvents = useMemo(
+    () => (taskEvents.length > 0 ? taskEvents : dbTask?.activityLog || []),
+    [taskEvents, dbTask]
+  )
+
   const latestThought = useMemo(
-    () => getLatestThought(taskEvents, isRunning),
-    [taskEvents, isRunning]
+    () => getLatestThought(effectiveTaskEvents, isRunning),
+    [effectiveTaskEvents, isRunning]
   )
 
   const lastProgressTime = useMemo(
-    () => getLastProgressTime(taskEvents, isRunning),
-    [taskEvents, isRunning]
+    () => getLastProgressTime(effectiveTaskEvents, isRunning),
+    [effectiveTaskEvents, isRunning]
   )
 
   const groupedPairs = useMemo(
-    () => buildGroupedPairs(taskEvents, lastProgressTime, isRunning),
-    [taskEvents, lastProgressTime, isRunning]
+    () => buildGroupedPairs(effectiveTaskEvents, lastProgressTime, isRunning),
+    [effectiveTaskEvents, lastProgressTime, isRunning]
   )
 
   return {

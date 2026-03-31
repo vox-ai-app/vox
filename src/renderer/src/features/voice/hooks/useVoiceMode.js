@@ -6,19 +6,47 @@ export function useVoiceMode() {
   const [transcript, setTranscript] = useState('')
   const [responseText, setResponseText] = useState('')
   const isActiveRef = useRef(false)
-  const {
-    setSilenceHandler,
-    resetSilenceTimer,
-    stopPlayback,
-    stopVoiceAudio,
-    playPcmBuffer,
-    primePlayback,
-    startMicCapture
-  } = useVoiceAudioRuntime(isActiveRef)
+  const ttsQueueRef = useRef([])
+  const ttsPlayingRef = useRef(false)
+  const { setSilenceHandler, resetSilenceTimer, stopVoiceAudio, startMicCapture } =
+    useVoiceAudioRuntime(isActiveRef, ttsPlayingRef)
+
+  const playNextTtsRef = useRef(null)
+  const playNextTts = useCallback(() => {
+    if (!isActiveRef.current || ttsQueueRef.current.length === 0) {
+      ttsPlayingRef.current = false
+      if (isActiveRef.current && ttsQueueRef.current.length === 0) {
+        setResponseText('')
+        setPhase('listening')
+        resetSilenceTimer()
+      }
+      return
+    }
+    ttsPlayingRef.current = true
+    const text = ttsQueueRef.current.shift()
+    setResponseText(text)
+    setPhase('speaking')
+    resetSilenceTimer()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.onend = () => {
+      if (!isActiveRef.current) return
+      playNextTtsRef.current?.()
+    }
+    utterance.onerror = () => {
+      if (!isActiveRef.current) return
+      playNextTtsRef.current?.()
+    }
+    window.speechSynthesis.speak(utterance)
+  }, [resetSilenceTimer])
+
+  useEffect(() => {
+    playNextTtsRef.current = playNextTts
+  }, [playNextTts])
 
   const deactivate = useCallback(async () => {
     if (!isActiveRef.current) return
     isActiveRef.current = false
+    window.speechSynthesis?.cancel()
     stopVoiceAudio()
     setPhase('idle')
     setTranscript('')
@@ -29,7 +57,6 @@ export function useVoiceMode() {
     } catch {
       void 0
     }
-
     try {
       await window.api.voice.sessionEnd()
     } catch {
@@ -64,76 +91,74 @@ export function useVoiceMode() {
       return
     }
 
-    await primePlayback()
-
     try {
       await startMicCapture()
     } catch {
       void deactivate()
     }
-  }, [deactivate, primePlayback, startMicCapture])
-
-  const dismiss = useCallback(() => {
-    void deactivate()
-  }, [deactivate])
+  }, [deactivate, startMicCapture])
 
   useEffect(() => {
-    const unsubActivate = window.api.voice.onActivate(() => {
+    const unsub = window.api.voice.onActivate((payload) => {
+      if (payload?.active === false) return
       void activate()
     })
-
-    const unsubAudio = window.api.voice.onAudio((buffer) => {
-      if (!isActiveRef.current) return
-      setPhase('speaking')
-      void playPcmBuffer(buffer)
-    })
-
-    return () => {
-      unsubActivate()
-      unsubAudio()
-    }
-  }, [activate, playPcmBuffer])
+    return () => unsub()
+  }, [activate])
 
   useEffect(() => {
-    const unsubEvent = window.api.chat.onEvent((event) => {
+    const unsub = window.api.chat.onEvent((event) => {
       if (!isActiveRef.current) return
 
+      if (event.type === 'hearing') {
+        setPhase('hearing')
+      }
+
       if (event.type === 'transcript' && event.data?.content) {
+        window.speechSynthesis?.cancel()
+        ttsQueueRef.current = []
+        ttsPlayingRef.current = false
         setTranscript(event.data.content)
         setPhase('thinking')
         setResponseText('')
         resetSilenceTimer()
       }
 
-      if (event.type === 'message_chunk' && event.data?.content) {
-        setResponseText((current) => current + event.data.content)
-        resetSilenceTimer()
+      if (event.type === 'llm_response_chunk' && event.data?.content) {
+        ttsQueueRef.current.push(event.data.content)
+        if (!ttsPlayingRef.current) playNextTts()
       }
 
-      if (event.type === 'audio_start') {
-        setPhase('speaking')
-      }
-
-      if (event.type === 'audio_end') {
-        setPhase('listening')
-        setResponseText('')
-        resetSilenceTimer()
+      if (event.type === 'llm_response' && event.data?.content) {
+        ttsQueueRef.current.push(event.data.content)
+        if (!ttsPlayingRef.current) playNextTts()
       }
 
       if (event.type === 'barge_in') {
-        stopPlayback()
-        setPhase('listening')
+        window.speechSynthesis?.cancel()
+        ttsQueueRef.current = []
+        ttsPlayingRef.current = false
         setResponseText('')
         resetSilenceTimer()
       }
-    })
 
-    return () => unsubEvent()
-  }, [resetSilenceTimer, stopPlayback])
+      if (event.type === 'voice_error') {
+        ttsQueueRef.current = []
+        ttsPlayingRef.current = false
+        setResponseText('')
+        setPhase('listening')
+        resetSilenceTimer()
+      }
+    })
+    return () => unsub()
+  }, [resetSilenceTimer, playNextTts])
 
   useEffect(() => {
     return () => {
       isActiveRef.current = false
+      ttsQueueRef.current = []
+      ttsPlayingRef.current = false
+      window.speechSynthesis?.cancel()
       stopVoiceAudio()
     }
   }, [stopVoiceAudio])
@@ -144,6 +169,6 @@ export function useVoiceMode() {
     responseText,
     isActive: phase !== 'idle',
     activate,
-    dismiss
+    dismiss: deactivate
   }
 }

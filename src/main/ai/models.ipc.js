@@ -7,7 +7,8 @@ import {
   deleteModel,
   pickLocalModel,
   cancelDownload,
-  getActiveDownloadProgress
+  getActiveDownloadProgress,
+  getRecommendedModel
 } from './models'
 import { getLlmStatus, reloadModel } from './llm.bridge'
 
@@ -78,5 +79,10 @@ export function registerModelsIpc() {
       await reloadModel(path)
       return { path }
     })
+  )
+
+  registerHandler(
+    'models:get-recommended',
+    createHandler(() => getRecommendedModel())
   )
 }

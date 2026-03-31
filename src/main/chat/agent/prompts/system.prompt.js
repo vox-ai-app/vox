@@ -7,7 +7,7 @@ const JOURNAL_FIELDS = `Journal fields:
 - blockers: what's blocking you (use clearBlockers=true when resolved)
 - done: true when finished, with doneReason explaining the outcome`
 
-export function buildAgentPrompt(instructions, context) {
+export function buildAgentPrompt(instructions, context, pastContext, knowledgePatterns) {
   const parts = [
     `You are an autonomous agent completing tasks for the user. You have access to their filesystem, desktop tools, web search, and code execution.
 
@@ -67,6 +67,8 @@ Tool output limits:
   ]
 
   if (context) parts.push('', `Context:\n${context}`)
+  if (pastContext) parts.push('', `Similar past tasks for reference:\n${pastContext}`)
+  if (knowledgePatterns) parts.push('', `Relevant patterns from past tasks:\n${knowledgePatterns}`)
 
   return parts.join('\n')
 }

@@ -24,7 +24,6 @@ function RouteFallback() {
   )
 }
 
-
 const noopSync = async () => false
 
 function LocalApp() {
@@ -36,7 +35,9 @@ function LocalApp() {
     setActiveRoute(route)
   }, [])
 
-  const { folders, removeFolder, pickAndAddFolder } = useFoldersStore({ syncSessionExpiry: noopSync })
+  const { folders, removeFolder, pickAndAddFolder } = useFoldersStore({
+    syncSessionExpiry: noopSync
+  })
 
   const { indexingStatus, rebuildIndexing, getIndexedChildren } = useIndexingController({
     syncSessionExpiry: noopSync
@@ -102,10 +103,7 @@ function LocalApp() {
   }
 
   return (
-    <AppShell
-      activeRoute={activeRoute}
-      onRouteChange={handleRouteChange}
-    >
+    <AppShell activeRoute={activeRoute} onRouteChange={handleRouteChange}>
       {renderRoute()}
     </AppShell>
   )

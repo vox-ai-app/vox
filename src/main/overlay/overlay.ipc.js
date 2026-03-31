@@ -26,11 +26,16 @@ export function registerOverlayIpc() {
     const tmpFile = path.join(os.tmpdir(), `vox_overlay_capture_${Date.now()}.jpg`)
     try {
       await new Promise((resolve, reject) => {
-        const child = exec(`screencapture -i -t jpg "${tmpFile}"`, { timeout: 60_000 }, (error) => {
-          if (error) reject(error)
-          else resolve()
+        let settled = false
+        const settle = (fn, val) => {
+          if (settled) return
+          settled = true
+          fn(val)
+        }
+        exec(`screencapture -i -t jpg "${tmpFile}"`, { timeout: 60_000 }, (error) => {
+          if (error) settle(reject, error)
+          else settle(resolve)
         })
-        child.on('close', () => resolve())
       })
 
       let buffer

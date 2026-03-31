@@ -1,4 +1,4 @@
-import { parentPort } from 'worker_threads'
+const { parentPort } = require('worker_threads')
 
 let transcriber = null
 
@@ -11,7 +11,12 @@ async function init(cacheDir) {
 
   transcriber = await pipeline('automatic-speech-recognition', 'onnx-community/whisper-tiny.en', {
     dtype: 'fp32',
-    device: 'cpu'
+    device: 'cpu',
+    progress_callback: (p) => {
+      if (p.status === 'progress' && p.total) {
+        parentPort.postMessage({ type: 'progress', file: p.file, loaded: p.loaded, total: p.total })
+      }
+    }
   })
 
   parentPort.postMessage({ type: 'ready' })
@@ -24,11 +29,7 @@ async function transcribe(audioBuffer) {
   }
 
   const audio = new Float32Array(audioBuffer)
-  const result = await transcriber(audio, {
-    language: 'english',
-    task: 'transcribe',
-    return_timestamps: false
-  })
+  const result = await transcriber(audio, { return_timestamps: false })
 
   const text = (result.text || '').trim()
   parentPort.postMessage({ type: 'transcript', text })

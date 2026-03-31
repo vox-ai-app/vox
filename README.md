@@ -67,15 +67,15 @@ Nothing is sent off-device.
 
 The monorepo publishes 7 packages. Most are platform-agnostic and usable in any Electron app or Node.js project:
 
-| Package                                                       | Platform        | Description                                |
-| ------------------------------------------------------------- | --------------- | ------------------------------------------ |
-| [`@vox-ai-app/mcp`](packages/mcp)                             | any             | MCP client (stdio, SSE, HTTP)              |
-| [`@vox-ai-app/tools`](packages/tools)                         | any             | Registry, builtins, docs, tool definitions |
-| [`@vox-ai-app/integrations`](packages/integrations)           | macOS (for now) | Mail, Screen, iMessage integrations        |
-| [`@vox-ai-app/voice`](packages/voice)                         | any             | Wake word detection and voice window       |
-| [`@vox-ai-app/indexing`](packages/indexing)                   | any             | File indexing and full-text search         |
-| [`@vox-ai-app/parser`](packages/parser)                       | any             | Document parsing (PDF, DOCX, PPTX, etc.)   |
-| [`@vox-ai-app/ui`](packages/ui)                               | any             | React UI components and design tokens      |
+| Package                                             | Platform        | Description                                |
+| --------------------------------------------------- | --------------- | ------------------------------------------ |
+| [`@vox-ai-app/mcp`](packages/mcp)                   | any             | MCP client (stdio, SSE, HTTP)              |
+| [`@vox-ai-app/tools`](packages/tools)               | any             | Registry, builtins, docs, tool definitions |
+| [`@vox-ai-app/integrations`](packages/integrations) | macOS (for now) | Mail, Screen, iMessage integrations        |
+| [`@vox-ai-app/voice`](packages/voice)               | any             | Wake word detection and voice window       |
+| [`@vox-ai-app/indexing`](packages/indexing)         | any             | File indexing and full-text search         |
+| [`@vox-ai-app/parser`](packages/parser)             | any             | Document parsing (PDF, DOCX, PPTX, etc.)   |
+| [`@vox-ai-app/ui`](packages/ui)                     | any             | React UI components and design tokens      |
 
 `@vox-ai-app/integrations` is the only package with platform-specific code today. Adding Windows or Linux integrations means adding an implementation alongside the existing macOS one without changing the rest of the workspace.
 
@@ -93,6 +93,7 @@ npm run format   # format with prettier
 ```
 
 **Good first areas:**
+
 - **Windows/Linux integrations** — the biggest gap; screen control, file access, and email on other platforms ([`packages/integrations/`](packages/integrations))
 - **New tools** — calendar, contacts, browser control, terminal, anything useful day-to-day ([`packages/integrations/`](packages/integrations))
 - **UI and UX** — this is v1; chat flow, settings, onboarding all have room to improve ([`packages/ui/`](packages/ui))

@@ -1,16 +1,29 @@
 import { emitAll } from '../ipc/shared'
 import { startAgent, abortAgent, onAgentEvent } from '../ai/llm.bridge'
 import { logger } from '../logger'
-import { appendMessage } from '../storage/messages.db'
-import { appendTaskActivity, loadAllTaskActivity, loadTasks, upsertTask } from '../storage/tasks.db'
+import {
+  appendTaskActivity,
+  loadAllTaskActivity,
+  loadTasks,
+  upsertTask,
+  indexTaskInFts
+} from '../storage/tasks.db'
 
-const MAX_CONCURRENT = 2
+const MAX_CONCURRENT = 1
+const MAX_ACTIVITY_PER_TASK = 500
 
 const queue = []
 const active = new Map()
 const taskMeta = new Map()
 const taskActivity = new Map()
 let hydrated = false
+let _draining = false
+
+let _toolDefinitionProvider = null
+
+export function setToolDefinitionProvider(fn) {
+  _toolDefinitionProvider = fn
+}
 
 function buildTaskObject(taskId) {
   const meta = taskMeta.get(taskId)
@@ -64,16 +77,16 @@ function hydrateTaskState() {
       instructions: storedTask.instructions || '',
       context: storedTask.context || '',
       toolDefinitions: [],
-      status: isInterrupted ? 'aborted' : storedTask.status,
+      status: isInterrupted ? 'failed' : storedTask.status,
       createdAt: storedTask.createdAt || new Date().toISOString(),
       updatedAt: storedTask.updatedAt || storedTask.createdAt || new Date().toISOString(),
       currentPlan: storedTask.currentPlan || '',
-      message: isInterrupted ? 'Task stopped because the app restarted.' : storedTask.message || '',
+      message: isInterrupted
+        ? 'Interrupted by app restart — resume to continue.'
+        : storedTask.message || '',
       result: storedTask.result || null,
       completedAt: isInterrupted ? '' : storedTask.completedAt || '',
-      failedAt: isInterrupted
-        ? storedTask.failedAt || new Date().toISOString()
-        : storedTask.failedAt || ''
+      failedAt: isInterrupted ? new Date().toISOString() : storedTask.failedAt || ''
     }
 
     taskMeta.set(normalized.taskId, normalized)
@@ -153,6 +166,9 @@ function buildActivityEvent(taskId, event) {
 function recordActivity(taskId, event) {
   const nextEvent = buildActivityEvent(taskId, event)
   const events = taskActivity.get(taskId) || []
+  if (events.length >= MAX_ACTIVITY_PER_TASK) {
+    events.splice(0, events.length - MAX_ACTIVITY_PER_TASK + 1)
+  }
   events.push(nextEvent)
   taskActivity.set(taskId, events)
   appendTaskActivity(nextEvent)
@@ -222,7 +238,7 @@ export function abortTask(taskId) {
   const idx = queue.findIndex((t) => t.taskId === taskId)
   if (idx >= 0) {
     queue.splice(idx, 1)
-    setStatus(taskId, 'aborted')
+    setStatus(taskId, 'aborted', { message: 'Cancelled before starting' })
     return
   }
   if (active.has(taskId)) {
@@ -249,14 +265,13 @@ export async function resumeTask(taskId) {
     return { resumed: false, reason: 'invalid-status' }
   }
 
-  const { getToolDefinitions } = await import('./chat.session.js')
   meta.status = 'queued'
   meta.updatedAt = new Date().toISOString()
   meta.message = ''
   meta.result = null
   meta.completedAt = ''
   meta.failedAt = ''
-  meta.toolDefinitions = getToolDefinitions()
+  meta.toolDefinitions = _toolDefinitionProvider?.() || []
   persistTaskMeta(meta)
 
   queue.push({
@@ -343,9 +358,15 @@ export function refreshTaskCache() {
 }
 
 function drain() {
-  while (queue.length > 0 && active.size < MAX_CONCURRENT) {
-    const task = queue.shift()
-    runTask(task)
+  if (_draining) return
+  _draining = true
+  try {
+    while (queue.length > 0 && active.size < MAX_CONCURRENT) {
+      const task = queue.shift()
+      runTask(task)
+    }
+  } finally {
+    _draining = false
   }
 }
 
@@ -367,22 +388,35 @@ function runTask({ taskId, instructions, context, toolDefinitions }) {
           if (status === 'failed' || status === 'aborted') meta.failedAt = new Date().toISOString()
         }
         setStatus(taskId, status, extra)
-        if (result) appendMessage('system', `[Task ${taskId} ${status}]: ${result}`)
-        active.get(taskId)?.cleanup?.()
+        if (status === 'completed' || status === 'incomplete') {
+          const m = taskMeta.get(taskId)
+          if (m) {
+            try {
+              indexTaskInFts(taskId, m.instructions, extra.result || m.result || '')
+            } catch (err) {
+              logger.warn('[task.queue] FTS indexing failed:', err.message)
+            }
+          }
+        }
+        const entry = active.get(taskId)
+        if (entry?.cleanup) entry.cleanup()
         active.delete(taskId)
         drain()
       }
-    } else if (event.type === 'journal_update' && event.journal?.currentPlan) {
+    } else if (event.type === 'journal_update') {
       const meta = taskMeta.get(taskId)
       if (meta) {
-        meta.currentPlan = event.journal.currentPlan
+        if (event.journal?.currentPlan) meta.currentPlan = event.journal.currentPlan
         meta.updatedAt = new Date().toISOString()
         persistTaskMeta(meta)
         emitChatTaskEvent('task:updated', taskId)
       }
+      recordActivity(taskId, event)
     } else if (
-      (event.type === 'tool_call' || event.type === 'tool_result') &&
-      event.name !== 'update_journal'
+      event.type === 'tool_call' ||
+      event.type === 'tool_result' ||
+      event.type === 'text' ||
+      event.type === 'thought'
     ) {
       recordActivity(taskId, event)
     }
@@ -418,12 +452,15 @@ export function getTaskDetail(taskId) {
     task: {
       ...buildTaskStatusResponse(task),
       result: taskMeta.get(taskId)?.result || '',
-      steps: activity.map((event) => ({
-        step_id: event.id,
+      steps: [],
+      activityLog: activity.map((event) => ({
+        id: event.id,
+        taskId: event.taskId,
         type: event.type,
-        status: event.type,
-        name: event.name || '',
+        name: event.name || event.data?.name || '',
+        rawResult: event.rawResult,
         at: event.timestamp,
+        timestamp: event.timestamp,
         data: event.data
       }))
     }

@@ -1,13 +1,14 @@
 import './shared/theme'
 import { useEffect, useState } from 'react'
-import voxLogo from './assets/vox.svg'
 import LocalApp from './app/LocalApp'
+import SetupScreen from './features/setup/SetupScreen'
 
 const IS_MAC_OS = navigator.userAgent.toUpperCase().includes('MAC')
 
 function App() {
   const [modelState, setModelState] = useState('booting')
   const [errorMsg, setErrorMsg] = useState('')
+  const [setupPhase, setSetupPhase] = useState('checking')
 
   useEffect(() => {
     const unsubReady = window.api?.models?.onReady?.(() => {
@@ -24,6 +25,17 @@ function App() {
       setErrorMsg(typeof err === 'string' ? err : err?.message || 'Model failed to load.')
     })
 
+    const unsubSetup = window.api?.setup?.onPhase?.((data) => {
+      setSetupPhase(data.phase)
+    })
+
+    window.api?.setup
+      ?.getPhase?.()
+      .then((phase) => {
+        if (phase) setSetupPhase(phase)
+      })
+      .catch(() => {})
+
     window.api?.models
       ?.isReady?.()
       .then((ready) => {
@@ -36,38 +48,13 @@ function App() {
       unsubReady?.()
       unsubNoModel?.()
       unsubError?.()
+      unsubSetup?.()
     }
   }, [])
 
   const renderBody = () => {
-    if (modelState === 'booting' || modelState === 'loading') {
-      return (
-        <section className="boot-splash">
-          <img alt="Vox" className="boot-splash-logo" src={voxLogo} />
-          <span aria-hidden="true" className="boot-splash-ring" />
-        </section>
-      )
-    }
-
-    if (modelState === 'no_model') {
-      return (
-        <section className="screen-shell workspace-status-shell">
-          <article className="status-card">
-            <p className="status-badge status-badge-pending">No model configured</p>
-            <h1>Select a model to get started</h1>
-            <p className="status-copy">
-              Download a model from the Settings page to start using Vox locally.
-            </p>
-            <button
-              className="secondary-button"
-              onClick={() => setModelState('ready')}
-              type="button"
-            >
-              Continue anyway
-            </button>
-          </article>
-        </section>
-      )
+    if (modelState === 'booting' || modelState === 'loading' || modelState === 'no_model') {
+      return <SetupScreen setupPhase={setupPhase} noModel={modelState === 'no_model'} />
     }
 
     if (modelState === 'error') {

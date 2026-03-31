@@ -1,5 +1,6 @@
 import { app } from 'electron'
 import { join } from 'path'
+import { totalmem } from 'os'
 import { readdirSync, statSync, mkdirSync, existsSync } from 'fs'
 import { storeGet, storeSet, storeDelete } from '../storage/store'
 import { emitAll } from '../ipc/shared'
@@ -181,6 +182,24 @@ export function deleteModel(path) {
 
   const active = storeGet(STORE_KEY_ACTIVE)
   if (active === path) storeDelete(STORE_KEY_ACTIVE)
+}
+
+export function getRecommendedModel() {
+  const gb = totalmem() / 1073741824
+  if (gb >= 16)
+    return {
+      hfRepo: 'bartowski/Meta-Llama-3.1-8B-Instruct-GGUF',
+      hfFile: 'Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf'
+    }
+  if (gb >= 8)
+    return {
+      hfRepo: 'bartowski/Llama-3.2-3B-Instruct-GGUF',
+      hfFile: 'Llama-3.2-3B-Instruct-Q4_K_M.gguf'
+    }
+  return {
+    hfRepo: 'bartowski/Phi-3.5-mini-instruct-GGUF',
+    hfFile: 'Phi-3.5-mini-instruct-Q4_K_M.gguf'
+  }
 }
 
 export async function pickLocalModel() {

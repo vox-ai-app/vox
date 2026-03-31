@@ -1,15 +1,74 @@
 import { Worker } from 'worker_threads'
 import { join } from 'path'
+import { randomUUID } from 'crypto'
 import { app } from 'electron'
 import { emitAll } from '../ipc/shared'
 import { logger } from '../logger'
+import { CONTEXT_SIZE } from './config.js'
 
 let worker = null
 let _status = { ready: false, modelPath: null, loading: false, error: null }
+let _shuttingDown = false
 const pendingRequests = new Map()
 const agentListeners = new Map()
 
 let _activeStreamId = null
+let _voiceTextHandler = null
+let _voiceEndHandler = null
+let _streamBuffer = ''
+let _streamFlushTimer = null
+const MAX_STREAM_BUFFER = 64 * 1024
+
+function flushStreamBuffer() {
+  if (!_streamBuffer || !_activeStreamId) return
+  const content = _streamBuffer
+  _streamBuffer = ''
+  try {
+    emitAll('chat:event', {
+      type: 'msg:stream-chunk',
+      data: { streamId: _activeStreamId, content }
+    })
+    emitAll('chat:event', {
+      type: 'message_chunk',
+      data: { streamId: _activeStreamId, content }
+    })
+  } catch (err) {
+    logger.error('[llm.bridge] flushStreamBuffer failed:', err)
+  }
+}
+
+function scheduleFlush() {
+  if (_streamFlushTimer) return
+  _streamFlushTimer = setTimeout(() => {
+    _streamFlushTimer = null
+    flushStreamBuffer()
+  }, 16)
+}
+
+function resetStreamState() {
+  if (_streamFlushTimer) {
+    clearTimeout(_streamFlushTimer)
+    _streamFlushTimer = null
+  }
+  _streamBuffer = ''
+  _activeStreamId = null
+}
+
+let _restartAttempts = 0
+let _healthCheckInterval = null
+let _missedPongs = 0
+const MAX_RESTART_ATTEMPTS = 3
+const HEALTH_CHECK_INTERVAL_MS = 30_000
+
+export function setChatStreamHandlers(onText, onEnd) {
+  _voiceTextHandler = onText
+  _voiceEndHandler = onEnd
+}
+
+export function clearChatStreamHandlers() {
+  _voiceTextHandler = null
+  _voiceEndHandler = null
+}
 
 function workerPath() {
   const base = app.getAppPath().replace('app.asar', 'app.asar.unpacked')
@@ -17,7 +76,7 @@ function workerPath() {
 }
 
 function spawnWorker() {
-  if (worker) return
+  if (worker || _shuttingDown) return
 
   worker = new Worker(workerPath())
   worker.on('message', handleWorkerMessage)
@@ -27,17 +86,72 @@ function spawnWorker() {
     emitAll('models:load-error', { message: err.message })
   })
   worker.on('exit', (code) => {
-    if (code !== 0) {
+    stopHealthCheck()
+    const prevModelPath = _status.modelPath
+    worker = null
+    _status = {
+      ready: false,
+      modelPath: prevModelPath,
+      loading: false,
+      error: code !== 0 ? `Worker exited: ${code}` : null
+    }
+
+    if (code !== 0 && !_shuttingDown) {
       logger.warn('[llm.bridge] Worker exited with code', code)
-      worker = null
-      _status = { ready: false, modelPath: null, loading: false, error: `Worker exited: ${code}` }
+
+      if (prevModelPath && _restartAttempts < MAX_RESTART_ATTEMPTS) {
+        _restartAttempts++
+        logger.info(
+          `[llm.bridge] Auto-restarting worker (attempt ${_restartAttempts}/${MAX_RESTART_ATTEMPTS})`
+        )
+        emitAll('models:restarting', { attempt: _restartAttempts })
+        setTimeout(() => {
+          if (_shuttingDown) return
+          loadModel(prevModelPath).catch((err) => {
+            logger.error('[llm.bridge] Auto-restart failed:', err)
+            emitAll('models:load-error', { message: err.message })
+          })
+        }, 2000 * _restartAttempts)
+      } else if (_restartAttempts >= MAX_RESTART_ATTEMPTS) {
+        logger.error('[llm.bridge] Worker failed permanently after max restarts')
+        emitAll('models:load-error', {
+          message: 'AI worker failed to restart. Please reload the app.'
+        })
+      }
     }
   })
 }
 
 function post(msg) {
+  if (_shuttingDown) return
   if (!worker) spawnWorker()
-  worker.postMessage(msg)
+  if (worker) worker.postMessage(msg)
+}
+
+function stopHealthCheck() {
+  if (_healthCheckInterval) {
+    clearInterval(_healthCheckInterval)
+    _healthCheckInterval = null
+  }
+  _missedPongs = 0
+}
+
+function startHealthCheck() {
+  stopHealthCheck()
+  _healthCheckInterval = setInterval(() => {
+    if (!worker) {
+      stopHealthCheck()
+      return
+    }
+    _missedPongs++
+    if (_missedPongs > 3) {
+      logger.error('[llm.bridge] Worker health check failed — force terminating')
+      stopHealthCheck()
+      worker.terminate()
+      return
+    }
+    post({ type: 'ping' })
+  }, HEALTH_CHECK_INTERVAL_MS)
 }
 
 const KNOWLEDGE_TOOL_NAMES = new Set([
@@ -45,6 +159,8 @@ const KNOWLEDGE_TOOL_NAMES = new Set([
   'read_indexed_file',
   'search_indexed_context'
 ])
+
+const SAFE_MODULES = new Set(['path', 'url', 'querystring', 'crypto', 'util', 'buffer', 'os'])
 
 async function executeElectronTool(name, args) {
   switch (name) {
@@ -65,24 +181,39 @@ async function executeElectronTool(name, args) {
     case 'save_user_info': {
       const { storeGet, storeSet } = await import('../storage/store.js')
       const current = storeGet('vox.user.info') || {}
-      current[String(args?.info_key || '').trim()] = args?.info_value ?? ''
+      const key = String(args?.info_key || '').trim()
+      if (!key) return JSON.stringify({ error: 'info_key is required' })
+      current[key] = args?.info_value ?? ''
       storeSet('vox.user.info', current)
-      return JSON.stringify({ saved: true, key: args?.info_key })
+      return JSON.stringify({ saved: true, key })
     }
     case 'spawn_task': {
       const { enqueueTask } = await import('../chat/task.queue.js')
       const { getToolDefinitions } = await import('../chat/chat.session.js')
-      const { randomUUID } = await import('crypto')
-      const taskId = randomUUID()
-
-      const toolDefinitions = getToolDefinitions()
+      const { randomUUID: uuid } = await import('crypto')
+      const taskId = uuid()
       enqueueTask({
         taskId,
         instructions: args?.instructions || '',
         context: args?.context || '',
-        toolDefinitions
+        toolDefinitions: getToolDefinitions()
       })
       return JSON.stringify({ taskId, status: 'spawned' })
+    }
+    case 'get_task': {
+      const { getTaskDetail } = await import('../chat/task.queue.js')
+      const detail = getTaskDetail(String(args?.taskId || ''))
+      if (!detail) return JSON.stringify({ error: 'Task not found' })
+      return JSON.stringify(detail)
+    }
+    case 'search_tasks': {
+      const { listTaskHistory } = await import('../chat/task.queue.js')
+      const { searchTasksFts } = await import('../storage/tasks.db.js')
+      if (args?.query) {
+        const results = searchTasksFts(args.query)
+        return JSON.stringify({ tasks: results, has_more: false })
+      }
+      return JSON.stringify(listTaskHistory({ status: args?.status || null }))
     }
     default: {
       if (KNOWLEDGE_TOOL_NAMES.has(name)) {
@@ -104,9 +235,18 @@ async function executeElectronTool(name, args) {
       const custom = customTools.find((t) => t.name === name && t.is_enabled !== false)
       if (custom) {
         if (custom.source_type === 'http_webhook' && custom.webhook_url) {
+          const { getToolSecrets } = await import('../storage/secrets.js')
+          const secrets = getToolSecrets(name)
+          const headers = { 'Content-Type': 'application/json', ...(custom.webhook_headers || {}) }
+          for (const [k, v] of Object.entries(headers)) {
+            if (typeof v === 'string' && v.startsWith('secret:')) {
+              const secretKey = v.slice(7)
+              headers[k] = secrets[secretKey] || v
+            }
+          }
           const resp = await fetch(custom.webhook_url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify(args || {})
           })
           return await resp.text()
@@ -115,8 +255,29 @@ async function executeElectronTool(name, args) {
           (custom.source_type === 'js_function' || custom.source_type === 'desktop') &&
           custom.source_code
         ) {
-          const fn = new Function('args', custom.source_code)
-          const result = await fn(args || {})
+          const { createContext, runInContext } = await import('vm')
+          const { createRequire } = await import('module')
+          const vmRequire = createRequire(import.meta.url)
+          const sandboxedRequire = (mod) => {
+            if (!SAFE_MODULES.has(mod)) {
+              throw new Error(`Module "${mod}" is not allowed in custom tool sandbox`)
+            }
+            return vmRequire(mod)
+          }
+          const sandbox = {
+            args: args || {},
+            require: sandboxedRequire,
+            console: { log: () => {}, warn: () => {}, error: () => {} },
+            Promise,
+            JSON,
+            Math,
+            Date,
+            result: undefined
+          }
+          createContext(sandbox)
+          const wrapped = `(async function(args) { ${custom.source_code} })(args).then(r => { result = r }).catch(e => { result = { error: e.message } })`
+          await runInContext(wrapped, sandbox, { timeout: 10_000 })
+          const result = sandbox.result
           return typeof result === 'string' ? result : JSON.stringify(result ?? null)
         }
         throw new Error(`Custom tool "${name}" has no executable source`)
@@ -131,8 +292,18 @@ function handleWorkerMessage(msg) {
   switch (msg.type) {
     case 'ready':
       _status = { ready: true, modelPath: _status.modelPath, loading: false, error: null }
-      logger.info('[llm.bridge] Model ready:', _status.modelPath)
+      _restartAttempts = 0
+      startHealthCheck()
+      post({ type: 'chat:prewarm' })
+      break
+
+    case 'prewarm:done':
+      logger.info('[llm.bridge] Model ready (prewarmed):', _status.modelPath)
       emitAll('models:ready', { path: _status.modelPath })
+      break
+
+    case 'pong':
+      _missedPongs = 0
       break
 
     case 'load-error':
@@ -181,8 +352,13 @@ function handleWorkerMessage(msg) {
       pendingRequests.delete('history')
       break
 
+    case 'summarize:result':
+      pendingRequests.get(msg.requestId)?.resolve(msg.result)
+      pendingRequests.delete(msg.requestId)
+      break
+
     case 'tool:execute': {
-      const { callId, taskId: _taskId, name, args } = msg
+      const { callId, name, args } = msg
       executeElectronTool(name, args)
         .then((result) => post({ type: 'tool:result', callId, result }))
         .catch((err) => post({ type: 'tool:result', callId, error: err.message }))
@@ -219,28 +395,27 @@ function handleChatEventForRenderer(requestId, event) {
     }
 
     case 'text': {
+      if (_voiceTextHandler) _voiceTextHandler(event.content)
       if (_activeStreamId) {
-        emitAll('chat:event', {
-          type: 'msg:stream-chunk',
-          data: { streamId: _activeStreamId, content: event.content }
-        })
-        emitAll('chat:event', {
-          type: 'message_chunk',
-          data: { streamId: _activeStreamId, content: event.content }
-        })
+        _streamBuffer += event.content
+        if (_streamBuffer.length > MAX_STREAM_BUFFER) {
+          flushStreamBuffer()
+        } else {
+          scheduleFlush()
+        }
       }
       break
     }
 
     case 'chunk_end': {
+      if (_streamFlushTimer) {
+        clearTimeout(_streamFlushTimer)
+        _streamFlushTimer = null
+      }
+      flushStreamBuffer()
       const streamId = event.streamId || requestId
-
       emitAll('chat:event', { type: 'chunk_end', streamId, finalText: event.finalText })
-
-      emitAll('chat:event', {
-        type: 'msg:complete',
-        data: { streamId, dbId: null }
-      })
+      if (_voiceEndHandler) _voiceEndHandler(event.finalText || null)
       _activeStreamId = null
       break
     }
@@ -257,14 +432,30 @@ function handleChatEventForRenderer(requestId, event) {
       break
 
     case 'abort_initiated':
+      resetStreamState()
       emitAll('chat:event', { type: 'abort_initiated' })
-      _activeStreamId = null
+      if (_voiceEndHandler) _voiceEndHandler(null)
       break
 
     case 'error':
+      resetStreamState()
       emitAll('chat:event', { type: 'error', data: { message: event.message } })
-      _activeStreamId = null
+      if (_voiceEndHandler) _voiceEndHandler(null)
       break
+
+    case 'usage': {
+      emitAll('chat:event', { type: 'usage', data: event })
+      if (event.inputTokens && event.inputTokens > 0) {
+        const usageRatio = event.inputTokens / (CONTEXT_SIZE / 4)
+        if (usageRatio > 0.7) {
+          emitAll('chat:event', {
+            type: 'context_warning',
+            data: { ratio: usageRatio, message: 'Context window is getting full.' }
+          })
+        }
+      }
+      break
+    }
 
     default:
       break
@@ -290,21 +481,30 @@ export async function reloadModel(modelPath) {
 
 function waitForReady(timeoutMs = 120_000) {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error('Model load timeout')), timeoutMs)
+    const timer = setTimeout(() => {
+      worker?.off('message', oneShot)
+      reject(new Error('Model load timeout'))
+    }, timeoutMs)
 
     const oneShot = (msg) => {
       if (msg.type === 'ready') {
         clearTimeout(timer)
-        worker.off('message', oneShot)
+        worker?.off('message', oneShot)
         resolve()
       } else if (msg.type === 'load-error') {
         clearTimeout(timer)
-        worker.off('message', oneShot)
+        worker?.off('message', oneShot)
         reject(new Error(msg.message))
       }
     }
-    worker.on('message', oneShot)
+    if (worker) worker.on('message', oneShot)
+    else reject(new Error('Worker not available'))
   })
+}
+
+export function prewarmChat() {
+  if (!worker) return
+  post({ type: 'chat:prewarm' })
 }
 
 export function sendChatMessage({ requestId, message, systemPrompt, history, toolDefinitions }) {
@@ -336,15 +536,37 @@ export function abortChat() {
 }
 
 export async function clearChat() {
-  _activeStreamId = null
+  resetStreamState()
   post({ type: 'chat:clear' })
 }
 
 export async function getChatHistory() {
   if (!worker) return []
   return new Promise((resolve) => {
-    pendingRequests.set('history', { resolve, reject: resolve.bind(null, []) })
+    pendingRequests.set('history', { resolve, reject: () => resolve([]) })
     post({ type: 'chat:get-history' })
+  })
+}
+
+export function summarizeText(text, promptPrefix) {
+  if (!worker) return Promise.resolve(text)
+  return new Promise((resolve) => {
+    const requestId = randomUUID()
+    const timer = setTimeout(() => {
+      pendingRequests.delete(requestId)
+      resolve(text)
+    }, 60_000)
+    pendingRequests.set(requestId, {
+      resolve: (result) => {
+        clearTimeout(timer)
+        resolve(result)
+      },
+      reject: () => {
+        clearTimeout(timer)
+        resolve(text)
+      }
+    })
+    post({ type: 'summarize', requestId, text, promptPrefix })
   })
 }
 
@@ -362,8 +584,14 @@ export function onAgentEvent(taskId, listener) {
 }
 
 export function destroyWorker() {
+  _shuttingDown = true
+  stopHealthCheck()
+  resetStreamState()
+  for (const [key, pending] of pendingRequests) {
+    pending.reject?.(new Error('Worker destroyed'))
+    pendingRequests.delete(key)
+  }
   worker?.terminate()
   worker = null
-  _activeStreamId = null
   _status = { ready: false, modelPath: null, loading: false, error: null }
 }

@@ -1,10 +1,16 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import OverlayChatView from './components/OverlayChatView'
 import OverlayActivityView from './components/OverlayActivityView'
+import useChatStore from '../features/chat/state/chatStore'
 
 export default function OverlayApp() {
   const [activeTab, setActiveTab] = useState('chat')
+
+  useEffect(() => {
+    useChatStore.getState().init()
+    return () => useChatStore.getState().destroy()
+  }, [])
 
   const handleClose = useCallback(() => {
     window.api?.overlay?.hide?.()

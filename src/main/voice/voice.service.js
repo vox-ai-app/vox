@@ -1,5 +1,6 @@
 import { emitAll } from '../ipc/shared'
 import { getLlmStatus } from '../ai/llm.bridge'
+import { isReady as isSttReady } from './stt.service'
 import { logger } from '../logger'
 import {
   initVoiceService as _init,
@@ -17,16 +18,13 @@ setOnError((err) => {
 })
 
 function canActivate() {
-  return getLlmStatus().ready
+  return getLlmStatus().ready && isSttReady()
 }
 
 export async function initVoiceService() {
   await _init({
     onActivate: () => {
-      if (!canActivate()) {
-        logger.info('[voice] Activation ignored — model not ready')
-        return false
-      }
+      if (!canActivate()) return false
       emitAll('voice:activate', { active: true })
       return true
     }

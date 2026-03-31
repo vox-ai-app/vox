@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { createHandler, emitAll, registerHandler } from '../ipc/shared'
+import { createHandler, registerHandler } from '../ipc/shared'
 import { pauseWakeWord, resumeWakeWord } from './voice.service'
 import { getVoiceWindow } from './voice.window'
 import {
@@ -33,7 +33,6 @@ export function registerVoiceIpc() {
     createHandler(() => {
       deactivateVoiceMode()
       resumeWakeWord()
-      emitAll('voice:activate', { active: false })
       return { ended: true }
     })
   )

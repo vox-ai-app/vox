@@ -1,4 +1,5 @@
-const CONTEXT_SIZE = 32768
+import { CONTEXT_SIZE } from '../../ai/config.js'
+
 const DEFAULT_THRESHOLD = Math.floor(CONTEXT_SIZE * 3.5 * 0.6)
 const DEFAULT_KEEP_RECENT = Math.floor(DEFAULT_THRESHOLD * 0.5)
 const SUMMARY_CHUNK_LIMIT = Math.floor(CONTEXT_SIZE * 4 * 0.8)
@@ -72,22 +73,28 @@ export async function summarizeIfNeeded(messages, opts = {}) {
   } = opts
 
   if (totalChars(messages) <= threshold) return messages
+  if (messages.length < 3) return messages
 
-  const system = messages[0]
+  const hasSystemPrompt = messages[0]?.role === 'system'
+  const contentStart = hasSystemPrompt ? 1 : 0
 
   let splitAt = messages.length - 1
   let recentChars = 0
-  while (splitAt > 1 && recentChars < keepRecentChars) {
+  while (splitAt > contentStart && recentChars < keepRecentChars) {
     recentChars += messageChars(messages[splitAt])
     splitAt--
   }
-  while (splitAt > 1) {
+  splitAt = Math.max(splitAt, contentStart + 1)
+
+  while (splitAt > contentStart + 1) {
     const msg = messages[splitAt]
     if (msg.role === 'tool' || (msg.role === 'assistant' && msg.toolCalls?.length)) splitAt--
     else break
   }
 
-  const old = messages.slice(1, splitAt)
+  const old = messages.slice(contentStart, splitAt)
+  if (old.length === 0) return messages
+
   const recent = messages.slice(splitAt)
   const formattedOld = formatForSummary(old)
 
@@ -108,5 +115,9 @@ export async function summarizeIfNeeded(messages, opts = {}) {
     summary = parts.join('\n\n---\n\n')
   }
 
-  return [system, { role: 'assistant', content: `[${summaryLabel}]\n${summary}` }, ...recent]
+  const result = []
+  if (hasSystemPrompt) result.push(messages[0])
+  result.push({ role: 'assistant', content: `[${summaryLabel}]\n${summary}` })
+  result.push(...recent)
+  return result
 }

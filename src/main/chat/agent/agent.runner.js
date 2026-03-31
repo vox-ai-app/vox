@@ -1,71 +1,64 @@
+import { randomUUID } from 'crypto'
 import { createJournal } from './journal/journal.schema.js'
 import { createJournalTool } from './journal/journal.tool.js'
 import { createStallDetector } from './detectors/stall.detector.js'
 import { createRepetitionDetector } from './detectors/repetition.detector.js'
+import { validateToolResult, buildValidationPrompt } from './detectors/result.validator.js'
 import { buildAgentPrompt } from './prompts/system.prompt.js'
 import { planningPrompt, journalPrompt, postActionPrompt } from './prompts/iteration.prompts.js'
 import { createReadResultTool, storeResult, STORE_THRESHOLD } from './result.store.js'
-import { createRequire } from 'module'
-
-const require = createRequire(import.meta.url)
+import { summarizeIfNeeded } from './summarize.js'
+import { sessionPromptGen, jsonSchemaToZod } from '../../ai/session.utils.js'
+import { CONTEXT_KEEP_RECENT_CHARS } from '../../ai/config.js'
 
 const VERIFY_INTERVAL = 3
 const JOURNAL_TOOL_NAME = 'update_journal'
 const STALL_GIVE_UP_THRESHOLD = 6
+const MAX_COMPRESSION_ATTEMPTS = 2
+const MAX_ITERATIONS = 50
 
-async function* sessionPromptGen(session, userPrompt, functions, signal) {
-  const queue = []
-  let notify = null
-  let done = false
-  let finalErr = null
+function isContextLengthError(err) {
+  return /context|token|length|exceed/i.test(err?.message || '')
+}
 
-  const enqueue = (event) => {
-    queue.push(event)
-    if (notify) {
-      const r = notify
-      notify = null
-      r()
-    }
-  }
-
-  const promptPromise = session
-    .prompt(userPrompt, {
-      functions: functions && Object.keys(functions).length > 0 ? functions : undefined,
-      onTextChunk: (chunk) => enqueue({ type: 'text', content: chunk }),
-      signal
-    })
-    .then(() => {
-      done = true
-      if (notify) {
-        const r = notify
-        notify = null
-        r()
+async function compressSessionHistory(session, summarize) {
+  const raw = await session.getChatHistory()
+  const messages = raw
+    .map((item) => {
+      if (item.type === 'user') return { role: 'user', content: item.text ?? '' }
+      if (item.type === 'model') {
+        return {
+          role: 'assistant',
+          content: Array.isArray(item.response)
+            ? item.response.map((r) => r.text ?? '').join('')
+            : String(item.response ?? '')
+        }
       }
+      if (item.type === 'system') return { role: 'system', content: item.text ?? '' }
+      return null
     })
-    .catch((err) => {
-      finalErr = err
-      done = true
-      if (notify) {
-        const r = notify
-        notify = null
-        r()
-      }
+    .filter(Boolean)
+
+  const condensed = await summarizeIfNeeded(messages, {
+    threshold: 0,
+    keepRecentChars: CONTEXT_KEEP_RECENT_CHARS,
+    summarize,
+    promptPrefix:
+      'Summarize this task execution history concisely. Preserve key findings, decisions, tool outputs, and any context needed to continue the task:',
+    summaryLabel: 'Summary of earlier work'
+  })
+
+  const llamaHistory = condensed
+    .map((m) => {
+      if (m.role === 'user') return { type: 'user', text: m.content }
+      if (m.role === 'assistant')
+        return { type: 'model', response: [{ type: 'text', text: m.content }] }
+      if (m.role === 'system') return { type: 'system', text: m.content }
+      return null
     })
+    .filter(Boolean)
 
-  while (true) {
-    if (queue.length > 0) {
-      yield queue.shift()
-    } else if (done) {
-      break
-    } else {
-      await new Promise((r) => {
-        notify = r
-      })
-    }
-  }
-
-  await promptPromise
-  if (finalErr && finalErr.name !== 'AbortError' && !signal?.aborted) throw finalErr
+  await session.setChatHistory(llamaHistory)
 }
 
 function buildTools(toolMap, ...extraTools) {
@@ -136,34 +129,6 @@ function updatePlanningState(state, journal) {
 }
 
 function buildSessionFunctions(tools, _taskId, signal, onCall, onResult) {
-  const { z } = require('zod')
-  function jsonSchemaToZod(schema) {
-    if (!schema) return z.unknown()
-    switch (schema.type) {
-      case 'string':
-        return z.string()
-      case 'number':
-      case 'integer':
-        return z.number()
-      case 'boolean':
-        return z.boolean()
-      case 'array':
-        return z.array(schema.items ? jsonSchemaToZod(schema.items) : z.unknown())
-      case 'object': {
-        if (!schema.properties) return z.record(z.unknown())
-        const required = new Set(schema.required || [])
-        const shape = {}
-        for (const [key, s] of Object.entries(schema.properties)) {
-          const t = jsonSchemaToZod(s)
-          shape[key] = required.has(key) ? t : t.optional()
-        }
-        return z.object(shape)
-      }
-      default:
-        return z.unknown()
-    }
-  }
-
   const functions = {}
   for (const def of tools.definitions) {
     const safeName = def.name.replace(/[^a-zA-Z0-9_]/g, '_')
@@ -188,21 +153,61 @@ function buildSessionFunctions(tools, _taskId, signal, onCall, onResult) {
   return functions
 }
 
+export { buildAgentPrompt, fetchPastContext, fetchKnowledgePatterns, recordBlockerPatterns }
+
+async function fetchPastContext(instructions) {
+  try {
+    const { searchTasksFts } = await import('../../storage/tasks.db.js')
+    const results = searchTasksFts(instructions)
+    if (results.length === 0) return null
+    return results
+      .slice(0, 3)
+      .map((t) => `- "${t.instructions}" → ${String(t.result || '').slice(0, 500)}`)
+      .join('\n')
+  } catch {
+    return null
+  }
+}
+
+async function fetchKnowledgePatterns(instructions) {
+  try {
+    const { searchKnowledgePatterns } = await import('../../storage/tasks.db.js')
+    const results = searchKnowledgePatterns(instructions)
+    if (results.length === 0) return null
+    return results.map((p) => `- When: "${p.trigger}" → Try: "${p.solution}"`).join('\n')
+  } catch {
+    return null
+  }
+}
+
+async function recordBlockerPatterns(journal) {
+  if (!journal.done || journal.blockersEncountered.length === 0) return
+  try {
+    const { insertKnowledgePattern } = await import('../../storage/tasks.db.js')
+    const solution = journal.doneReason || journal.completed.at(-1) || ''
+    if (!solution) return
+    for (const blocker of journal.blockersEncountered) {
+      insertKnowledgePattern(randomUUID(), String(blocker).slice(0, 500), solution.slice(0, 500))
+    }
+  } catch {
+    /* pattern recording is best-effort */
+  }
+}
+
 export async function runAgentLocal({
   taskId,
   session,
-  instructions,
-  context,
+  instructions: _instructions,
+  context: _context,
   toolDefinitions,
   executeToolFn,
   signal,
-  emit
+  emit,
+  summarize
 }) {
   const journal = createJournal()
   const stallDetector = createStallDetector()
   const repetitionDetector = createRepetitionDetector()
-
-  const systemPrompt = buildAgentPrompt(instructions, context)
 
   const toolMap = new Map(
     toolDefinitions.map((def) => [
@@ -227,15 +232,16 @@ export async function runAgentLocal({
     lastArgs: null
   }
 
-  const messages = [
-    { role: 'system', content: systemPrompt },
-    { role: 'user', content: instructions }
-  ]
-
   let pendingCorrection = null
+  let compressionAttempts = 0
+  let iterations = 0
 
   while (true) {
     if (signal?.aborted) throw new Error('Task cancelled')
+    if (++iterations > MAX_ITERATIONS) {
+      emit({ type: 'thought', content: 'Max iterations reached, stopping.' })
+      break
+    }
 
     let iterationPrompt = selectPrompt(state, journal)
     if (pendingCorrection) {
@@ -244,42 +250,67 @@ export async function runAgentLocal({
     }
 
     const iterationToolDefs = state.planningComplete ? tools.definitions : [journalTool.definition]
-    const iterationTools = {
-      definitions: iterationToolDefs,
-      execute: tools.execute,
-      functions: buildSessionFunctions(
-        { definitions: iterationToolDefs, execute: tools.execute },
-        taskId,
-        signal,
-        (name, args) => {
-          state.lastToolName = name
-          state.lastArgs = args
-          emit({ type: 'tool_call', name, args })
-        },
-        (name, result) => {
-          state.lastToolResult = result
-          if (name !== JOURNAL_TOOL_NAME) repetitionDetector.record(name, state.lastArgs, result)
-          emit({ type: 'tool_result', name, result })
+    const iterationFunctions = buildSessionFunctions(
+      { definitions: iterationToolDefs, execute: tools.execute },
+      taskId,
+      signal,
+      (name, args) => {
+        state.lastToolName = name
+        state.lastArgs = args
+        emit({ type: 'tool_call', name, args })
+      },
+      (name, result) => {
+        state.lastToolResult = result
+        if (name !== JOURNAL_TOOL_NAME) {
+          repetitionDetector.record(name, state.lastArgs, result)
+          const warnings = validateToolResult(name, result)
+          if (warnings.length) {
+            const prompt = buildValidationPrompt(name, warnings)
+            if (prompt)
+              pendingCorrection = (pendingCorrection ? pendingCorrection + '\n\n' : '') + prompt
+          }
         }
-      )
-    }
+        emit({ type: 'tool_result', name, result })
+      }
+    )
 
     let pendingThought = ''
 
-    for await (const event of sessionPromptGen(
-      session,
-      iterationPrompt,
-      iterationTools.functions,
-      signal
-    )) {
-      switch (event.type) {
-        case 'text':
-          pendingThought += event.content
-          emit({ type: 'text', content: event.content })
-          break
-        case 'usage':
-          emit(event)
-          break
+    while (true) {
+      try {
+        pendingThought = ''
+        for await (const event of sessionPromptGen(
+          session,
+          iterationPrompt,
+          iterationFunctions,
+          signal
+        )) {
+          switch (event.type) {
+            case 'text':
+              pendingThought += event.content
+              emit({ type: 'text', content: event.content })
+              break
+            case 'usage':
+              emit(event)
+              break
+          }
+        }
+        break
+      } catch (err) {
+        if (
+          summarize &&
+          isContextLengthError(err) &&
+          compressionAttempts < MAX_COMPRESSION_ATTEMPTS
+        ) {
+          compressionAttempts++
+          try {
+            await compressSessionHistory(session, summarize)
+          } catch (compressErr) {
+            throw new Error(`Context too large and compression failed: ${compressErr.message}`)
+          }
+        } else {
+          throw err
+        }
       }
     }
 
@@ -287,12 +318,10 @@ export async function runAgentLocal({
       emit({ type: 'thought', content: pendingThought.trim() })
     }
 
-    messages.push({ role: 'user', content: iterationPrompt })
-
     const repetition = repetitionDetector.detectRepetition()
     if (repetition) {
       if (repetition.type === 'same_failing_action') break
-      pendingCorrection = repetition.message
+      pendingCorrection = (pendingCorrection ? pendingCorrection + '\n\n' : '') + repetition.message
     }
 
     updatePlanningState(state, journal)
@@ -305,5 +334,5 @@ export async function runAgentLocal({
   }
 
   const summary = journal.doneReason || journal.completed.at(-1) || journal.understanding || ''
-  return { summary, done: journal.done }
+  return { summary, done: journal.done, journal }
 }

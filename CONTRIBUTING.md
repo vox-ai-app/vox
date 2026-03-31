@@ -54,10 +54,12 @@ When changing a package that others depend on, bump its version and update the d
 The app currently runs on macOS. This is not a permanent constraint — it reflects where the integrations exist today, not a limitation of the architecture.
 
 **What is platform-specific:**
+
 - `@vox-ai-app/integrations` — screen control, Mail, iMessage (all use macOS APIs: osascript, Accessibility, SQLite DBs)
 - The Electron app's permission requests (microphone, screen recording, etc.)
 
 **What is already cross-platform:**
+
 - `@vox-ai-app/mcp`, `@vox-ai-app/tools`, `@vox-ai-app/voice`, `@vox-ai-app/indexing`, `@vox-ai-app/parser`, `@vox-ai-app/ui` — all pure Node.js / React, no OS-specific code
 
 **How to add Windows or Linux support:**

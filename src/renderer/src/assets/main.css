@@ -1,6 +1,7 @@
 @import './tokens.css';
 @import './base.css';
 @import '../styles/shell.css';
+@import '../styles/setup.css';
 @import '../styles/pages/pages.shared.css';
 @import '../styles/pages/pages.chat.css';
 @import '../styles/pages/pages.chat.tasks.css';

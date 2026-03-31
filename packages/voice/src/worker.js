@@ -8,10 +8,15 @@ const EMBED_DIMS = 96
 const MEL_WINDOW = 76
 const EMBED_WINDOW = 16
 const WAKE_THRESHOLD = 0.5
+const MAX_CONSECUTIVE_ERRORS = 5
+const ERROR_BACKOFF_BASE_MS = 500
+const MAX_RECREATE_ATTEMPTS = 3
 let sessions = null
 let running = false
 let paused = false
 let recorder = null
+let consecutiveErrors = 0
+let recreateAttempts = 0
 const warmFrame = () => new Float32Array(MEL_DIMS).fill(1.0)
 const ringStorage = new Int16Array(RAW_BUF_MAX)
 let ringHead = 0
@@ -60,31 +65,76 @@ const loadSessions = async () => {
     wakeWord: await ort.InferenceSession.create(join(base, 'computer.onnx'))
   }
 }
-const startRecorderLoop = async () => {
+const releaseRecorder = () => {
+  if (!recorder) return
+  try {
+    recorder.stop()
+  } catch {
+    void 0
+  }
+  try {
+    recorder.release()
+  } catch {
+    void 0
+  }
+  recorder = null
+}
+const createRecorder = () => {
   const { PvRecorder } = require('@picovoice/pvrecorder-node')
   recorder = new PvRecorder(CHUNK_SAMPLES)
   recorder.start()
+  consecutiveErrors = 0
+}
+const recreateRecorder = async () => {
+  releaseRecorder()
+  recreateAttempts++
+  if (recreateAttempts > MAX_RECREATE_ATTEMPTS) {
+    parentPort.postMessage({
+      type: 'error',
+      message: `Recorder failed after ${MAX_RECREATE_ATTEMPTS} recreate attempts — giving up`
+    })
+    running = false
+    return false
+  }
+  const delay = ERROR_BACKOFF_BASE_MS * Math.pow(2, recreateAttempts)
+  await new Promise((r) => setTimeout(r, delay))
+  if (!running) return false
+  try {
+    createRecorder()
+    return true
+  } catch (err) {
+    parentPort.postMessage({ type: 'error', message: `Recorder recreate failed: ${err.message}` })
+    return false
+  }
+}
+const startRecorderLoop = async () => {
+  createRecorder()
   running = true
   const loop = async () => {
     if (!running) {
-      try {
-        recorder.stop()
-        recorder.release()
-      } catch (err) {
-        parentPort.postMessage({
-          type: 'error',
-          message: `Recorder cleanup failed: ${err.message}`
-        })
-      }
+      releaseRecorder()
       return
     }
     try {
       const frame = await recorder.read()
+      consecutiveErrors = 0
+      recreateAttempts = 0
       if (!paused && frame && frame.length === CHUNK_SAMPLES) {
         await processFrame(new Int16Array(frame))
       }
-    } catch (err) {
-      parentPort.postMessage({ type: 'error', message: `Frame read error: ${err.message}` })
+    } catch {
+      consecutiveErrors++
+      if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+        parentPort.postMessage({
+          type: 'error',
+          message: `Frame read failing repeatedly (${consecutiveErrors}x) — recreating recorder`
+        })
+        const ok = await recreateRecorder()
+        if (!ok) return
+      } else {
+        const backoff = ERROR_BACKOFF_BASE_MS * consecutiveErrors
+        await new Promise((r) => setTimeout(r, backoff))
+      }
     }
     if (running) setImmediate(loop)
   }
@@ -152,19 +202,7 @@ parentPort.on('message', (msg) => {
     paused = false
   } else if (msg.type === 'stop') {
     running = false
-    if (recorder) {
-      try {
-        recorder.stop()
-      } catch {
-        void 0
-      }
-      try {
-        recorder.release()
-      } catch {
-        void 0
-      }
-      recorder = null
-    }
+    releaseRecorder()
     if (sessions) {
       for (const s of Object.values(sessions)) {
         try {

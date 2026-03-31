@@ -13,6 +13,120 @@ const useChatStore = create(
       abortTimeout: null
     }
     let _unsubs = []
+    let _safetyTimer = null
+
+    const msgBatch = {
+      pendingDeltas: {},
+      rafId: null
+    }
+
+    const flushDeltas = () => {
+      msgBatch.rafId = null
+      const entries = Object.entries(msgBatch.pendingDeltas)
+      if (entries.length === 0) return
+      msgBatch.pendingDeltas = {}
+
+      set((state) => {
+        let next = state.messages
+        for (const [streamId, text] of entries) {
+          const idx = next.findLastIndex((m) => m.streamId === streamId)
+          if (idx === -1) continue
+          const updated = { ...next[idx], content: next[idx].content + text }
+          next = [...next.slice(0, idx), updated, ...next.slice(idx + 1)]
+        }
+        return { messages: next }
+      })
+    }
+
+    const handleMessageEvent = (event) => {
+      const type = event?.type
+      const data = event?.data
+
+      switch (type) {
+        case 'msg:append':
+          if (data?.message) {
+            set((state) => ({ messages: [...state.messages, data.message] }))
+          }
+          break
+
+        case 'msg:stream-chunk':
+          if (data?.streamId && data?.content) {
+            msgBatch.pendingDeltas[data.streamId] =
+              (msgBatch.pendingDeltas[data.streamId] || '') + data.content
+            if (!msgBatch.rafId) {
+              msgBatch.rafId = requestAnimationFrame(flushDeltas)
+            }
+          }
+          break
+
+        case 'msg:complete':
+          if (data?.streamId) {
+            if (msgBatch.pendingDeltas[data.streamId]) {
+              if (msgBatch.rafId) {
+                cancelAnimationFrame(msgBatch.rafId)
+                msgBatch.rafId = null
+              }
+              flushDeltas()
+            }
+            set((state) => {
+              const hasMatch = state.messages.some((m) => m.streamId === data.streamId)
+              if (hasMatch) {
+                return {
+                  messages: state.messages.map((m) =>
+                    m.streamId === data.streamId
+                      ? { ...m, pending: false, streamId: null, dbId: data.dbId || m.dbId }
+                      : m
+                  )
+                }
+              }
+              if (data.recovery && !state.messages.some((m) => m.dbId === data.recovery.dbId)) {
+                return { messages: [...state.messages, data.recovery] }
+              }
+              return {}
+            })
+          }
+          break
+
+        case 'msg:prepend':
+          if (Array.isArray(data?.messages) && data.messages.length > 0) {
+            set((state) => ({
+              messages: [...data.messages, ...state.messages],
+              prependCount: state.prependCount + data.messages.length,
+              ...(typeof data.hasMore === 'boolean' ? { hasMore: data.hasMore } : {})
+            }))
+          } else if (typeof data?.hasMore === 'boolean') {
+            set({ hasMore: data.hasMore })
+          }
+          break
+
+        case 'msg:replace-all':
+          if (Array.isArray(data?.messages)) {
+            set({
+              messages: data.messages,
+              prependCount: 0,
+              isReady: true,
+              ...(typeof data.hasMore === 'boolean' ? { hasMore: data.hasMore } : {})
+            })
+          }
+          break
+
+        case 'abort_initiated':
+          if (msgBatch.rafId) {
+            cancelAnimationFrame(msgBatch.rafId)
+            msgBatch.rafId = null
+          }
+          flushDeltas()
+          set((state) => {
+            if (!state.messages.some((m) => m.pending)) return {}
+            return {
+              messages: state.messages.map((m) =>
+                m.pending ? { ...m, pending: false, streamId: null } : m
+              )
+            }
+          })
+          break
+      }
+    }
 
     const handlePhaseEvent = (event) => {
       if (!event || typeof event !== 'object') return
@@ -116,8 +230,31 @@ const useChatStore = create(
       chatStatus: EMPTY_CHAT_STATUS,
       streamStatus: '',
       sendError: '',
+      messages: [],
+      hasMore: true,
+      isReady: false,
+      prependCount: 0,
+      loadingOlder: false,
 
       clearSendError: () => set({ sendError: '' }),
+
+      loadOlder: async () => {
+        const state = get()
+        if (state.loadingOlder || !state.hasMore) return
+        set({ loadingOlder: true })
+        try {
+          const oldest = state.messages.find((m) => m.dbId)
+          if (!oldest?.dbId) {
+            set({ hasMore: false, loadingOlder: false })
+            return
+          }
+          await window.api?.chat?.loadOlder?.(oldest.dbId)
+        } catch {
+          set({ hasMore: false })
+        } finally {
+          set({ loadingOlder: false })
+        }
+      },
 
       sendMessage: async (rawContent) => {
         const content = String(rawContent || '').trim()
@@ -185,6 +322,7 @@ const useChatStore = create(
 
         const unsubEvent = window.api.chat.onEvent((event) => {
           handlePhaseEvent(event)
+          handleMessageEvent(event)
         })
         _unsubs.push(unsubEvent)
 
@@ -206,19 +344,38 @@ const useChatStore = create(
         _unsubs.push(unsubStatus)
 
         try {
+          const data = await window.api?.chat?.getMessages?.()
+          if (data?.messages?.length) {
+            set({
+              messages: data.messages,
+              hasMore: typeof data.hasMore === 'boolean' ? data.hasMore : true,
+              isReady: true
+            })
+          } else {
+            set({ messages: [], isReady: true })
+            window.api?.chat?.ensureConnected?.().catch(() => {})
+          }
+        } catch {
+          set({ messages: [], isReady: true })
+        }
+
+        _safetyTimer = setTimeout(() => {
+          if (!get().isReady) set({ isReady: true })
+          _safetyTimer = null
+        }, 8000)
+
+        try {
           const statusData = await window.api.chat.getStatus()
           set({ chatStatus: toChatStatusState(statusData?.status) })
-          // eslint-disable-next-line no-empty
-        } catch {}
+        } catch {
+          /* status check is best-effort */
+        }
 
         try {
           const connectData = await window.api.chat.ensureConnected()
           const nextStatus = toChatStatusState(connectData?.status)
           set({ chatStatus: nextStatus })
-
-          if (nextStatus.sessionReady) {
-            set({ streamStatus: '' })
-          }
+          if (nextStatus.sessionReady) set({ streamStatus: '' })
         } catch (error) {
           set({ sendError: error?.message || 'Unable to connect to chat.' })
         }
@@ -229,7 +386,17 @@ const useChatStore = create(
           if (typeof unsub === 'function') unsub()
         }
         _unsubs = []
+
         if (session.abortTimeout) clearTimeout(session.abortTimeout)
+        if (_safetyTimer) {
+          clearTimeout(_safetyTimer)
+          _safetyTimer = null
+        }
+        if (msgBatch.rafId) {
+          cancelAnimationFrame(msgBatch.rafId)
+          msgBatch.rafId = null
+        }
+        msgBatch.pendingDeltas = {}
 
         session.activeTaskId = null
         session.activeStreamId = null
@@ -239,7 +406,12 @@ const useChatStore = create(
           phase: PHASE.IDLE,
           chatStatus: EMPTY_CHAT_STATUS,
           streamStatus: '',
-          sendError: ''
+          sendError: '',
+          messages: [],
+          hasMore: true,
+          isReady: false,
+          prependCount: 0,
+          loadingOlder: false
         })
       }
     }

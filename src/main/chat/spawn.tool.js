@@ -1,6 +1,3 @@
-import { randomUUID } from 'crypto'
-import { emitAll } from '../ipc/shared'
-
 export const definition = {
   name: 'spawn_task',
   description:
@@ -19,34 +16,5 @@ export const definition = {
       }
     },
     required: ['instructions']
-  }
-}
-
-export function createSpawnTool({ toolDefinitions, enqueueTask }) {
-  return {
-    definition,
-    execute: () => async (args) => {
-      const taskId = randomUUID()
-
-      emitAll('task:event', {
-        taskId,
-        type: 'task.status',
-        status: 'spawned',
-        instructions: args.instructions
-      })
-
-      enqueueTask({
-        taskId,
-        instructions: args.instructions,
-        context: args.context || '',
-        toolDefinitions
-      })
-
-      return {
-        taskId,
-        status: 'spawned',
-        message: 'Worker agent started in background. Use get_task to check progress.'
-      }
-    }
   }
 }

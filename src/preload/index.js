@@ -65,10 +65,13 @@ const api = {
     delete: (path) => invoke('models:delete', { path }),
     pickFile: () => invoke('models:pick-file'),
     reload: () => invoke('models:reload'),
+    getRecommended: () => invoke('models:get-recommended'),
     onReady: (listener) => subscribeToRendererEvent('models:ready', listener),
     onNoModel: (listener) => subscribeToRendererEvent('models:no-model', listener),
     onError: (listener) => subscribeToRendererEvent('models:load-error', listener),
     onProgress: (listener) => subscribeToRendererEvent('models:progress', listener),
+    onSttStatus: (listener) => subscribeToRendererEvent('models:stt-status', listener),
+    onSttProgress: (listener) => subscribeToRendererEvent('models:stt-progress', listener),
     getDownloads: () => invoke('models:get-downloads')
   },
 
@@ -86,17 +89,11 @@ const api = {
   },
 
   voice: {
-    sendAudio: (arrayBuffer) => electronAPI.ipcRenderer.invoke('voice:send-audio', arrayBuffer),
+    sendAudio: (buffer) => invoke('voice:send-audio', buffer),
     sessionStart: () => invoke('voice:session-start'),
     sessionEnd: () => invoke('voice:session-end'),
     setIgnoreMouseEvents: (ignore) => electronAPI.ipcRenderer.send('voice:mouse-ignore', ignore),
-    onActivate: (listener) => subscribeToRendererEvent('voice:activate', listener),
-    onAudio: (listener) => {
-      if (typeof listener !== 'function') return () => {}
-      const wrapped = (_event, buf) => listener(buf)
-      electronAPI.ipcRenderer.on('voice:audio', wrapped)
-      return () => electronAPI.ipcRenderer.removeListener('voice:audio', wrapped)
-    }
+    onActivate: (listener) => subscribeToRendererEvent('voice:activate', listener)
   },
 
   store: {
@@ -123,6 +120,11 @@ const api = {
     stop: () => invoke('imessage:stop'),
     listConversations: () => invoke('imessage:list-conversations'),
     listContacts: () => invoke('imessage:list-contacts')
+  },
+
+  setup: {
+    getPhase: () => invoke('setup:get-phase'),
+    onPhase: (listener) => subscribeToRendererEvent('setup:phase', listener)
   }
 }
 

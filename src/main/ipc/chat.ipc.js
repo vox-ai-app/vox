@@ -5,7 +5,8 @@ import {
   clearConversation,
   loadOlderStoredMessages,
   getStoredMessagesPage,
-  getChatStatus
+  getChatStatus,
+  setMode
 } from '../chat/chat.session'
 import {
   abortTask,
@@ -47,7 +48,10 @@ export function registerChatIpc() {
 
   registerHandler(
     'chat:set-mode',
-    createHandler(() => ({ ok: true }))
+    createHandler((_e, { mode } = {}) => {
+      if (mode) setMode(mode)
+      return { ok: true }
+    })
   )
 
   registerHandler(

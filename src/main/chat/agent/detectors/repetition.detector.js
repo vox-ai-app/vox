@@ -1,20 +1,29 @@
+import { createHash } from 'crypto'
+
 export function createRepetitionDetector() {
   const recentActions = []
   const MAX_HISTORY = 10
 
+  function hashArgs(args) {
+    const serialized = JSON.stringify(args || {})
+    return createHash('sha256').update(serialized).digest('hex').slice(0, 16)
+  }
+
   function normalize(action) {
-    return JSON.stringify({
-      tool: action.tool,
-      argsHash: JSON.stringify(action.args || {}).slice(0, 100)
-    })
+    return `${action.tool}:${action.argsHash}`
   }
 
   return {
     record(toolName, args, result) {
+      const failed =
+        typeof result === 'string'
+          ? /error|failed|exception/i.test(result)
+          : !!(result?.error || (result?.exitCode && result.exitCode !== 0))
       const action = {
         tool: toolName,
         args,
-        failed: !!(result?.error || (result?.exitCode && result.exitCode !== 0)),
+        argsHash: hashArgs(args),
+        failed,
         timestamp: Date.now()
       }
       recentActions.push(action)
@@ -45,9 +54,10 @@ export function createRepetitionDetector() {
 
       const failedCount = recentActions.filter((a) => a.failed).length
       if (failedCount >= 5 && recentActions.length >= 6) {
+        const failedTools = new Set(recentActions.filter((a) => a.failed).map((a) => a.tool))
         return {
           type: 'high_failure_rate',
-          message: `${failedCount} of your last ${recentActions.length} actions failed. Step back and reconsider your fundamental approach.`
+          message: `${failedCount} of your last ${recentActions.length} actions failed (tools: ${[...failedTools].join(', ')}). Step back and reconsider your fundamental approach.`
         }
       }
 

@@ -13,7 +13,10 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
   -webkit-app-region: no-drag;
 }
 
@@ -33,6 +36,12 @@
 }
 
 @keyframes voiceFadeIn {
-  from { opacity: 0; transform: translateY(-5px) scale(0.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

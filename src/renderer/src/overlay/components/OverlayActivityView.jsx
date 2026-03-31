@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { getTaskStatusColor } from '../helpers'
-import { useTaskCache } from '../../shared/hooks/useChat'
+import { useTaskHistory } from '../../features/activity/hooks/useTaskHistory'
 
 export default function OverlayActivityView() {
-  const { tasks, isReady: tasksReady, loadMore: loadMoreTasks, loadingMore } = useTaskCache()
+  const { tasks, loading, loadMore } = useTaskHistory('local')
+  const tasksReady = !loading || tasks.length > 0
   const [selectedTask, setSelectedTask] = useState(null)
   const activityScrollRef = useRef(null)
 
@@ -12,18 +13,18 @@ export default function OverlayActivityView() {
     if (!el) return
     const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60
     if (nearBottom) {
-      loadMoreTasks()
+      loadMore()
     }
-  }, [loadMoreTasks])
+  }, [loadMore])
 
   useEffect(() => {
-    if (loadingMore) return
+    if (loading) return
     const el = activityScrollRef.current
     if (!el) return
     if (el.scrollHeight <= el.clientHeight && tasks.length > 0) {
-      loadMoreTasks()
+      loadMore()
     }
-  }, [loadingMore, tasks.length, loadMoreTasks])
+  }, [loading, tasks.length, loadMore])
 
   return (
     <div className="overlay-messages" ref={activityScrollRef} onScroll={handleActivityScroll}>
@@ -117,7 +118,7 @@ export default function OverlayActivityView() {
               </div>
             )
           })}
-          {loadingMore && (
+          {loading && (
             <div className="overlay-skeleton" style={{ padding: '0', gap: '8px' }}>
               {[70, 55].map((w, i) => (
                 <div className="overlay-skeleton-task" key={i}>

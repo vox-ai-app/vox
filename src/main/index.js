@@ -1,4 +1,6 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, shell, ipcMain } from 'electron'
+
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
 import { join } from 'path'
 import { promisify } from 'util'
 import { exec } from 'child_process'
@@ -17,11 +19,14 @@ import { registerMcpIpc } from './mcp/mcp.ipc'
 import { registerImessageIpc } from './imessage/imessage.ipc'
 import { registerVoiceIpc } from './voice/voice.ipc'
 import { registerPowerIpc, setKeepAwake } from './power/power.ipc'
-import { loadModel, destroyWorker } from './ai/llm.bridge'
+import { loadModel, destroyWorker, prewarmChat } from './ai/llm.bridge'
 import { getActiveModelPath } from './ai/models'
-import { connectAllMcpServers, closeAllMcp } from './mcp/mcp.service'
+import { connectAllMcpServers, closeAllMcp, setToolInvalidationCallback } from './mcp/mcp.service'
+import { invalidateToolDefinitions, getToolDefinitions } from './chat/chat.session'
+import { setToolDefinitionProvider } from './chat/task.queue'
 import { startWatching, stopWatching } from './imessage/imessage.service'
 import { initVoiceService, destroyVoiceService } from './voice/voice.service'
+import { initStt, destroyStt, waitSttReady } from './voice/stt.service'
 import { createVoiceWindow, destroyVoiceWindow } from './voice/voice.window'
 import {
   createOverlayWindow,
@@ -35,7 +40,15 @@ import { createTray, destroyTray } from './app/tray'
 
 const execAsync = promisify(exec)
 
+const SHUTDOWN_TIMEOUT_MS = 5000
+
 let mainWindow = null
+let _setupPhase = 'checking'
+
+function emitSetupPhase(phase) {
+  _setupPhase = phase
+  emitAll('setup:phase', { phase })
+}
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -87,6 +100,7 @@ function registerAllIpc() {
   registerIndexingIpc()
   registerOverlayIpc()
   initIndexingStatusPush()
+  ipcMain.handle('setup:get-phase', () => _setupPhase)
 }
 
 async function bootBackgroundServices() {
@@ -115,6 +129,7 @@ async function initLlm() {
 
   try {
     await loadModel(modelPath)
+    void prewarmChat()
   } catch (err) {
     logger.error('[main] Model load failed:', err)
     emitAll('models:load-error', { message: err.message })
@@ -125,11 +140,12 @@ app
   .whenReady()
   .then(async () => {
     try {
-      const shell = process.env.SHELL || '/bin/sh'
-      const { stdout } = await execAsync(`${shell} -l -c 'echo $PATH'`)
+      const loginShell = process.env.SHELL || '/bin/sh'
+      const { stdout } = await execAsync(`${loginShell} -l -c 'echo $PATH'`)
       if (stdout.trim()) process.env.PATH = stdout.trim()
-      // eslint-disable-next-line no-empty
-    } catch {}
+    } catch {
+      logger.warn('[main] Failed to inherit shell PATH')
+    }
 
     process.env.VOX_USER_DATA_PATH = app.getPath('userData')
     process.env.VOX_APP_PATH = app.getAppPath()
@@ -143,7 +159,19 @@ app
 
     getDb()
 
+    const { session: electronSession } = await import('electron')
+    electronSession.defaultSession.setPermissionRequestHandler(
+      (_webContents, permission, callback) => {
+        callback(permission === 'media')
+      }
+    )
+    electronSession.defaultSession.setPermissionCheckHandler((_webContents, permission) => {
+      return permission === 'media'
+    })
+
     registerAllIpc()
+    setToolInvalidationCallback(invalidateToolDefinitions)
+    setToolDefinitionProvider(getToolDefinitions)
 
     if (getSetting(SETTINGS_KEYS.KEEP_AWAKE)) setKeepAwake(true)
     const imessagePassphrase = getSetting(SETTINGS_KEYS.IMESSAGE_PASSPHRASE)
@@ -161,15 +189,30 @@ app
     registerOverlayShortcut()
     createTray(getMainWindow, createMainWindow)
 
+    initVoiceOrchestrator()
+
+    emitSetupPhase('checking')
+
+    initStt()
+    emitSetupPhase('loading-stt')
+    await waitSttReady().catch((err) => logger.warn('[main] STT preload failed:', err))
+
+    emitSetupPhase('loading-llm')
     try {
-      initVoiceOrchestrator()
+      await initLlm()
+    } catch (err) {
+      logger.error('[main] LLM init failed:', err)
+    }
+
+    try {
       await initVoiceService()
     } catch (err) {
       logger.warn('[main] Voice init failed:', err)
     }
 
+    emitSetupPhase('done')
+
     void bootBackgroundServices()
-    void initLlm()
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
@@ -180,8 +223,9 @@ app
     logger.error('[main] App startup failed:', err)
     try {
       createMainWindow()
-      // eslint-disable-next-line no-empty
-    } catch {}
+    } catch {
+      logger.error('[main] Failed to create fallback window')
+    }
   })
 
 let quitting = false
@@ -191,23 +235,35 @@ app.on('before-quit', (e) => {
   quitting = true
   e.preventDefault()
 
-  Promise.all([
-    shutdownIndexingRuntime().catch(() => {}),
-    destroyVoiceService().catch(() => {}),
-    closeAllMcp().catch(() => {}),
+  const shutdownTimer = setTimeout(() => {
+    logger.warn('[main] Shutdown timeout — forcing quit')
+    forceCleanup()
+    app.quit()
+  }, SHUTDOWN_TIMEOUT_MS)
+
+  Promise.allSettled([
+    shutdownIndexingRuntime().catch((err) => logger.warn('[main] Indexing shutdown failed:', err)),
+    destroyVoiceService().catch((err) => logger.warn('[main] Voice shutdown failed:', err)),
+    closeAllMcp().catch((err) => logger.warn('[main] MCP shutdown failed:', err)),
     Promise.resolve()
       .then(() => stopWatching())
-      .catch(() => {})
+      .catch((err) => logger.warn('[main] iMessage stop failed:', err))
   ]).finally(() => {
-    destroyVoiceOrchestrator()
-    destroyVoiceWindow()
-    destroyOverlayWindow()
-    destroyTray()
-    destroyWorker()
-    closeDb()
+    clearTimeout(shutdownTimer)
+    forceCleanup()
     app.quit()
   })
 })
+
+function forceCleanup() {
+  destroyVoiceOrchestrator()
+  destroyStt()
+  destroyWorker()
+  closeDb()
+  destroyVoiceWindow()
+  destroyOverlayWindow()
+  destroyTray()
+}
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()

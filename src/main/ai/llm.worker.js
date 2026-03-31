@@ -1,6 +1,7 @@
 import { parentPort } from 'worker_threads'
 import { randomUUID } from 'crypto'
-import { z } from 'zod'
+import { sessionPromptGen, jsonSchemaToZod } from './session.utils.js'
+import { CONTEXT_SIZE, SUMMARIZE_CONTEXT_SIZE, MAX_CONCURRENT_AGENTS } from './config.js'
 
 let llama = null
 let model = null
@@ -23,56 +24,38 @@ async function init(modelPath) {
 async function reload(modelPath) {
   chat.controller?.abort()
 
-  for (const [taskId, agent] of agents) {
+  for (const [, agent] of agents) {
     agent.controller.abort()
-    agents.delete(taskId)
   }
+  agents.clear()
 
   try {
     await chat.context?.dispose()
-    // eslint-disable-next-line no-empty
-  } catch {}
+  } catch {
+    /* context may already be disposed */
+  }
   chat.context = null
   chat.session = null
   chat.controller = null
 
   try {
     await model?.dispose()
-    // eslint-disable-next-line no-empty
-  } catch {}
+  } catch {
+    /* model may already be disposed */
+  }
   model = null
 
   await init(modelPath)
 }
 
-function jsonSchemaToZod(schema) {
-  if (!schema) return z.unknown()
-  switch (schema.type) {
-    case 'string':
-      return z.string()
-    case 'number':
-    case 'integer':
-      return z.number()
-    case 'boolean':
-      return z.boolean()
-    case 'array':
-      return z.array(schema.items ? jsonSchemaToZod(schema.items) : z.unknown())
-    case 'object': {
-      if (!schema.properties) return z.record(z.unknown())
-      const required = new Set(schema.required || [])
-      const shape = {}
-      for (const [key, propSchema] of Object.entries(schema.properties)) {
-        const t = jsonSchemaToZod(propSchema)
-        shape[key] = required.has(key) ? t : t.optional()
-      }
-      return z.object(shape)
-    }
-    default:
-      return z.unknown()
-  }
-}
-
-const ELECTRON_TOOLS = new Set(['pick_file', 'get_file_path', 'pick_directory', 'spawn_task'])
+const ELECTRON_TOOLS = new Set([
+  'pick_file',
+  'get_file_path',
+  'pick_directory',
+  'spawn_task',
+  'get_task',
+  'search_tasks'
+])
 
 async function executeToolRemote(name, args, taskId = null) {
   const callId = randomUUID()
@@ -140,7 +123,12 @@ function buildFunctions(toolDefinitions, taskId, onCall, onResult, signal) {
         onCall?.(def.name, args)
         let output
         try {
-          output = await executeTool(def.name, args, taskId, signal)
+          output = await Promise.race([
+            executeTool(def.name, args, taskId, signal),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error(`Tool ${def.name} timed out after 60s`)), 60_000)
+            )
+          ])
         } catch (err) {
           output = { error: err.message }
         }
@@ -153,68 +141,26 @@ function buildFunctions(toolDefinitions, taskId, onCall, onResult, signal) {
   return functions
 }
 
-async function* sessionPromptGen(session, userPrompt, functions, signal) {
-  const queue = []
-  let resolve = null
-  let done = false
-  let finalError = null
-
-  const enqueue = (event) => {
-    queue.push(event)
-    if (resolve) {
-      const r = resolve
-      resolve = null
-      r()
-    }
+async function handleChatPrewarm() {
+  if (!model || chat.context) {
+    post({ type: 'prewarm:done' })
+    return
   }
-
-  const promptPromise = session
-    .prompt(userPrompt, {
-      functions: Object.keys(functions).length > 0 ? functions : undefined,
-      onTextChunk: (chunk) => enqueue({ type: 'text', content: chunk }),
-      signal
-    })
-    .then(() => {
-      done = true
-      if (resolve) {
-        const r = resolve
-        resolve = null
-        r()
-      }
-    })
-    .catch((err) => {
-      finalError = err
-      done = true
-      if (resolve) {
-        const r = resolve
-        resolve = null
-        r()
-      }
-    })
-
-  while (true) {
-    if (queue.length > 0) {
-      yield queue.shift()
-    } else if (done) {
-      break
-    } else {
-      await new Promise((r) => {
-        resolve = r
-      })
-    }
+  try {
+    chat.context = await model.createContext({ contextSize: CONTEXT_SIZE })
+  } catch (err) {
+    console.warn('[llm.worker] Prewarm failed:', err.message)
   }
-
-  await promptPromise
-  if (finalError && finalError.name !== 'AbortError' && !signal?.aborted) {
-    throw finalError
-  }
+  post({ type: 'prewarm:done' })
 }
 
 async function ensureChatSession(systemPrompt, history) {
   if (chat.session) return chat.session
 
   const LlamaChatSession = globalThis._LlamaChatSession
-  chat.context = await model.createContext({ contextSize: 32768 })
+  if (!chat.context) {
+    chat.context = await model.createContext({ contextSize: CONTEXT_SIZE })
+  }
   chat.session = new LlamaChatSession({
     contextSequence: chat.context.getSequence(),
     systemPrompt
@@ -233,8 +179,9 @@ async function ensureChatSession(systemPrompt, history) {
     if (chatHistory.length > 0) {
       try {
         await chat.session.setChatHistory(chatHistory)
-        // eslint-disable-next-line no-empty
-      } catch {}
+      } catch (err) {
+        console.warn('[llm.worker] Failed to set chat history:', err.message)
+      }
     }
   }
 
@@ -247,7 +194,10 @@ async function handleChatSend({ requestId, message, systemPrompt, history, toolD
     return
   }
 
-  chat.controller?.abort()
+  if (chat.controller) {
+    chat.controller.abort()
+    chat.session = null
+  }
   const controller = new AbortController()
   chat.controller = controller
   const signal = controller.signal
@@ -292,8 +242,9 @@ async function handleChatClear() {
   chat.controller?.abort()
   try {
     await chat.context?.dispose()
-    // eslint-disable-next-line no-empty
-  } catch {}
+  } catch {
+    /* context may already be disposed */
+  }
   chat.context = null
   chat.session = null
   chat.controller = null
@@ -336,7 +287,7 @@ async function handleAgentStart({ taskId, instructions, context, toolDefinitions
     return
   }
 
-  if (agents.size >= 2) {
+  if (agents.size >= MAX_CONCURRENT_AGENTS) {
     postAgentEvent(taskId, {
       type: 'task.status',
       status: 'failed',
@@ -348,16 +299,23 @@ async function handleAgentStart({ taskId, instructions, context, toolDefinitions
   const controller = new AbortController()
   const LlamaChatSession = globalThis._LlamaChatSession
 
-  const agentContext = await model.createContext({ contextSize: 32768 })
+  const { runAgentLocal, buildAgentPrompt, fetchPastContext, fetchKnowledgePatterns } =
+    await import('../chat/agent/agent.runner.js')
+  const [pastContext, knowledgePatterns] = await Promise.all([
+    fetchPastContext(instructions).catch(() => null),
+    fetchKnowledgePatterns(instructions).catch(() => null)
+  ])
+  const systemPrompt = buildAgentPrompt(instructions, context, pastContext, knowledgePatterns)
+
+  const agentContext = await model.createContext({ contextSize: Math.floor(CONTEXT_SIZE / 2) })
   const agentSession = new LlamaChatSession({
-    contextSequence: agentContext.getSequence()
+    contextSequence: agentContext.getSequence(),
+    systemPrompt
   })
 
   agents.set(taskId, { context: agentContext, session: agentSession, controller })
 
   postAgentEvent(taskId, { type: 'task.status', status: 'running' })
-
-  const { runAgentLocal } = await import('../chat/agent/agent.runner.js')
 
   runAgentLocal({
     taskId,
@@ -367,9 +325,14 @@ async function handleAgentStart({ taskId, instructions, context, toolDefinitions
     toolDefinitions,
     executeToolFn: (name, args, tid, signal) => executeTool(name, args, tid, signal),
     signal: controller.signal,
-    emit: (event) => postAgentEvent(taskId, event)
+    emit: (event) => postAgentEvent(taskId, event),
+    summarize: (text, prefix) => summarizeText(text, prefix)
   })
-    .then(({ summary, done }) => {
+    .then(async ({ summary, done, journal }) => {
+      if (journal) {
+        const { recordBlockerPatterns } = await import('../chat/agent/agent.runner.js')
+        await recordBlockerPatterns(journal).catch(() => {})
+      }
       postAgentEvent(taskId, {
         type: 'task.status',
         status: done ? 'completed' : 'incomplete',
@@ -385,8 +348,9 @@ async function handleAgentStart({ taskId, instructions, context, toolDefinitions
       if (agent) {
         try {
           await agent.context.dispose()
-          // eslint-disable-next-line no-empty
-        } catch {}
+        } catch {
+          /* context may already be disposed */
+        }
         agents.delete(taskId)
       }
     })
@@ -408,12 +372,16 @@ function handleToolResult({ callId, result, error }) {
 export async function summarizeText(text, promptPrefix) {
   if (!model) return text
   const LlamaChatSession = globalThis._LlamaChatSession
-  const ctx = await model.createContext({ contextSize: 4096 })
+  const ctx = await model.createContext({ contextSize: SUMMARIZE_CONTEXT_SIZE })
   const sess = new LlamaChatSession({ contextSequence: ctx.getSequence() })
   try {
     return await sess.prompt(`${promptPrefix}\n\n${text}`)
   } finally {
-    await ctx.dispose()
+    try {
+      await ctx.dispose()
+    } catch {
+      /* context may already be disposed */
+    }
   }
 }
 
@@ -423,10 +391,15 @@ parentPort.on('message', async (msg) => {
       return init(msg.modelPath)
     case 'reload':
       return reload(msg.modelPath)
+    case 'chat:prewarm':
+      return handleChatPrewarm()
     case 'chat:send':
       return handleChatSend(msg)
     case 'chat:abort':
-      chat.controller?.abort()
+      if (chat.controller) {
+        chat.controller.abort()
+        chat.session = null
+      }
       break
     case 'chat:clear':
       return handleChatClear()
@@ -438,6 +411,18 @@ parentPort.on('message', async (msg) => {
       return handleAgentAbort(msg)
     case 'tool:result':
       return handleToolResult(msg)
+    case 'ping':
+      return post({ type: 'pong' })
+    case 'summarize': {
+      try {
+        const result = await summarizeText(msg.text, msg.promptPrefix || 'Summarize:')
+        post({ type: 'summarize:result', requestId: msg.requestId, result })
+      } catch (err) {
+        post({ type: 'summarize:result', requestId: msg.requestId, result: msg.text })
+        console.warn('[llm.worker] Summarize failed:', err.message)
+      }
+      return
+    }
     default:
       console.warn('[llm.worker] Unknown message type:', msg.type)
   }

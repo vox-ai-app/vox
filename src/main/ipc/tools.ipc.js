@@ -5,6 +5,9 @@ import { storeGet, storeSet } from '../storage/store'
 
 const STORE_KEY = 'customTools'
 
+const VALID_SOURCE_TYPES = new Set(['js_function', 'http_webhook', 'desktop', 'mcp'])
+const TOOL_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/
+
 function loadCustomTools() {
   return storeGet(STORE_KEY) || []
 }
@@ -25,6 +28,20 @@ function mcpDefsToTools(defs) {
 
 function allTools() {
   return [...loadCustomTools(), ...mcpDefsToTools(getMcpToolDefinitions())]
+}
+
+function validateToolData(data) {
+  if (!data?.name || !TOOL_NAME_PATTERN.test(data.name)) {
+    throw Object.assign(
+      new Error('Tool name must start with a letter and contain only letters, numbers, _ or -'),
+      { code: 'VALIDATION_ERROR' }
+    )
+  }
+  if (data.source_type && !VALID_SOURCE_TYPES.has(data.source_type)) {
+    throw Object.assign(new Error(`Invalid source_type: ${data.source_type}`), {
+      code: 'VALIDATION_ERROR'
+    })
+  }
 }
 
 export function registerToolsIpc() {
@@ -50,10 +67,16 @@ export function registerToolsIpc() {
   registerHandler(
     'tools:create',
     createHandler((_e, data) => {
+      validateToolData(data)
+      const existing = loadCustomTools()
+      if (existing.some((t) => t.name === data.name)) {
+        throw Object.assign(new Error(`Tool "${data.name}" already exists`), {
+          code: 'DUPLICATE'
+        })
+      }
       const tool = { id: randomUUID(), is_enabled: true, ...data }
-      const tools = loadCustomTools()
-      tools.push(tool)
-      saveCustomTools(tools)
+      existing.push(tool)
+      saveCustomTools(existing)
       return tool
     })
   )
@@ -63,12 +86,13 @@ export function registerToolsIpc() {
     createHandler((_e, { id, data }) => {
       const tools = loadCustomTools()
       const idx = tools.findIndex((t) => t.id === id)
-      if (idx >= 0) {
-        tools[idx] = { ...tools[idx], ...data }
-        saveCustomTools(tools)
-        return tools[idx]
+      if (idx < 0) {
+        throw Object.assign(new Error('Tool not found'), { code: 'NOT_FOUND' })
       }
-      return { id, ...data }
+      if (data?.name) validateToolData(data)
+      tools[idx] = { ...tools[idx], ...data }
+      saveCustomTools(tools)
+      return tools[idx]
     })
   )
 
