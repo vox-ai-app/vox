@@ -1,12 +1,12 @@
 # Contributing to Vox
 
-Vox is a local-first AI assistant built on Electron. The core packages (MCP, tools, voice, indexing, UI) are platform-agnostic. The macOS-specific parts live in `@vox-ai-app/integrations` — that's where platform parity work happens, and it's one of the best places to contribute.
+Vox is a local-first AI assistant built on Electron. The core packages (MCP, tools, voice, indexing, UI) are platform-agnostic. The macOS-specific parts live in `@vox-ai-app/integrations` — that's where platform parity work happens, and it's the single highest-impact place to contribute.
 
 ## Prerequisites
 
 - Node.js 20+
 - npm 10+
-- macOS to run the app itself (for now — see [Platform support](#platform-support) below)
+- macOS to run the full app (for now — the architecture is ready for Windows and Linux, see [Platform support](#platform-support))
 
 The app downloads llama-server (llama.cpp) and a default model automatically on first launch. No external LLM setup required.
 
@@ -54,7 +54,7 @@ When changing a package that others depend on, bump its version and update the d
 
 ## Platform support
 
-The app currently runs on macOS. This is not a permanent constraint — it reflects where the integrations exist today, not a limitation of the architecture.
+Vox is Mac-first today, not Mac-only. This reflects where integrations exist right now, not a limitation of the architecture. **Windows and Linux are the #1 contributor priority.**
 
 **What is platform-specific:**
 

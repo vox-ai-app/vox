@@ -1,10 +1,10 @@
 # Vox
 
-A local-first AI assistant that actually does things — control your screen, manage files, send emails, reply to iMessages, all on your machine with no cloud and no subscription.
+The first local AI that actually does things on your Mac — control your screen, manage files, send emails, reply to iMessages, all on your machine with no cloud and no subscription.
 
-Most local AI setups give you a chat box. Vox gives you an agent. You talk to it, it acts: reads your emails, drafts replies, opens apps, edits files, searches your documents, and even texts people back for you. The model runs entirely on your hardware via llama.cpp — nothing leaves your device.
+Most AI assistants give you a chat box. Vox gives you an agent. You talk to it, it acts: reads your emails, drafts replies, opens apps, edits files, searches your documents, and even texts people back for you. The model runs entirely on your hardware via llama.cpp — nothing leaves your device. Not the smartest AI. But the only one that's truly yours.
 
-> **Currently macOS only.** The core (MCP, tools, voice, indexing, UI) is platform-agnostic — macOS is just where the integrations exist today. Windows and Linux contributions are very welcome.
+> **Mac-first, not Mac-only.** The core (MCP, tools, voice, indexing, UI) is platform-agnostic — macOS is just where the integrations exist today. Windows and Linux are the #1 contributor priority.
 
 <p align="center">
   <img src="vids/vox-demo.gif" alt="Vox app demo" width="720" />
@@ -95,6 +95,18 @@ On macOS, Vox requests these permissions on first use:
 | Automation → Mail | Sending emails via Apple Mail                      |
 
 Nothing is sent off-device.
+
+---
+
+## Platform roadmap
+
+| Platform | Status | Notes |
+| -------- | ------ | ----- |
+| **macOS** | Stable (v1.0.3) | Full feature set — voice, iMessage, screen control, email, overlay |
+| **Windows** | Planned | Core architecture is ready. Needs platform integrations. [Help wanted.](https://github.com/vox-ai-app/vox/issues) |
+| **Linux** | Planned | Same path as Windows. [Help wanted.](https://github.com/vox-ai-app/vox/issues) |
+
+The only macOS-specific code lives in `@vox-ai-app/integrations`. Everything else — MCP, tools, voice, indexing, parser, storage, UI — is already cross-platform. Adding a new platform means adding implementations alongside the existing `mac/` directory using the factory pattern.
 
 ---
 
