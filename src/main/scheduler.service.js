@@ -98,6 +98,6 @@ export function getSchedules() {
   }))
 }
 
-export function destroyScheduler() {
+export async function destroyScheduler() {
   cancelAllJobs()
 }

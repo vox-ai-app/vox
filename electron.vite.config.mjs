@@ -5,7 +5,13 @@ import react from '@vitejs/plugin-react'
 
 const require = createRequire(import.meta.url)
 
-const EXTRA_EXTERNALS = ['better-sqlite3', 'onnxruntime-node', '@huggingface/transformers']
+const EXTRA_EXTERNALS = [
+  'better-sqlite3',
+  'onnxruntime-node',
+  '@huggingface/transformers',
+  'sharp',
+  '@picovoice/pvrecorder-node'
+]
 
 export default defineConfig({
   main: {
