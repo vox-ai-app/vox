@@ -145,6 +145,12 @@ const api = {
   setup: {
     getPhase: () => invoke('setup:get-phase'),
     onPhase: (listener) => subscribeToRendererEvent('setup:phase', listener)
+  },
+
+  updater: {
+    install: () => invoke('update:install'),
+    onAvailable: (listener) => subscribeToRendererEvent('update:available', listener),
+    onDownloaded: (listener) => subscribeToRendererEvent('update:downloaded', listener)
   }
 }
 

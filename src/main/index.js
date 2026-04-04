@@ -60,6 +60,7 @@ import {
 } from './channels.service'
 import { handleChannelMessage } from './channels/channels.sessions'
 import { setChannelQueueHandler, enqueueChannelMessage } from './channels/channels.queue'
+import { initUpdater, installAndRestart } from './updater/updater'
 
 const execAsync = promisify(exec)
 
@@ -134,6 +135,7 @@ function registerAllIpc() {
   registerOverlayIpc()
   initIndexingStatusPush()
   ipcMain.handle('setup:get-phase', () => _setupPhase)
+  ipcMain.handle('update:install', () => installAndRestart())
 }
 
 async function bootBackgroundServices() {
@@ -298,6 +300,8 @@ app
     }
 
     emitSetupPhase('done')
+
+    initUpdater()
 
     void bootBackgroundServices()
 
