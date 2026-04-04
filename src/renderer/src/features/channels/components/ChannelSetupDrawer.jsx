@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { Loader2, ExternalLink, AlertCircle, Check, Eye, EyeOff, Smartphone } from 'lucide-react'
 import Drawer from '../../../shared/components/Drawer'
 import ChannelIcon from './ChannelIcon'
 
-function StepItem({ number, step }) {
+function _StepItem({ number, step }) {
   return (
     <div className="ch-setup-step">
       <span className="ch-setup-step-num">{number}</span>
@@ -36,9 +36,9 @@ function WhatsAppSetup({ qrCode, connecting, connected, error, onConnect }) {
           <div className="ch-setup-success-icon">
             <Check size={20} />
           </div>
-          <p className="ch-setup-success-title">You're all set</p>
+          <p className="ch-setup-success-title">You&apos;re all set</p>
           <p className="ch-setup-success-desc">
-            Vox is now linked to your WhatsApp. Send any message and it will reply automatically.
+            Vox is now linked to your WhatsApp. Send any message and it&apos;ll reply automatically.
           </p>
         </div>
       </div>
@@ -53,7 +53,7 @@ function WhatsAppSetup({ qrCode, connecting, connected, error, onConnect }) {
       {!connecting && !hasQr && !error && (
         <>
           <p className="ch-setup-intro">
-            No passwords or tokens needed — just scan a QR code with your phone's camera.
+            No passwords or tokens needed — just scan a QR code with your phone&apos;s camera.
           </p>
           <button
             className="ch-setup-connect-btn"
@@ -84,7 +84,7 @@ function WhatsAppSetup({ qrCode, connecting, connected, error, onConnect }) {
             <ol className="ch-setup-qr-instructions-list">
               <li>Open WhatsApp on your phone</li>
               <li>Go to Settings → Linked Devices</li>
-              <li>Tap "Link a Device"</li>
+              <li>Tap &quot;Link a Device&quot;</li>
               <li>Point your camera at this QR code</li>
             </ol>
           </div>
@@ -129,8 +129,8 @@ function TokenSetup({ def, connecting, connected, error, onConnect }) {
           <div className="ch-setup-success-icon">
             <Check size={20} />
           </div>
-          <p className="ch-setup-success-title">You're all set</p>
-          <p className="ch-setup-success-desc">{def.connectedHint}</p>
+          <p className="ch-setup-success-title">You&apos;re all set</p>
+          <p className="ch-setup-success-desc">{def.connectedHint || 'Connected'}</p>
         </div>
       </div>
     )

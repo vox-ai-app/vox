@@ -146,10 +146,10 @@ export function useChannelsStore() {
   }, [refresh, loadActivity])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    refresh()
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadActivity()
+    /* eslint-disable react-hooks/set-state-in-effect */
+    void refresh()
+    void loadActivity()
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [refresh, loadActivity])
 
   const connect = useCallback(async (channelId, config) => {
