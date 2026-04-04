@@ -23,6 +23,7 @@ asarUnpack:
   - node_modules/semver/**
   - node_modules/@picovoice/pvrecorder-node/**
   - node_modules/onnxruntime-node/**
+  - node_modules/onnxruntime-web/**
   - node_modules/onnxruntime-common/**
 win:
   executableName: Vox

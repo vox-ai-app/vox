@@ -1,5 +1,12 @@
 const { parentPort } = require('worker_threads')
 
+const Module = require('module')
+const _resolveFilename = Module._resolveFilename
+Module._resolveFilename = function (request, ...args) {
+  if (request === 'onnxruntime-node') throw new Error('blocked')
+  return _resolveFilename.call(this, request, ...args)
+}
+
 let transcriber = null
 
 async function init(cacheDir) {
@@ -11,7 +18,6 @@ async function init(cacheDir) {
 
   transcriber = await pipeline('automatic-speech-recognition', 'onnx-community/whisper-tiny.en', {
     dtype: 'fp32',
-    device: 'cpu',
     session_options: { intraOpNumThreads: 1, interOpNumThreads: 1 },
     progress_callback: (p) => {
       if (p.status === 'progress' && p.total) {

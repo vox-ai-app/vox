@@ -1,5 +1,5 @@
 const { parentPort, workerData } = require('worker_threads')
-const ort = require('onnxruntime-node')
+const ort = require('onnxruntime-web')
 const CHUNK_SAMPLES = 1280
 const MEL_CONTEXT = 480
 const RAW_BUF_MAX = 16000 * 10

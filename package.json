@@ -1,6 +1,6 @@
 {
   "name": "vox",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Open-source local-model desktop app for Vox",
   "main": "./out/main/index.js",
   "author": "Arnav Gupta",
@@ -53,6 +53,7 @@
     "@vox-ai-app/voice": "^1.0.1",
     "electron-log": "^5.3.4",
     "electron-updater": "^6.3.9",
+    "onnxruntime-web": "^1.24.3",
     "qrcode.react": "^4.2.0",
     "react-icons": "^5.6.0",
     "react-virtuoso": "^4.12.0",

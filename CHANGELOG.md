@@ -7,6 +7,26 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.0.6] - 2026-04-05
+
+### Fixed
+
+- **ONNX Runtime NAPI crash (the real fix)** — v1.0.5's single-thread mitigation didn't resolve the crash. Root cause: `onnxruntime-node` ships prebuilt NAPI binaries compiled for stock Node.js V8, but Electron 41 uses its own V8 (Chromium 146). When `napi_new_instance` ran in a `worker_thread`, V8's `JSDispatchTable::SetCodeNoWriteBarrier` hit an ABI assertion — `EXC_BREAKPOINT` on ARM64. Switched both the wake word worker and STT worker from native `onnxruntime-node` to `onnxruntime-web` (pure WebAssembly). Zero native bindings, same `InferenceSession`/`Tensor` API, no NAPI crash.
+- **STT worker `onnxruntime-node` isolation** — `@huggingface/transformers` auto-imports `onnxruntime-node` in Node environments. Blocked the import via `Module._resolveFilename` hook so transformers falls through to `onnxruntime-web` (WASM) naturally, using `device: 'wasm'` and correct execution providers.
+
+### Added
+
+- **Update button in sidebar** — shows a pink "Update to vX.X.X" button above the profile section when a new version is downloaded and ready to install.
+
+### Changed
+
+- `onnxruntime-web` added as direct dependency (replaces `onnxruntime-node` for inference)
+- `electron.vite.config.mjs` — `onnxruntime-web` and `onnxruntime-common` added to externals
+- `electron-builder.yml` — `onnxruntime-web` added to `asarUnpack`
+- `packages/voice` peer dependency changed from `onnxruntime-node` to `onnxruntime-web`
+
+---
+
 ## [1.0.5] - 2026-04-04
 
 ### Fixed

@@ -1,4 +1,6 @@
+import { useCallback, useEffect, useState } from 'react'
 import {
+  ArrowDownCircle,
   BookOpen,
   MessageSquare,
   PanelLeft,
@@ -21,6 +23,19 @@ const PRIMARY_TABS = [
 
 function LeftRail({ activeRoute, collapsed, onRouteChange, onToggleCollapse }) {
   const CollapseIcon = collapsed ? PanelLeft : PanelLeftClose
+  const [updateReady, setUpdateReady] = useState(null)
+  const [installing, setInstalling] = useState(false)
+
+  useEffect(() => {
+    const unsub1 = window.api.updater.onAvailable(({ version }) => setUpdateReady({ version, downloaded: false }))
+    const unsub2 = window.api.updater.onDownloaded(({ version }) => setUpdateReady({ version, downloaded: true }))
+    return () => { unsub1(); unsub2() }
+  }, [])
+
+  const handleInstall = useCallback(() => {
+    setInstalling(true)
+    window.api.updater.install()
+  }, [])
 
   return (
     <aside className={`workspace-sidebar${collapsed ? ' workspace-sidebar-collapsed' : ''}`}>
@@ -55,6 +70,25 @@ function LeftRail({ activeRoute, collapsed, onRouteChange, onToggleCollapse }) {
       </nav>
 
       <div className="workspace-sidebar-spacer" />
+
+      {updateReady && (
+        <button
+          className="update-sidebar-btn"
+          disabled={installing || !updateReady.downloaded}
+          onClick={handleInstall}
+          title={updateReady.downloaded ? `Install v${updateReady.version} and restart` : `Downloading v${updateReady.version}...`}
+          type="button"
+        >
+          <ArrowDownCircle size={16} />
+          {!collapsed && (
+            <span>
+              {updateReady.downloaded
+                ? `Update to v${updateReady.version}`
+                : 'Downloading...'}
+            </span>
+          )}
+        </button>
+      )}
 
       <hr className="workspace-nav-divider" />
       <div className="workspace-profile-menu">

@@ -8,6 +8,8 @@ const require = createRequire(import.meta.url)
 const EXTRA_EXTERNALS = [
   'better-sqlite3',
   'onnxruntime-node',
+  'onnxruntime-web',
+  'onnxruntime-common',
   '@huggingface/transformers',
   'sharp',
   '@picovoice/pvrecorder-node'

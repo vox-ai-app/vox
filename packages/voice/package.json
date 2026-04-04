@@ -27,6 +27,6 @@
   "peerDependencies": {
     "electron": ">=28.0.0",
     "@picovoice/pvrecorder-node": ">=1.0.0",
-    "onnxruntime-node": ">=1.18.0"
+    "onnxruntime-web": ">=1.18.0"
   }
 }

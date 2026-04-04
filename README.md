@@ -121,7 +121,7 @@ Nothing is sent off-device.
 
 | Platform    | Status          | Notes                                                                                                             |
 | ----------- | --------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **macOS**   | Stable (v1.0.4) | Full feature set — voice, iMessage, screen control, email, overlay                                                |
+| **macOS**   | Stable (v1.0.6) | Full feature set — voice, iMessage, screen control, email, overlay. Tested on Apple Silicon (M1–M4) and Intel Macs. |
 | **Windows** | Planned         | Core architecture is ready. Needs platform integrations. [Help wanted.](https://github.com/vox-ai-app/vox/issues) |
 | **Linux**   | Planned         | Same path as Windows. [Help wanted.](https://github.com/vox-ai-app/vox/issues)                                    |
 
