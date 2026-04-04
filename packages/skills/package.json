@@ -1,0 +1,29 @@
+{
+  "name": "@vox-ai-app/skills",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "AgentSkills-compatible skill loader for Vox — load SKILL.md folders, parse frontmatter, inject into LLM prompts",
+  "main": "./src/index.js",
+  "private": false,
+  "exports": {
+    ".": "./src/index.js",
+    "./loader": "./src/loader.js",
+    "./parser": "./src/parser.js",
+    "./prompt": "./src/prompt.js"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vox-ai-app/vox"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {}
+}

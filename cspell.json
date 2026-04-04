@@ -115,6 +115,10 @@
     "mpty",
     "listme",
     "grepme",
-    "convos"
+    "convos",
+    "creds",
+    "sched",
+    "xoxb",
+    "xapp"
   ]
 }

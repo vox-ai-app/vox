@@ -34,13 +34,27 @@ let _chatHistory = []
 let _systemPrompt = null
 let _chatController = null
 
-export function sendChatMessage({ requestId, message, systemPrompt, history, toolDefinitions }) {
+export function sendChatMessage({
+  requestId,
+  message,
+  systemPrompt,
+  history,
+  toolDefinitions,
+  silent
+}) {
   cancelPrewarm()
   ensurePendingRequest(requestId)
-  handleChatSend({ requestId, message, systemPrompt, history, toolDefinitions })
+  handleChatSend({ requestId, message, systemPrompt, history, toolDefinitions, silent })
 }
 
-async function handleChatSend({ requestId, message, systemPrompt, history, toolDefinitions = [] }) {
+async function handleChatSend({
+  requestId,
+  message,
+  systemPrompt,
+  history,
+  toolDefinitions = [],
+  silent
+}) {
   const _bridgePerfId = `[PERF] handleChatSend #${Date.now()}`
   console.time(_bridgePerfId)
   console.log(
@@ -52,22 +66,25 @@ async function handleChatSend({ requestId, message, systemPrompt, history, toolD
     const ready = await waitForReady()
     console.timeEnd(`${_bridgePerfId} waitForReady`)
     if (!ready) {
-      handleChatEventForRenderer(requestId, { type: 'error', message: 'Model not loaded' })
+      if (!silent)
+        handleChatEventForRenderer(requestId, { type: 'error', message: 'Model not loaded' })
       resolvePending(requestId)
       return
     }
   }
 
-  if (_chatController) {
+  if (!silent && _chatController) {
     _chatController.abort()
   }
   const controller = new AbortController()
-  _chatController = controller
+  if (!silent) _chatController = controller
   const signal = controller.signal
 
-  const emit = (event) => {
-    if (!signal.aborted) handleChatEventForRenderer(requestId, event)
-  }
+  const emit = silent
+    ? () => {}
+    : (event) => {
+        if (!signal.aborted) handleChatEventForRenderer(requestId, event)
+      }
 
   emit({ type: 'chunk_start', streamId: requestId })
 
@@ -212,8 +229,10 @@ async function handleChatSend({ requestId, message, systemPrompt, history, toolD
       messages.push({ role: 'assistant', content: lastRoundText })
     }
 
-    _chatHistory = messages
-    _systemPrompt = systemPrompt
+    if (!silent) {
+      _chatHistory = messages
+      _systemPrompt = systemPrompt
+    }
 
     console.timeEnd(_bridgePerfId)
     console.log(`${_bridgePerfId} finalText length: ${finalText.length} chars`)
@@ -222,19 +241,20 @@ async function handleChatSend({ requestId, message, systemPrompt, history, toolD
     resolvePending(requestId, { finalText, streamId: requestId })
   } catch (err) {
     if (signal.aborted) {
-      handleChatEventForRenderer(requestId, { type: 'abort_initiated' })
-      handleChatEventForRenderer(requestId, {
-        type: 'chunk_end',
-        streamId: requestId,
-        finalText: null
-      })
+      if (!silent) handleChatEventForRenderer(requestId, { type: 'abort_initiated' })
+      if (!silent)
+        handleChatEventForRenderer(requestId, {
+          type: 'chunk_end',
+          streamId: requestId,
+          finalText: null
+        })
       resolvePending(requestId)
     } else {
-      handleChatEventForRenderer(requestId, { type: 'error', message: err.message })
+      if (!silent) handleChatEventForRenderer(requestId, { type: 'error', message: err.message })
       resolvePending(requestId, null, new Error(err.message))
     }
   } finally {
-    if (_chatController === controller) _chatController = null
+    if (!silent && _chatController === controller) _chatController = null
   }
 }
 

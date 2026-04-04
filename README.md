@@ -28,8 +28,11 @@ Say "summarize my unread emails and draft replies to anything urgent." Vox reads
 - **Web** — fetch and summarize web pages
 - **Knowledge base** — index folders for semantic search across 50+ file types
 - **Background agents** — queue multi-step tasks that run independently while you keep chatting
+- **Scheduled tasks** — set up recurring agent runs with cron expressions (e.g. "summarize my email every morning at 9am")
 - **MCP tools** — connect any [MCP server](https://modelcontextprotocol.io) to extend capabilities
 - **Custom tools** — build your own tools and register them in the app
+- **Chat channels** — connect WhatsApp, Telegram, Discord, or Slack so the agent can respond across platforms
+- **Skills** — load SKILL.md files to give the agent specialized domain knowledge
 
 ### iMessage & phone control
 
@@ -56,6 +59,22 @@ The overlay is a floating window that stays on top of everything. Press `⌥Spac
 </p>
 
 You never have to switch windows to interact with Vox.
+
+---
+
+### Beta features
+
+These features are functional but still being refined. Expect rough edges.
+
+| Feature               | Status | What it does                                                                                                                                                 |
+| --------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Chat channels**     | Beta   | Connect WhatsApp, Telegram, Discord, or Slack — Vox responds to messages across platforms using your local model. WhatsApp uses QR-code pairing via Baileys. |
+| **Scheduled tasks**   | Beta   | Tell Vox to do something on a schedule ("summarize my email every morning at 9am"). Cron-based, timezone-aware, persists across restarts.                    |
+| **Skills**            | Beta   | Drop SKILL.md files into your workspace to give Vox specialized domain knowledge — coding standards, writing style, project context.                         |
+| **Background agents** | Beta   | Queue multi-step tasks that run independently. Vox works on them while you keep chatting.                                                                    |
+| **Custom tools**      | Beta   | Register your own tools in the app. Vox discovers them automatically via `find_tools`.                                                                       |
+
+Beta features may change behavior between releases. Report issues on [GitHub](https://github.com/vox-ai-app/vox/issues).
 
 ---
 
@@ -100,11 +119,11 @@ Nothing is sent off-device.
 
 ## Platform roadmap
 
-| Platform | Status | Notes |
-| -------- | ------ | ----- |
-| **macOS** | Stable (v1.0.3) | Full feature set — voice, iMessage, screen control, email, overlay |
-| **Windows** | Planned | Core architecture is ready. Needs platform integrations. [Help wanted.](https://github.com/vox-ai-app/vox/issues) |
-| **Linux** | Planned | Same path as Windows. [Help wanted.](https://github.com/vox-ai-app/vox/issues) |
+| Platform    | Status          | Notes                                                                                                             |
+| ----------- | --------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **macOS**   | Stable (v1.0.4) | Full feature set — voice, iMessage, screen control, email, overlay                                                |
+| **Windows** | Planned         | Core architecture is ready. Needs platform integrations. [Help wanted.](https://github.com/vox-ai-app/vox/issues) |
+| **Linux**   | Planned         | Same path as Windows. [Help wanted.](https://github.com/vox-ai-app/vox/issues)                                    |
 
 The only macOS-specific code lives in `@vox-ai-app/integrations`. Everything else — MCP, tools, voice, indexing, parser, storage, UI — is already cross-platform. Adding a new platform means adding implementations alongside the existing `mac/` directory using the factory pattern.
 
@@ -133,7 +152,8 @@ The only macOS-specific code lives in `@vox-ai-app/integrations`. Everything els
 │  ┌──────────────────────────────────────────────────┐ │
 │  │              Packages (npm workspaces)            │ │
 │  │  mcp · tools · integrations · voice · indexing   │ │
-│  │  parser · storage · ui                           │ │
+│  │  parser · storage · ui · scheduler · skills     │ │
+│  │  channels                                       │ │
 │  └──────────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────┘
          │
@@ -149,7 +169,7 @@ The only macOS-specific code lives in `@vox-ai-app/integrations`. Everything els
 
 ## Package structure
 
-The monorepo publishes 8 packages. Most are platform-agnostic and usable in any Electron app or Node.js project:
+The monorepo publishes 11 packages. Most are platform-agnostic and usable in any Electron app or Node.js project:
 
 | Package                                             | Platform        | Description                                             |
 | --------------------------------------------------- | --------------- | ------------------------------------------------------- |
@@ -161,6 +181,9 @@ The monorepo publishes 8 packages. Most are platform-agnostic and usable in any 
 | [`@vox-ai-app/parser`](packages/parser)             | any             | Document parsing (PDF, DOCX, PPTX, etc.)                |
 | [`@vox-ai-app/storage`](packages/storage)           | any             | Local message and config persistence (SQLite)           |
 | [`@vox-ai-app/ui`](packages/ui)                     | any             | React UI components and design tokens                   |
+| [`@vox-ai-app/scheduler`](packages/scheduler)       | any             | Cron-based job scheduling with timezone support         |
+| [`@vox-ai-app/skills`](packages/skills)             | any             | SKILL.md loader and LLM prompt formatter                |
+| [`@vox-ai-app/channels`](packages/channels)         | any             | Chat adapters (WhatsApp, Telegram, Discord, Slack)      |
 
 `@vox-ai-app/integrations` is the only package with platform-specific code today. Adding Windows or Linux integrations means adding an implementation alongside the existing macOS one without changing the rest of the workspace.
 

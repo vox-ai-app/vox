@@ -109,6 +109,67 @@ export async function executeElectronTool(name, args) {
       }
       return JSON.stringify(listTaskHistory({ status: args?.status || null }))
     }
+    case 'schedule_task': {
+      const { addSchedule } = await import('../scheduler.service.js')
+      const expr = String(args?.cron_expression || '').trim()
+      const instructions = String(args?.instructions || '').trim()
+      if (!expr) return JSON.stringify({ error: 'cron_expression is required' })
+      if (!instructions) return JSON.stringify({ error: 'instructions is required' })
+      const parts = expr.split(/\s+/)
+      if (parts.length < 5 || parts.length > 6)
+        return JSON.stringify({
+          error:
+            'Invalid cron expression. Use 5-field format: minute hour day-of-month month day-of-week'
+        })
+      const minField = parts[0]
+      if (
+        /^\*$/.test(minField) ||
+        (minField.startsWith('*/') && parseInt(minField.slice(2), 10) < 5)
+      ) {
+        return JSON.stringify({ error: 'Minimum interval is 5 minutes. Use "*/5" or higher.' })
+      }
+      const schedule = addSchedule({
+        expr,
+        tz: args?.timezone || null,
+        prompt: instructions,
+        enabled: true,
+        once: args?.once === true
+      })
+      return JSON.stringify({
+        scheduled: true,
+        schedule_id: schedule.id,
+        cron_expression: schedule.expr,
+        timezone: schedule.tz || Intl.DateTimeFormat().resolvedOptions().timeZone,
+        instructions: schedule.prompt,
+        once: args?.once === true,
+        note: 'This schedule only runs while Vox is open on your machine.'
+      })
+    }
+    case 'list_schedules': {
+      const { getSchedules } = await import('../scheduler.service.js')
+      const schedules = getSchedules()
+      return JSON.stringify({
+        schedules: schedules.map((s) => ({
+          schedule_id: s.id,
+          cron_expression: s.expr,
+          timezone: s.tz || Intl.DateTimeFormat().resolvedOptions().timeZone,
+          instructions: s.prompt,
+          enabled: s.enabled,
+          once: s.once || false,
+          next_run: s.nextRun ? new Date(s.nextRun).toISOString() : null
+        })),
+        count: schedules.length
+      })
+    }
+    case 'remove_schedule': {
+      const { removeSchedule, getSchedules } = await import('../scheduler.service.js')
+      const id = String(args?.schedule_id || '').trim()
+      if (!id) return JSON.stringify({ error: 'schedule_id is required' })
+      const exists = getSchedules().some((s) => s.id === id)
+      if (!exists) return JSON.stringify({ error: `Schedule "${id}" not found` })
+      removeSchedule(id)
+      return JSON.stringify({ removed: true, schedule_id: id })
+    }
     default: {
       logger.info(`[tool-executor] Dispatching tool: ${name}`)
 

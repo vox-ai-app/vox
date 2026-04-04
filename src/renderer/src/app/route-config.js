@@ -3,5 +3,6 @@ export const APP_ROUTES = {
   ACTIVITY: 'activity',
   KNOWLEDGE: 'knowledge',
   TOOLS: 'tools',
+  CHANNELS: 'channels',
   SETTINGS: 'settings'
 }

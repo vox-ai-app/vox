@@ -1,0 +1,36 @@
+feat: channels, scheduler, skills, WhatsApp reconnect fix - v1.0.4
+
+Channels (new @vox-ai-app/channels package)
+- WhatsApp via Baileys QR pairing
+- Telegram via grammY
+- Discord via discord.js
+- Slack via Bolt
+- Base adapter: EventEmitter, exponential backoff reconnect, message dedup, text chunking
+- Fix WhatsApp disconnect race condition (abort before socket end, null controller guard)
+- Full renderer UI: ChannelsPage, setup drawers, activity feed, thread viewer
+
+Scheduler (new @vox-ai-app/scheduler package)
+- Cron-based recurring/one-shot agentic tasks
+- Persistent store with JSON file backend
+- schedule_task, list_schedules, remove_schedule tool definitions
+- Cron validation with minimum 5-min interval guard
+
+Skills (new @vox-ai-app/skills package)
+- SKILL.md frontmatter parser
+- Directory-based skill loader with dedup and size limits
+- XML prompt formatter injected into system prompt
+
+App wiring
+- channels.service, channels.ipc, channels.queue, channels.sessions
+- skills.service integrated into chat.session system prompt
+- scheduler.service with agent handler and graceful shutdown
+- Drawer animation polish (opacity, box-shadow, content slide-in)
+- Preload API for channels (list, init, disconnect, send, events)
+- Left rail Channels tab with Radio icon
+
+Tests: 528 passing across 21 files
+
+Docs
+- CHANGELOG [1.0.4] entry
+- README beta features table
+- Channels README with beta banner

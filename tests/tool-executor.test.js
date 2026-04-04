@@ -98,6 +98,30 @@ vi.mock('../src/main/storage/tasks.db', () => ({
   searchTasksFts: vi.fn(() => [])
 }))
 
+const _schedules = new Map()
+vi.mock('../src/main/scheduler.service', () => ({
+  addSchedule: vi.fn((config) => {
+    const id = config.id || `sched_${Date.now()}`
+    const s = {
+      id,
+      expr: config.expr,
+      tz: config.tz || null,
+      prompt: config.prompt,
+      channel: config.channel || null,
+      enabled: config.enabled !== false,
+      once: config.once === true
+    }
+    _schedules.set(id, s)
+    return s
+  }),
+  removeSchedule: vi.fn((id) => {
+    _schedules.delete(id)
+  }),
+  getSchedules: vi.fn(() =>
+    [..._schedules.values()].map((s) => ({ ...s, nextRun: Date.now() + 3600000 }))
+  )
+}))
+
 vi.mock('../src/main/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
@@ -107,6 +131,7 @@ const storeMod = await import('../src/main/storage/store')
 
 beforeEach(() => {
   storeMod._reset()
+  _schedules.clear()
 })
 
 describe('executeElectronTool - file dialogs', () => {
@@ -345,6 +370,165 @@ describe('executeElectronTool - find_tools and run_tool', () => {
     await expect(executeElectronTool('run_tool', { name: 'no_source', args: {} })).rejects.toThrow(
       'no executable source'
     )
+  })
+})
+
+describe('executeElectronTool - schedule_task', () => {
+  it('should schedule a task with valid cron', async () => {
+    const result = JSON.parse(
+      await executeElectronTool('schedule_task', {
+        instructions: 'Check email',
+        cron_expression: '0 9 * * *'
+      })
+    )
+    expect(result.scheduled).toBe(true)
+    expect(result.schedule_id).toBeDefined()
+    expect(result.cron_expression).toBe('0 9 * * *')
+    expect(result.instructions).toBe('Check email')
+    expect(result.note).toContain('Vox is open')
+  })
+
+  it('should pass timezone through', async () => {
+    const result = JSON.parse(
+      await executeElectronTool('schedule_task', {
+        instructions: 'Morning brief',
+        cron_expression: '0 8 * * 1-5',
+        timezone: 'America/New_York'
+      })
+    )
+    expect(result.scheduled).toBe(true)
+    expect(result.timezone).toBe('America/New_York')
+  })
+
+  it('should set once flag', async () => {
+    const result = JSON.parse(
+      await executeElectronTool('schedule_task', {
+        instructions: 'One-time reminder',
+        cron_expression: '30 14 * * *',
+        once: true
+      })
+    )
+    expect(result.once).toBe(true)
+  })
+
+  it('should reject empty cron expression', async () => {
+    const result = JSON.parse(
+      await executeElectronTool('schedule_task', {
+        instructions: 'Test',
+        cron_expression: ''
+      })
+    )
+    expect(result.error).toContain('cron_expression is required')
+  })
+
+  it('should reject empty instructions', async () => {
+    const result = JSON.parse(
+      await executeElectronTool('schedule_task', {
+        instructions: '',
+        cron_expression: '0 9 * * *'
+      })
+    )
+    expect(result.error).toContain('instructions is required')
+  })
+
+  it('should reject invalid cron with wrong field count', async () => {
+    const result = JSON.parse(
+      await executeElectronTool('schedule_task', {
+        instructions: 'Test',
+        cron_expression: '0 9 *'
+      })
+    )
+    expect(result.error).toContain('Invalid cron')
+  })
+
+  it('should reject bare * minute field (every-minute)', async () => {
+    const result = JSON.parse(
+      await executeElectronTool('schedule_task', {
+        instructions: 'Spam',
+        cron_expression: '* * * * *'
+      })
+    )
+    expect(result.error).toContain('Minimum interval')
+  })
+
+  it('should reject */1 minute interval', async () => {
+    const result = JSON.parse(
+      await executeElectronTool('schedule_task', {
+        instructions: 'Spam',
+        cron_expression: '*/1 * * * *'
+      })
+    )
+    expect(result.error).toContain('Minimum interval')
+  })
+
+  it('should accept */5 minute interval', async () => {
+    const result = JSON.parse(
+      await executeElectronTool('schedule_task', {
+        instructions: 'Frequent check',
+        cron_expression: '*/5 * * * *'
+      })
+    )
+    expect(result.scheduled).toBe(true)
+  })
+
+  it('should reject */3 minute interval', async () => {
+    const result = JSON.parse(
+      await executeElectronTool('schedule_task', {
+        instructions: 'Too fast',
+        cron_expression: '*/3 * * * *'
+      })
+    )
+    expect(result.error).toContain('Minimum interval')
+  })
+})
+
+describe('executeElectronTool - list_schedules', () => {
+  it('should return empty list when no schedules', async () => {
+    const result = JSON.parse(await executeElectronTool('list_schedules', {}))
+    expect(result.schedules).toEqual([])
+    expect(result.count).toBe(0)
+  })
+
+  it('should return schedules after scheduling', async () => {
+    await executeElectronTool('schedule_task', {
+      instructions: 'Daily check',
+      cron_expression: '0 10 * * *'
+    })
+    const result = JSON.parse(await executeElectronTool('list_schedules', {}))
+    expect(result.count).toBe(1)
+    expect(result.schedules[0].instructions).toBe('Daily check')
+    expect(result.schedules[0].cron_expression).toBe('0 10 * * *')
+    expect(result.schedules[0].next_run).toBeDefined()
+  })
+})
+
+describe('executeElectronTool - remove_schedule', () => {
+  it('should remove an existing schedule', async () => {
+    const created = JSON.parse(
+      await executeElectronTool('schedule_task', {
+        instructions: 'To remove',
+        cron_expression: '0 12 * * *'
+      })
+    )
+    const result = JSON.parse(
+      await executeElectronTool('remove_schedule', { schedule_id: created.schedule_id })
+    )
+    expect(result.removed).toBe(true)
+    expect(result.schedule_id).toBe(created.schedule_id)
+    const list = JSON.parse(await executeElectronTool('list_schedules', {}))
+    expect(list.count).toBe(0)
+  })
+
+  it('should error for empty schedule_id', async () => {
+    const result = JSON.parse(await executeElectronTool('remove_schedule', { schedule_id: '' }))
+    expect(result.error).toContain('schedule_id is required')
+  })
+
+  it('should error for non-existent schedule', async () => {
+    const result = JSON.parse(
+      await executeElectronTool('remove_schedule', { schedule_id: 'not_real' })
+    )
+    expect(result.error).toContain('not found')
   })
 })
 

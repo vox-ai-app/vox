@@ -1,0 +1,5 @@
+export { ChannelAdapter, chunkText } from './adapter.js'
+export { WhatsAppChannel } from './whatsapp/index.js'
+export { TelegramChannel } from './telegram/index.js'
+export { DiscordChannel } from './discord/index.js'
+export { SlackChannel } from './slack/index.js'

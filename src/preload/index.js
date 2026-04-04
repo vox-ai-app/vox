@@ -120,6 +120,20 @@ const api = {
     setIgnoreMouseEvents: (ignore) => electronAPI.ipcRenderer.send('overlay:mouse-ignore', ignore)
   },
 
+  channels: {
+    list: () => invoke('channels:list'),
+    init: (channelId, config) => invoke('channels:init', { channelId, config }),
+    disconnect: (channelId) => invoke('channels:disconnect', { channelId }),
+    send: (channelId, peerId, text, opts) =>
+      invoke('channels:send', { channelId, peerId, text, opts }),
+    destroyAll: () => invoke('channels:destroy-all'),
+    getActivity: (limit) => invoke('channels:get-activity', { limit }),
+    getThread: (channel, peerId) => invoke('channels:get-thread', { channel, peerId }),
+    onStatus: (listener) => subscribeToRendererEvent('channels:status', listener),
+    onQR: (listener) => subscribeToRendererEvent('channels:qr', listener),
+    onActivity: (listener) => subscribeToRendererEvent('channels:activity', listener)
+  },
+
   imessage: {
     getStatus: () => invoke('imessage:get-status'),
     start: (passphrase) => invoke('imessage:start', { passphrase }),

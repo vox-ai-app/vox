@@ -1,0 +1,36 @@
+{
+  "name": "@vox-ai-app/channels",
+  "version": "1.1.1",
+  "type": "module",
+  "license": "MIT",
+  "description": "Chat channel adapters for Vox — WhatsApp, Telegram, Discord, Slack, and extensible channel interface",
+  "main": "./src/index.js",
+  "private": false,
+  "exports": {
+    ".": "./src/index.js",
+    "./adapter": "./src/adapter.js",
+    "./whatsapp": "./src/whatsapp/index.js",
+    "./telegram": "./src/telegram/index.js",
+    "./discord": "./src/discord/index.js",
+    "./slack": "./src/slack/index.js"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vox-ai-app/vox"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "dependencies": {
+    "@slack/bolt": "^4.6.0",
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "discord.js": "^14.26.2",
+    "grammy": "^1.41.1"
+  }
+}

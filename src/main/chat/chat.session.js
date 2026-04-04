@@ -19,6 +19,7 @@ import { getUnreportedTerminalTasks, markTaskReported } from '../storage/tasks.d
 import { logger } from '../logger'
 import { buildDefaultSystemPrompt } from './chat.prompts'
 import { getToolDefinitions, invalidateToolDefinitions } from './chat.tools'
+import { getSkillsPrompt } from './skills.service'
 import {
   sanitizeHistory,
   buildContextHistory,
@@ -53,8 +54,12 @@ function buildPage(rows, limit) {
 export function getSystemPrompt() {
   const base = storeGet('systemPrompt') || buildDefaultSystemPrompt()
   const userInfo = storeGet('vox.user.info') || {}
-  if (Object.keys(userInfo).length === 0) return base
-  return `${base}\n\nKnown user information:\n${JSON.stringify(userInfo, null, 2)}`
+  const skills = getSkillsPrompt()
+  let prompt = base
+  if (skills) prompt += skills
+  if (Object.keys(userInfo).length > 0)
+    prompt += `\n\nKnown user information:\n${JSON.stringify(userInfo, null, 2)}`
+  return prompt
 }
 
 function appendUserMessageToConversation(content, requestId) {

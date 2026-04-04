@@ -10,11 +10,13 @@ const lazyKnowledge = () => import('../features/knowledge/pages/KnowledgePage')
 const lazyActivity = () => import('../features/activity/pages/ActivityPage')
 const lazyTools = () => import('../features/tools/pages/ToolsPage')
 const lazySettings = () => import('../features/settings/pages/SettingsPage')
+const lazyChannels = () => import('../features/channels/pages/ChannelsPage')
 
 const KnowledgePage = lazy(lazyKnowledge)
 const ActivityPage = lazy(lazyActivity)
 const ToolsPage = lazy(lazyTools)
 const SettingsPage = lazy(lazySettings)
+const ChannelsPage = lazy(lazyChannels)
 
 function RouteFallback() {
   return (
@@ -49,6 +51,7 @@ function LocalApp() {
       lazyActivity()
       lazyTools()
       lazySettings()
+      lazyChannels()
     }, 1000)
     return () => clearTimeout(timer)
   }, [])
@@ -89,6 +92,12 @@ function LocalApp() {
         return (
           <Suspense fallback={<RouteFallback />}>
             <ToolsPage />
+          </Suspense>
+        )
+      case APP_ROUTES.CHANNELS:
+        return (
+          <Suspense fallback={<RouteFallback />}>
+            <ChannelsPage />
           </Suspense>
         )
       case APP_ROUTES.SETTINGS:

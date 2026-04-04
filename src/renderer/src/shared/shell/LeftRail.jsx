@@ -3,6 +3,7 @@ import {
   MessageSquare,
   PanelLeft,
   PanelLeftClose,
+  Radio,
   Settings,
   Wrench,
   Zap
@@ -14,6 +15,7 @@ const PRIMARY_TABS = [
   { key: APP_ROUTES.ACTIVITY, label: 'Activity', icon: Zap },
   { key: APP_ROUTES.KNOWLEDGE, label: 'Knowledge', icon: BookOpen },
   { key: APP_ROUTES.TOOLS, label: 'Tools', icon: Wrench },
+  { key: APP_ROUTES.CHANNELS, label: 'Channels', icon: Radio },
   { key: APP_ROUTES.SETTINGS, label: 'Settings', icon: Settings }
 ]
 

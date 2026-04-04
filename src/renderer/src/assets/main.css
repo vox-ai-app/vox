@@ -9,6 +9,7 @@
 @import '../styles/pages/pages.activity.css';
 @import '../styles/pages/pages.settings.css';
 @import '../styles/pages/pages.tools.new.css';
+@import '../styles/pages/pages.channels.css';
 @import '../styles/shared.drawer.css';
 
 #root {

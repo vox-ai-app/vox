@@ -18,13 +18,19 @@ import { registerToolsIpc } from './ipc/tools.ipc'
 import { registerModelsIpc } from './ai/models.ipc'
 import { registerMcpIpc } from './mcp/mcp.ipc'
 import { registerImessageIpc } from './imessage/imessage.ipc'
+import { registerChannelsIpc } from './channels/channels.ipc'
 import { registerVoiceIpc } from './voice/voice.ipc'
 import { registerPowerIpc, setKeepAwake } from './power/power.ipc'
 import { loadModel, destroyWorker, prewarmChat, setPrewarmProviders } from './ai/llm.bridge'
 import { ensureBinary } from './ai/llm.server'
 import { getActiveModelPath, cleanupPartialDownloads } from './ai/models'
 import { connectAllMcpServers, closeAllMcp, setToolInvalidationCallback } from './mcp/mcp.service'
-import { invalidateToolDefinitions, getToolDefinitions, getSystemPrompt } from './chat/chat.session'
+import {
+  invalidateToolDefinitions,
+  getToolDefinitions,
+  getSystemPrompt,
+  sendMessageAndWait
+} from './chat/chat.session'
 import { setToolDefinitionProvider } from './chat/task.queue'
 import { startWatching, stopWatching } from './imessage/imessage.service'
 import { initVoiceService, destroyVoiceService } from './voice/voice.service'
@@ -43,6 +49,17 @@ import {
   setSentryCapture
 } from '@vox-ai-app/indexing'
 import { createTray, destroyTray } from './app/tray'
+import { loadSkills } from './chat/skills.service'
+import { initScheduler, setSchedulerAgentHandler, destroyScheduler } from './scheduler.service'
+import {
+  setChannelMessageHandler,
+  destroyChannels,
+  sendToChannel,
+  initChannel,
+  hasWhatsAppAuth
+} from './channels.service'
+import { handleChannelMessage } from './channels/channels.sessions'
+import { setChannelQueueHandler, enqueueChannelMessage } from './channels/channels.queue'
 
 const execAsync = promisify(exec)
 
@@ -110,6 +127,7 @@ function registerAllIpc() {
   registerModelsIpc()
   registerMcpIpc()
   registerImessageIpc()
+  registerChannelsIpc()
   registerVoiceIpc()
   registerPowerIpc()
   registerIndexingIpc()
@@ -132,8 +150,54 @@ async function bootBackgroundServices() {
     logger.warn('[main] MCP connect error:', err)
   }
 
+  try {
+    loadSkills()
+  } catch (err) {
+    logger.warn('[main] Skills load failed:', err)
+  }
+
+  try {
+    initScheduler()
+  } catch (err) {
+    logger.warn('[main] Scheduler init failed:', err)
+  }
+
+  setSchedulerAgentHandler(async ({ scheduleId, prompt, channel }) => {
+    try {
+      const reply = await sendMessageAndWait({ content: prompt })
+      if (channel) await sendToChannel(channel, null, reply).catch(() => {})
+    } catch (err) {
+      logger.warn(`[scheduler] Agent run failed for ${scheduleId}:`, err)
+    }
+  })
+
+  setChannelQueueHandler(async ({ channel, peerId, text, senderName }) => {
+    try {
+      const { reply, activityEntry } = await handleChannelMessage({
+        channel,
+        peerId,
+        text,
+        senderName
+      })
+      if (reply) await sendToChannel(channel, peerId, reply)
+      emitAll('channels:activity', activityEntry)
+    } catch (err) {
+      logger.warn(`[channels] Reply failed for ${channel}/${peerId}:`, err)
+    }
+  })
+
+  setChannelMessageHandler(({ channel, peerId, text, senderName }) => {
+    enqueueChannelMessage({ channel, peerId, text, senderName })
+  })
+
   setPrewarmProviders(getToolDefinitions, getSystemPrompt)
   void prewarmChat()
+
+  if (hasWhatsAppAuth()) {
+    initChannel('whatsapp').catch((err) =>
+      logger.warn('[channels] WhatsApp auto-connect failed:', err)
+    )
+  }
 }
 
 async function initLlm() {
@@ -271,7 +335,9 @@ app.on('before-quit', (e) => {
     closeAllMcp().catch((err) => logger.warn('[main] MCP shutdown failed:', err)),
     Promise.resolve()
       .then(() => stopWatching())
-      .catch((err) => logger.warn('[main] iMessage stop failed:', err))
+      .catch((err) => logger.warn('[main] iMessage stop failed:', err)),
+    destroyScheduler().catch((err) => logger.warn('[main] Scheduler shutdown failed:', err)),
+    destroyChannels().catch((err) => logger.warn('[main] Channels shutdown failed:', err))
   ]).finally(() => {
     clearTimeout(shutdownTimer)
     forceCleanup()

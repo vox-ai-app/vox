@@ -24,6 +24,60 @@ const SAVE_USER_INFO_DEF = {
   }
 }
 
+const SCHEDULE_TASK_DEF = {
+  name: 'schedule_task',
+  description:
+    'Schedule a recurring or one-time agentic task. The task runs the full agent with tool access at the specified times. Only runs while Vox is open. Common cron patterns: daily at 10am = "0 10 * * *", every weekday at 9am = "0 9 * * 1-5", every 30 min = "*/30 * * * *", first of month at noon = "0 12 1 * *".',
+  parameters: {
+    type: 'object',
+    properties: {
+      instructions: {
+        type: 'string',
+        description: 'The prompt/instructions the agent will execute each time the schedule fires.'
+      },
+      cron_expression: {
+        type: 'string',
+        description:
+          'Standard 5-field cron expression (minute hour day-of-month month day-of-week).'
+      },
+      timezone: {
+        type: 'string',
+        description: 'IANA timezone (e.g. "America/New_York"). Defaults to the system timezone.'
+      },
+      once: {
+        type: 'boolean',
+        description: 'If true, the schedule auto-removes after firing once. Default false.'
+      }
+    },
+    required: ['instructions', 'cron_expression']
+  }
+}
+
+const LIST_SCHEDULES_DEF = {
+  name: 'list_schedules',
+  description: 'List all scheduled tasks with their next run time, cron expression, and status.',
+  parameters: {
+    type: 'object',
+    properties: {}
+  }
+}
+
+const REMOVE_SCHEDULE_DEF = {
+  name: 'remove_schedule',
+  description:
+    'Cancel and remove a scheduled task by its ID. Use list_schedules first to find the ID.',
+  parameters: {
+    type: 'object',
+    properties: {
+      schedule_id: {
+        type: 'string',
+        description: 'The schedule ID to remove.'
+      }
+    },
+    required: ['schedule_id']
+  }
+}
+
 const FIND_TOOLS_DEF = {
   name: 'find_tools',
   description:
@@ -94,6 +148,10 @@ function buildToolDefinitions() {
       }
     }
   })
+
+  defs.push(SCHEDULE_TASK_DEF)
+  defs.push(LIST_SCHEDULES_DEF)
+  defs.push(REMOVE_SCHEDULE_DEF)
 
   let hasMcpTools = false
   try {
