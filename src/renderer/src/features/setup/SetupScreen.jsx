@@ -160,8 +160,8 @@ export default function SetupScreen({ setupPhase, noModel }) {
       if (data.status === 'ready') {
         setSttStatus('done')
       } else if (data.status === 'error') {
-        setLlmPhase('error')
-        setErrorMsg('Something went wrong during setup. Please restart the app.')
+        setSttStatus('error')
+        setErrorMsg(data.message || 'Voice engine failed to initialize. Please restart the app.')
       }
     })
 
@@ -239,7 +239,7 @@ export default function SetupScreen({ setupPhase, noModel }) {
     }
   }, [sttDone, setupPhase, engineStatus])
 
-  const isError = llmPhase === 'error' || engineStatus === 'error'
+  const isError = llmPhase === 'error' || engineStatus === 'error' || sttStatus === 'error'
 
   const sttStepStatus = sttDone ? 'done' : 'active'
   const sttStepPercent = sttHasProgress ? sttProgress : null

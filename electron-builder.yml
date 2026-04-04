@@ -10,9 +10,16 @@ files:
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
 asarUnpack:
   - resources/**
-  - out/main/stt.worker.js
-  - out/main/voice.worker.js
-  - out/main/indexing.parser.worker.js
+  - out/main/*.worker.js
+  - out/main/chunks/**
+  - node_modules/adm-zip/**
+  - node_modules/better-sqlite3/**
+  - node_modules/bindings/**
+  - node_modules/file-uri-to-path/**
+  - node_modules/@huggingface/transformers/**
+  - node_modules/@picovoice/pvrecorder-node/**
+  - node_modules/onnxruntime-node/**
+  - node_modules/onnxruntime-common/**
 win:
   executableName: Vox
 nsis:
