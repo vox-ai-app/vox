@@ -38,7 +38,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
-    "@huggingface/transformers": "^3.4.0",
+    "@huggingface/transformers": "^4.0.1",
     "@picovoice/pvrecorder-node": "^1.2.8",
     "@sentry/electron": "^7.10.0",
     "@vox-ai-app/channels": "^1.0.0",
