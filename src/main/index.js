@@ -59,7 +59,6 @@ function createMainWindow() {
     minHeight: 600,
     show: false,
     title: 'Vox',
-    icon: join(__dirname, '../../resources/icon.png'),
     titleBarStyle: 'hiddenInset',
     autoHideMenuBar: true,
     webPreferences: {
