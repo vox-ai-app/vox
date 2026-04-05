@@ -89,6 +89,22 @@ export function listModels() {
 export function getActiveModelPath() {
   const stored = storeGet(STORE_KEY_ACTIVE)
   if (stored && existsSync(stored)) return stored
+
+  const dir = getModelsDir()
+  try {
+    const gguf = readdirSync(dir).find((f) => f.endsWith('.gguf'))
+    if (gguf) {
+      const found = join(dir, gguf)
+      const size = statSync(found).size
+      if (size > 1024) {
+        logger.info('[models] Auto-recovered active model:', found)
+        storeSet(STORE_KEY_ACTIVE, found)
+        return found
+      }
+    }
+  } catch {
+    /* models dir may not exist yet */
+  }
   return null
 }
 
@@ -121,6 +137,11 @@ export async function downloadModel({ hfRepo, hfFile, onProgress } = {}) {
       }
     } else {
       logger.info('[models] Already exists:', destPath)
+      const active = getActiveModelPath()
+      if (!active) {
+        storeSet(STORE_KEY_ACTIVE, destPath)
+        emitAll('models:auto-activated', { path: destPath, filename: hfFile })
+      }
       emitAll('models:progress', { path: destPath, filename: hfFile, percent: 100 })
       return destPath
     }
