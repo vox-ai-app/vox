@@ -11,6 +11,7 @@ function mapServer(row) {
     url: row.url || null,
     env: JSON.parse(row.env),
     isEnabled: !!row.is_enabled,
+    lastSyncedAt: row.last_synced_at || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   }
@@ -48,7 +49,7 @@ export function updateMcpServer(db, id, updates) {
 
   db.prepare(
     `UPDATE mcp_servers SET name = ?, transport = ?, command = ?, args = ?, url = ?,
-      env = ?, is_enabled = ?, updated_at = ?
+      env = ?, is_enabled = ?, last_synced_at = ?, updated_at = ?
      WHERE id = ?`
   ).run(
     String(merged.name),
@@ -58,6 +59,7 @@ export function updateMcpServer(db, id, updates) {
     merged.url || null,
     JSON.stringify(merged.env || {}),
     merged.isEnabled === false ? 0 : 1,
+    merged.lastSyncedAt || null,
     now,
     id
   )

@@ -12,18 +12,37 @@ import {
 const VALID_SOURCE_TYPES = new Set(['js_function', 'http_webhook', 'desktop', 'mcp'])
 const TOOL_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/
 
+function toolToWire(t) {
+  if (!t) return t
+  return {
+    id: t.id,
+    name: t.name,
+    description: t.description,
+    parameters: t.parameters,
+    source_type: t.sourceType,
+    source_code: t.sourceCode,
+    webhook_url: t.webhookUrl,
+    webhook_headers: t.webhookHeaders,
+    is_enabled: t.isEnabled,
+    tags: t.tags,
+    version: t.version,
+    created_at: t.createdAt,
+    updated_at: t.updatedAt
+  }
+}
+
 function mcpDefsToTools(defs) {
   return defs.map((def) => ({
     id: `mcp:${def.name}`,
     name: def.name,
     description: def.description || '',
-    sourceType: 'mcp',
-    isEnabled: true
+    source_type: 'mcp',
+    is_enabled: true
   }))
 }
 
 function allTools() {
-  return [...listTools(getDb()), ...mcpDefsToTools(getMcpToolDefinitions())]
+  return [...listTools(getDb()).map(toolToWire), ...mcpDefsToTools(getMcpToolDefinitions())]
 }
 
 function validateToolData(data) {
@@ -33,8 +52,8 @@ function validateToolData(data) {
       { code: 'VALIDATION_ERROR' }
     )
   }
-  if (data.sourceType && !VALID_SOURCE_TYPES.has(data.sourceType)) {
-    throw Object.assign(new Error(`Invalid source_type: ${data.sourceType}`), {
+  if (data.source_type && !VALID_SOURCE_TYPES.has(data.source_type)) {
+    throw Object.assign(new Error(`Invalid source_type: ${data.source_type}`), {
       code: 'VALIDATION_ERROR'
     })
   }
@@ -70,17 +89,18 @@ export function registerToolsIpc() {
           code: 'DUPLICATE'
         })
       }
-      return createTool(db, {
-        name: data.name,
-        description: data.description,
-        parameters: data.parameters,
-        sourceType: data.sourceType || data.source_type,
-        sourceCode: data.sourceCode || data.source_code,
-        webhookUrl: data.webhookUrl || data.webhook_url,
-        webhookHeaders: data.webhookHeaders || data.webhook_headers,
-        isEnabled: data.isEnabled ?? data.is_enabled ?? true,
-        tags: data.tags
-      })
+      return toolToWire(
+        createTool(db, {
+          name: data.name,
+          description: data.description,
+          parameters: data.parameters,
+          sourceType: data.source_type,
+          sourceCode: data.source_code,
+          webhookUrl: data.webhook_url,
+          webhookHeaders: data.webhook_headers,
+          tags: data.tags
+        })
+      )
     })
   )
 
@@ -88,15 +108,21 @@ export function registerToolsIpc() {
     'tools:update',
     createHandler((_e, { id, data }) => {
       if (data?.name) validateToolData(data)
-      const result = updateTool(getDb(), id, {
-        ...data,
-        sourceType: data?.sourceType || data?.source_type,
-        isEnabled: data?.isEnabled ?? data?.is_enabled
-      })
+      const patch = {}
+      if (data.name !== undefined) patch.name = data.name
+      if (data.description !== undefined) patch.description = data.description
+      if (data.parameters !== undefined) patch.parameters = data.parameters
+      if (data.source_type !== undefined) patch.sourceType = data.source_type
+      if (data.source_code !== undefined) patch.sourceCode = data.source_code
+      if (data.webhook_url !== undefined) patch.webhookUrl = data.webhook_url
+      if (data.webhook_headers !== undefined) patch.webhookHeaders = data.webhook_headers
+      if (data.is_enabled !== undefined) patch.isEnabled = data.is_enabled
+      if (data.tags !== undefined) patch.tags = data.tags
+      const result = updateTool(getDb(), id, patch)
       if (!result) {
         throw Object.assign(new Error('Tool not found'), { code: 'NOT_FOUND' })
       }
-      return result
+      return toolToWire(result)
     })
   )
 

@@ -4,10 +4,11 @@ import path from 'node:path'
 import { runMigrations } from './migrations/runner.js'
 import * as initialSchema from './migrations/001_initial_schema.js'
 import * as taskActivityTypes from './migrations/002_task_activity_types.js'
+import * as mcpLastSynced from './migrations/003_mcp_last_synced.js'
 
 const dbs = new Map()
 
-const migrations = [initialSchema, taskActivityTypes]
+const migrations = [initialSchema, taskActivityTypes, mcpLastSynced]
 
 function resolveDbPath(dbPath) {
   const normalized = String(dbPath || '').trim()

@@ -1,6 +1,6 @@
 {
   "name": "@vox-ai-app/storage",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "license": "MIT",
   "description": "Local message and config persistence for Vox",

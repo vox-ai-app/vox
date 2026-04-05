@@ -9,18 +9,34 @@ import {
   disconnectMcpServer
 } from './mcp.service'
 
+function serverToWire(s) {
+  if (!s) return s
+  return {
+    id: s.id,
+    name: s.name,
+    transport: s.transport,
+    command: s.command,
+    args: s.args,
+    url: s.url,
+    env: s.env,
+    is_enabled: s.isEnabled,
+    last_synced_at: s.lastSyncedAt,
+    created_at: s.createdAt,
+    updated_at: s.updatedAt
+  }
+}
+
 export function registerMcpIpc() {
   registerHandler(
     'mcp:list',
-    createHandler(() => ({ servers: listMcpServers() }))
+    createHandler(() => ({ servers: listMcpServers().map(serverToWire) }))
   )
 
   registerHandler(
     'mcp:create',
     createHandler((_e, data) => {
-      const server = { id: randomUUID(), ...data }
-      addMcpServer(server)
-      return server
+      const server = addMcpServer({ id: randomUUID(), ...data })
+      return serverToWire(server)
     })
   )
 
@@ -34,26 +50,26 @@ export function registerMcpIpc() {
 
   registerHandler(
     'mcp:update',
-    createHandler((_e, { id, data }) => updateMcpServer(id, data))
+    createHandler((_e, { id, data }) => serverToWire(updateMcpServer(id, data)))
   )
 
   registerHandler(
     'mcp:sync',
     createHandler(async (_e, { id }) => {
       const result = await connectMcpServer(id)
-      const updated = updateMcpServer(id, { last_synced_at: new Date().toISOString() })
-      return { ...result, server: updated }
+      const updated = updateMcpServer(id, { lastSyncedAt: new Date().toISOString() })
+      return { ...result, server: serverToWire(updated) }
     })
   )
 
   registerHandler(
     'mcp:list-servers',
-    createHandler(() => listMcpServers())
+    createHandler(() => listMcpServers().map(serverToWire))
   )
 
   registerHandler(
     'mcp:add-server',
-    createHandler((_e, server) => addMcpServer({ id: randomUUID(), ...server }))
+    createHandler((_e, server) => serverToWire(addMcpServer({ id: randomUUID(), ...server })))
   )
 
   registerHandler(

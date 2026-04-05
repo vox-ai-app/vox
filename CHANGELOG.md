@@ -7,6 +7,22 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.1.2] - 2026-04-06
+
+### Fixed
+
+- **Tool type badge missing on tools page** — DB repos return camelCase (`sourceType`, `isEnabled`) but the renderer reads snake_case (`source_type`, `is_enabled`). Added `toolToWire()` normalizer at the IPC boundary so every tool object reaching the renderer has the correct fields.
+- **MCP synced status always showing "Never synced"** — `last_synced_at` column was missing from the `mcp_servers` table. Added migration `003_mcp_last_synced`, wired it through the repo `mapServer` and UPDATE SQL, and added `serverToWire()` normalizer in the MCP IPC layer.
+- **Edit tool form fields empty** — `source_code`, `webhook_url`, `tags` were undefined because the returned tool used camelCase. Now correctly mapped through `toolToWire()`.
+- **MCP create returning raw input instead of DB record** — `mcp:create` handler now returns the actual DB result from `addMcpServer()` instead of the raw request payload.
+- **Tool update spreading raw renderer data into repo** — replaced `{ ...data }` spread with explicit field-by-field mapping from snake_case input to camelCase repo fields.
+
+### Changed
+
+- **`@vox-ai-app/storage` 1.0.3 → 1.0.4** — added `last_synced_at` to `mcp_servers` schema, `mapServer`, and UPDATE query.
+
+---
+
 ## [2.1.1] - 2026-04-06
 
 ### Fixed
