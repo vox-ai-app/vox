@@ -1,5 +1,14 @@
 # Vox
 
+<p align="center">
+  <a href="https://github.com/vox-ai-app/vox/releases/latest"><img src="https://img.shields.io/github/v/release/vox-ai-app/vox?display_name=tag&label=release&style=flat-square" alt="Latest release" /></a>
+  <a href="https://www.vox-ai.chat/download/mac"><img src="https://img.shields.io/badge/download-macOS-111827?logo=apple&logoColor=white&style=flat-square" alt="Download Vox for macOS" /></a>
+  <a href="https://www.vox-ai.chat/blog"><img src="https://img.shields.io/badge/updates-blog-355070?style=flat-square" alt="Vox blog" /></a>
+  <a href="https://www.vox-ai.chat/privacy"><img src="https://img.shields.io/badge/privacy-policy-0F766E?style=flat-square" alt="Privacy policy" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-0F766E?style=flat-square" alt="MIT license" /></a>
+  <a href="https://www.producthunt.com/products/vox-3"><img src="https://img.shields.io/badge/Product%20Hunt-Vox-DA552F?logo=producthunt&logoColor=white&style=flat-square" alt="Product Hunt" /></a>
+</p>
+
 The first local AI that actually does things on your Mac — control your screen, manage files, send emails, reply to iMessages, all on your machine with no cloud and no subscription.
 
 Most AI assistants give you a chat box. Vox gives you an agent. You talk to it, it acts: reads your emails, drafts replies, opens apps, edits files, searches your documents, and even texts people back for you. The model runs entirely on your hardware via llama.cpp — nothing leaves your device. Not the smartest AI. But the only one that's truly yours.
@@ -121,62 +130,36 @@ Nothing is sent off-device.
 
 | Platform    | Status          | Notes                                                                                                               |
 | ----------- | --------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **macOS**   | Stable (v1.0.7) | Full feature set — voice, iMessage, screen control, email, overlay. Tested on Apple Silicon (M1–M4) and Intel Macs. |
+| **macOS**   | Stable          | Full feature set — voice, iMessage, screen control, email, overlay. Tested on Apple Silicon (M1–M4) and Intel Macs. |
 | **Windows** | Planned         | Core architecture is ready. Needs platform integrations. [Help wanted.](https://github.com/vox-ai-app/vox/issues)   |
 | **Linux**   | Planned         | Same path as Windows. [Help wanted.](https://github.com/vox-ai-app/vox/issues)                                      |
 
-The only macOS-specific code lives in `@vox-ai-app/integrations`. Everything else — MCP, tools, voice, indexing, parser, storage, UI — is already cross-platform. Adding a new platform means adding implementations alongside the existing `mac/` directory using the factory pattern.
+Most of the codebase is already portable. Today, platform-specific work is concentrated in `@vox-ai-app/integrations`, and the current voice stack is still tuned for the macOS app build. Adding Windows or Linux mainly means implementing the platform adapters alongside the existing `mac/` directories and validating the voice/runtime packaging on those targets.
 
 ---
 
-## Architecture
+## System architecture
 
-```
-┌──────────────────────────────────────────────────────┐
-│                   Electron Shell                      │
-│  ┌─────────┐  ┌──────────┐  ┌──────────────────────┐ │
-│  │ Main    │  │ Overlay  │  │ Renderer (React UI)  │ │
-│  │ Process │  │ Window   │  │ Chat · Activity ·    │ │
-│  │         │  │          │  │ Knowledge · Settings │ │
-│  └────┬────┘  └────┬─────┘  └──────────┬───────────┘ │
-│       │            │                    │             │
-│  ┌────┴────────────┴────────────────────┴──────────┐ │
-│  │              IPC Bridge                          │ │
-│  └────┬────────────┬────────────┬──────────────────┘ │
-│       │            │            │                     │
-│  ┌────┴────┐ ┌─────┴────┐ ┌────┴─────┐              │
-│  │ Voice   │ │ AI (LLM) │ │ Storage  │              │
-│  │ Pipeline│ │ llama.cpp│ │ SQLite   │              │
-│  └─────────┘ └──────────┘ └──────────┘              │
-│                                                      │
-│  ┌──────────────────────────────────────────────────┐ │
-│  │              Packages (npm workspaces)            │ │
-│  │  mcp · tools · integrations · voice · indexing   │ │
-│  │  parser · storage · ui · scheduler · skills     │ │
-│  │  channels                                       │ │
-│  └──────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────┘
-         │
-    ┌────┴─────┐
-    │ llama-   │
-    │ server   │   ← runs locally on localhost:19741
-    │ (llama.  │
-    │  cpp)    │
-    └──────────┘
-```
+Vox is a layered Electron app. The renderer surfaces stay thin, the preload script exposes a narrow IPC contract, and the main process owns orchestration, tool execution, model lifecycle, storage, and OS-facing automation.
+
+
+- `src/renderer` contains the product UI for the main app, overlay, and voice surfaces.
+- `src/preload/index.js` is the trust boundary. Renderer code does not reach into Node or Electron directly; it calls a curated `window.api`.
+- `src/main` is the composition root: it wires IPC handlers, task execution, channels, iMessage, scheduler, storage, updater, and model bootstrapping.
+- Expensive work is intentionally pushed out of the UI thread into `llama-server`, the indexing utility process, and worker threads.
 
 ---
 
 ## Package structure
 
-The monorepo publishes 11 packages. Most are platform-agnostic and usable in any Electron app or Node.js project:
+The workspace is split into 11 packages. The Electron app in `src/` composes them; most are reusable in other Electron apps, and several are plain Node libraries.
 
 | Package                                             | Platform        | Description                                             |
 | --------------------------------------------------- | --------------- | ------------------------------------------------------- |
 | [`@vox-ai-app/mcp`](packages/mcp)                   | any             | MCP client (stdio, SSE, HTTP)                           |
 | [`@vox-ai-app/tools`](packages/tools)               | any             | Registry, builtins (fs, shell, fetch, grep, glob), docs |
 | [`@vox-ai-app/integrations`](packages/integrations) | macOS (for now) | Mail, Screen, iMessage integrations                     |
-| [`@vox-ai-app/voice`](packages/voice)               | any             | Wake word detection and voice window                    |
+| [`@vox-ai-app/voice`](packages/voice)               | macOS today     | Wake word detection, shortcut handling, and voice window |
 | [`@vox-ai-app/indexing`](packages/indexing)         | any             | File indexing and full-text search                      |
 | [`@vox-ai-app/parser`](packages/parser)             | any             | Document parsing (PDF, DOCX, PPTX, etc.)                |
 | [`@vox-ai-app/storage`](packages/storage)           | any             | Local message and config persistence (SQLite)           |
@@ -185,7 +168,7 @@ The monorepo publishes 11 packages. Most are platform-agnostic and usable in any
 | [`@vox-ai-app/skills`](packages/skills)             | any             | SKILL.md loader and LLM prompt formatter                |
 | [`@vox-ai-app/channels`](packages/channels)         | any             | Chat adapters (WhatsApp, Telegram, Discord, Slack)      |
 
-`@vox-ai-app/integrations` is the only package with platform-specific code today. Adding Windows or Linux integrations means adding an implementation alongside the existing macOS one without changing the rest of the workspace.
+The package boundaries are intentionally narrow: packages encapsulate reusable capabilities, while the app layer handles Electron-specific lifecycle, window management, IPC, and product behavior.
 
 ---
 
