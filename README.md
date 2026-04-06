@@ -19,30 +19,15 @@ Most AI assistants give you a chat box. Vox gives you an agent. You talk to it, 
   <img src="vids/vox-demo.gif" alt="Vox app demo" width="720" />
 </p>
 
-## Screenshots
-
-A few product views directly in the README. The full rotating gallery lives on [vox-ai.chat](https://www.vox-ai.chat).
-
-<p align="center"><strong>Overlay</strong></p>
-<p align="center">
-  <img src="screens/email-reply-overlay.webp" alt="Vox replying to emails in the overlay" height="220" />
-</p>
-
-<p align="center"><strong>Activity timeline</strong></p>
-<p align="center">
-  <img src="screens/activity-timeline.webp" alt="Activity timeline showing agent steps" height="220" />
-</p>
-
-<p align="center"><strong>Model settings</strong></p>
-<p align="center">
-  <img src="screens/settings-models.webp" alt="Settings page with model selection" height="220" />
-</p>
-
 ---
 
 ## What it does
 
 Say "summarize my unread emails and draft replies to anything urgent." Vox reads your Mail, identifies urgent threads, writes draft replies, and asks you to confirm before sending. No copy-pasting, no switching apps.
+
+<p align="center">
+  <img src="screens/email-reply-overlay.webp" alt="Vox replying to emails in the overlay" width="720" />
+</p>
 
 ### Core capabilities
 
@@ -104,13 +89,23 @@ These features are functional but still being refined. Expect rough edges.
 
 Beta features may change behavior between releases. Report issues on [GitHub](https://github.com/vox-ai-app/vox/issues).
 
+Background agents stream their steps into the activity timeline so you can inspect what the model did, what tools it used, and where it finished.
+
+<p align="center">
+  <img src="screens/activity-timeline.webp" alt="Activity timeline showing agent steps" width="640" />
+</p>
+
 ---
 
 ## Getting started
 
 **Download and install Vox** from the [latest release](https://github.com/vox-ai-app/vox/releases/latest).
 
-The installer downloads llama-server (llama.cpp) and the default Qwen3-4B model automatically. Open Vox when it's done.
+The installer downloads llama-server (llama.cpp) and the default Qwen3-4B model automatically. Open Vox when it's done. You can switch local models later in Settings.
+
+<p align="center">
+  <img src="screens/settings-models.webp" alt="Settings page with model selection" width="640" />
+</p>
 
 Press `⌘⌥V` or say the wake word to start.
 
