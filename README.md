@@ -233,6 +233,16 @@ Open an issue before starting large changes.
 
 ---
 
+## Community
+
+Small but growing. Vox is built by a handful of contributors who believe local AI should be open, private, and useful out of the box.
+
+<a href="https://github.com/vox-ai-app/vox/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=vox-ai-app/vox" />
+</a>
+
+---
+
 ## License
 
 MIT — see [LICENSE](LICENSE)
