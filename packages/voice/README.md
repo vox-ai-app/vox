@@ -12,12 +12,13 @@ Peer dependencies: `electron >= 28`, `@picovoice/pvrecorder-node >= 1.0.0`, `onn
 
 ## Requirements
 
-- macOS (pvrecorder + ONNX wake word models)
-- Microphone permission (requested automatically on first use)
 - ONNX models at `resources/voice/` in the app package:
   - `melspectrogram.onnx`
   - `embedding_model.onnx`
   - `computer.onnx`
+- Microphone permission — on macOS this is requested automatically via `systemPreferences.askForMediaAccess`. On other platforms the wake word worker starts without a permission prompt (OS-level mic access is assumed).
+
+The ONNX detection pipeline (`onnxruntime-web` WASM) and `pvrecorder-node` are cross-platform. The keyboard shortcut registers as `CommandOrControl+Alt+V` (`Ctrl+Alt+V` on Windows/Linux, `Cmd+Alt+V` on macOS) with `CommandOrControl+Shift+Space` as a fallback.
 
 ## Usage
 
@@ -43,7 +44,7 @@ await initVoiceService({
 await destroyVoiceService()
 ```
 
-`onActivate` handles both wake word detection and the keyboard shortcut (`Cmd+Alt+V`, falling back to `Cmd+Shift+Space`). If omitted, only the `setOnWakeWordDetected` callback fires on wake word.
+`onActivate` handles both wake word detection and the keyboard shortcut (`CommandOrControl+Alt+V`). If omitted, only the `setOnWakeWordDetected` callback fires on wake word.
 
 ## Voice Window
 

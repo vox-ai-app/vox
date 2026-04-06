@@ -30,7 +30,7 @@ import {
   CopyButton,
   Drawer,
   Skeleton,
-  Toast,
+  ToastLayer, useToast,
   ExpandableMarkdown
 } from '@vox-ai-app/ui/primitives'
 ```
@@ -41,14 +41,14 @@ Feature components built from primitives.
 
 ```js
 import {
-  ChatMessage,
+  ChatMessage, ToolGroup,
   ChatComposer,
   ChatEmptyState,
-  ChatScreenMessages,
+  ChatScreenMessages, groupMessages,
   ChatSkeleton,
   ActionItem,
   ActivityListRow,
-  ActivityTimeline,
+  TimelineMarker, StepItem,
   ExplorerSidebar,
   ExplorerTile,
   VoiceOrb
@@ -66,14 +66,39 @@ import { AppShell, LeftRail, UserMenu } from '@vox-ai-app/ui/layouts'
 ### Hooks
 
 ```js
-import {} from /* hooks */ '@vox-ai-app/ui/hooks'
+import {
+  useClickOutside,       // fires handler on mousedown outside the returned ref
+  useEscapeKey,          // fires handler when the Escape key is pressed
+  useIntersectionObserver // fires callback when the returned ref enters/leaves viewport
+} from '@vox-ai-app/ui/hooks'
+```
+
+```js
+const ref = useClickOutside(() => setOpen(false))
+return <div ref={ref}>...</div>
 ```
 
 ### Utils
 
 ```js
-import { cn } from '@vox-ai-app/ui/utils'
-// cn(...classes) — merges Tailwind class names
+import {
+  cn,                // merge Tailwind class names (clsx + twMerge)
+  parseToolArgs,     // safely parse tool args from a raw JSON string or object
+  toolLabel,         // human-readable label for a tool call name
+  relativeTime,      // format ISO date as "3m ago", "2h ago"
+  elapsedLabel,      // format elapsed time as "12s", "3m 14s"
+  formatBytes,       // format byte count as "4.2 MB"
+  formatIndexedTime, // format ISO date as a short locale-aware string
+  getStatusLabel,    // map an indexing status key to a display string
+  PHASE,             // task phase constants: IDLE, SENDING, STREAMING, …
+  TERMINAL_STATUSES, // Set of statuses representing a finished task
+  RUNNING_STATUSES,  // Set of statuses representing an active task
+  TASK_STATUS_COLOR, // map of task status → CSS color token
+  TASK_STATUS_LABEL, // map of task status → display label
+  PRIMARY_ARG_KEYS,  // priority-ordered list of arg keys shown as the primary value
+  getToolSub,        // get a secondary display label for a tool call
+  getOutcomeBadge    // get badge variant + label for a task outcome
+} from '@vox-ai-app/ui/utils'
 ```
 
 ### Tokens
@@ -91,8 +116,29 @@ import { colors } from '@vox-ai-app/ui/tokens'
 
 ## All exports
 
+All primitives, composites, layouts, hooks, utilities, and tokens are re-exported from the package root:
+
 ```js
-import {} from /* everything */ '@vox-ai-app/ui'
+import {
+  // primitives
+  Drawer, ToastLayer, useToast, Skeleton, CopyButton, ExpandableMarkdown, IconButton,
+  // composites
+  ChatMessage, ToolGroup, ChatComposer, ChatEmptyState, ChatScreenMessages, groupMessages,
+  ChatSkeleton, VoiceOrb, TimelineMarker, StepItem, ActivityListRow, ActionItem,
+  ExplorerTile, ExplorerSidebar,
+  // layouts
+  AppShell, LeftRail, UserMenu,
+  // layouts
+  AppShell, LeftRail, UserMenu,
+  // hooks
+  useClickOutside, useEscapeKey, useIntersectionObserver,
+  // utils
+  cn, parseToolArgs, toolLabel, relativeTime, elapsedLabel, formatBytes,
+  formatIndexedTime, getStatusLabel, PHASE, TERMINAL_STATUSES, RUNNING_STATUSES,
+  TASK_STATUS_COLOR, TASK_STATUS_LABEL, PRIMARY_ARG_KEYS, getToolSub, getOutcomeBadge,
+  // tokens
+  colors, darkColors, getColors
+} from '@vox-ai-app/ui'
 ```
 
 ## License
