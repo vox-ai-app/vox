@@ -199,7 +199,7 @@ describe('storage/settings', () => {
 
   it('should set and get a value', () => {
     setSetting(db, 'theme', 'dark')
-    expect(getSetting(db, 'theme')).toBe('dark')
+    expect(getSettingJson(db, 'theme')).toBe('dark')
   })
 
   it('should return undefined for missing key', () => {
@@ -220,7 +220,7 @@ describe('storage/settings', () => {
   })
 
   it('should handle JSON values', () => {
-    setSetting(db, 'nested', JSON.stringify({ foo: [1, 2, 3] }))
+    setSetting(db, 'nested', { foo: [1, 2, 3] })
     expect(getSettingJson(db, 'nested')).toEqual({ foo: [1, 2, 3] })
   })
 })
