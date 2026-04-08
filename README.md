@@ -2,6 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/vox-ai-app/vox/releases/latest"><img src="https://img.shields.io/github/v/release/vox-ai-app/vox?display_name=tag&label=release&style=flat-square" alt="Latest release" /></a>
+  <a href="https://github.com/vox-ai-app/vox/releases/latest"><img src="https://img.shields.io/github/downloads/vox-ai-app/vox/latest/total?style=flat-square" alt="Downloads" /></a>
   <a href="https://www.vox-ai.chat/download/mac"><img src="https://img.shields.io/badge/download-macOS-111827?logo=apple&logoColor=white&style=flat-square" alt="Download Vox for macOS" /></a>
   <a href="https://www.vox-ai.chat/blog"><img src="https://img.shields.io/badge/updates-blog-355070?style=flat-square" alt="Vox blog" /></a>
   <a href="https://www.vox-ai.chat/privacy"><img src="https://img.shields.io/badge/privacy-policy-0F766E?style=flat-square" alt="Privacy policy" /></a>
@@ -15,6 +16,8 @@ The first local AI that actually does things on your Mac — control your screen
 Most AI assistants give you a chat box. Vox gives you an agent. You talk to it, it acts: reads your emails, drafts replies, opens apps, edits files, searches your documents, and even texts people back for you. The model runs entirely on your hardware via llama.cpp — nothing leaves your device. Not the smartest AI. But the only one that's truly yours.
 
 > **Mac-first, not Mac-only.** The core (MCP, tools, voice, indexing, UI) is platform-agnostic — macOS is just where the integrations exist today. Windows and Linux are the #1 contributor priority.
+
+> **This is what personal computing looks like next.** Your hardware runs the model, your hardware runs the agent, nothing touches a server. As local compute keeps getting faster and cheaper, this is the direction everything is heading — Vox is just early.
 
 <p align="center">
   <img src="vids/vox-demo.gif" alt="Vox app demo" width="720" />
