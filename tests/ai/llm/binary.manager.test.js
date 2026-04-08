@@ -48,16 +48,16 @@ vi.mock('electron', () => ({
   }
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
-vi.mock('../src/main/ipc/shared', () => ({
+vi.mock('../../../src/main/ipc/shared', () => ({
   emitAll: vi.fn()
 }))
 
 describe('binary.manager', async () => {
-  const manager = await import('../src/main/ai/llm/binary.manager.js')
+  const manager = await import('../../../src/main/ai/llm/binary.manager.js')
 
   beforeEach(() => {
     vi.clearAllMocks()

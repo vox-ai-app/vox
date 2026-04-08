@@ -38,11 +38,11 @@ vi.mock('electron', () => ({
   }
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
-vi.mock('../src/main/ai/llm/server.js', () => ({
+vi.mock('../../../src/main/ai/llm/server.js', () => ({
   startServer: vi.fn(),
   stopServer: vi.fn(),
   onLoadProgress: vi.fn(),
@@ -53,7 +53,7 @@ vi.mock('../src/main/ai/llm/server.js', () => ({
   ensureBinary: vi.fn(async () => '/opt/homebrew/bin/llama-server')
 }))
 
-vi.mock('../src/main/ai/llm/client.js', () => ({
+vi.mock('../../../src/main/ai/llm/client.js', () => ({
   chatCompletion: vi.fn(),
   streamChat: vi.fn(async function* () {
     yield { type: 'text', content: 'Test response' }
@@ -62,36 +62,36 @@ vi.mock('../src/main/ai/llm/client.js', () => ({
   healthCheck: vi.fn(async () => true)
 }))
 
-vi.mock('../src/main/ai/llm/stream.js', () => ({
+vi.mock('../../../src/main/ai/llm/stream.js', () => ({
   resetStreamState: vi.fn(),
   setChatStreamHandlers: vi.fn(),
   clearChatStreamHandlers: vi.fn(),
   handleChatEventForRenderer: vi.fn()
 }))
 
-vi.mock('../src/main/ipc/shared', () => ({
+vi.mock('../../../src/main/ipc/shared', () => ({
   emitAll: vi.fn()
 }))
 
-vi.mock('../src/main/ai/llm/tool-executor.js', () => ({
+vi.mock('../../../src/main/ai/llm/tool-executor.js', () => ({
   executeElectronTool: vi.fn(async (name, _args) => ({ result: `executed ${name}` }))
 }))
 
-vi.mock('../src/main/ai/config.js', () => ({
+vi.mock('../../../src/main/ai/config.js', () => ({
   CONTEXT_SIZE: 4096,
   CONTEXT_KEEP_RECENT_CHARS: 8000
 }))
 
-vi.mock('../src/main/storage/store', () => ({
+vi.mock('../../../src/main/storage/store', () => ({
   storeGet: () => ({}),
   storeSet: vi.fn()
 }))
 
-vi.mock('../src/main/storage/secrets', () => ({
+vi.mock('../../../src/main/storage/secrets', () => ({
   getToolSecrets: () => ({})
 }))
 
-vi.mock('../src/main/mcp/mcp.service', () => ({
+vi.mock('../../../src/main/mcp/mcp.service', () => ({
   getMcpToolDefinitions: () => [],
   executeMcpTool: vi.fn()
 }))
@@ -106,24 +106,24 @@ vi.mock('@vox-ai-app/indexing', () => ({
   searchIndexedContextForTool: vi.fn(() => '[]')
 }))
 
-vi.mock('../src/main/chat/task.queue', () => ({
+vi.mock('../../../src/main/chat/task.queue', () => ({
   enqueueTask: vi.fn(),
   waitForTaskCompletion: vi.fn(async () => ({ taskId: 't1', status: 'completed' })),
   getTaskDetail: vi.fn(() => ({ task: { id: 't1' } })),
   listTaskHistory: vi.fn(() => ({ tasks: [] }))
 }))
 
-vi.mock('../src/main/chat/chat.session', () => ({
+vi.mock('../../../src/main/chat/chat.session', () => ({
   getToolDefinitions: () => []
 }))
 
-vi.mock('../src/main/storage/tasks.db', () => ({
+vi.mock('../../../src/main/storage/tasks.db', () => ({
   searchTasksFts: vi.fn(() => [])
 }))
 
 describe('llm.bridge', async () => {
-  const bridge = await import('../src/main/ai/llm/bridge.js')
-  const server = await import('../src/main/ai/llm/server.js')
+  const bridge = await import('../../../src/main/ai/llm/bridge.js')
+  const server = await import('../../../src/main/ai/llm/server.js')
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -152,7 +152,7 @@ describe('llm.bridge', async () => {
   })
 
   it('prewarmChat with providers should call chatCompletion', async () => {
-    const { chatCompletion } = await import('../src/main/ai/llm/client.js')
+    const { chatCompletion } = await import('../../../src/main/ai/llm/client.js')
     chatCompletion.mockResolvedValueOnce({ choices: [{ message: { content: '' } }] })
 
     bridge.setPrewarmProviders(
@@ -179,7 +179,7 @@ describe('llm.bridge', async () => {
   })
 
   it('prewarmChat should not throw on failure', async () => {
-    const { chatCompletion } = await import('../src/main/ai/llm/client.js')
+    const { chatCompletion } = await import('../../../src/main/ai/llm/client.js')
     chatCompletion.mockRejectedValueOnce(new Error('connection refused'))
     bridge.setPrewarmProviders(
       () => [],
@@ -197,10 +197,10 @@ describe('llm.bridge', async () => {
 })
 
 describe('spawn_task flow via bridge', async () => {
-  const bridge = await import('../src/main/ai/llm/bridge.js')
-  const { streamChat } = await import('../src/main/ai/llm/client.js')
-  const { handleChatEventForRenderer } = await import('../src/main/ai/llm/stream.js')
-  const { executeElectronTool } = await import('../src/main/ai/llm/tool-executor.js')
+  const bridge = await import('../../../src/main/ai/llm/bridge.js')
+  const { streamChat } = await import('../../../src/main/ai/llm/client.js')
+  const { handleChatEventForRenderer } = await import('../../../src/main/ai/llm/stream.js')
+  const { executeElectronTool } = await import('../../../src/main/ai/llm/tool-executor.js')
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -337,10 +337,10 @@ describe('spawn_task flow via bridge', async () => {
 })
 
 describe('bridge chat message flow', async () => {
-  const bridge = await import('../src/main/ai/llm/bridge.js')
-  const { streamChat } = await import('../src/main/ai/llm/client.js')
-  const { handleChatEventForRenderer } = await import('../src/main/ai/llm/stream.js')
-  const { executeElectronTool } = await import('../src/main/ai/llm/tool-executor.js')
+  const bridge = await import('../../../src/main/ai/llm/bridge.js')
+  const { streamChat } = await import('../../../src/main/ai/llm/client.js')
+  const { handleChatEventForRenderer } = await import('../../../src/main/ai/llm/stream.js')
+  const { executeElectronTool } = await import('../../../src/main/ai/llm/tool-executor.js')
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -489,7 +489,7 @@ describe('bridge chat message flow', async () => {
 })
 
 describe('agent lifecycle', async () => {
-  const bridge = await import('../src/main/ai/llm/bridge.js')
+  const bridge = await import('../../../src/main/ai/llm/bridge.js')
 
   it('startAgent should accept task parameters', () => {
     expect(() =>

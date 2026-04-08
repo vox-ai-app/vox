@@ -5,7 +5,7 @@ describe('tools/schema — validateArgs', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ validateArgs } = await import('../packages/tools/src/core/schema.js'))
+    ;({ validateArgs } = await import('../src/core/schema.js'))
   })
 
   it('should return empty array for valid args', () => {
@@ -88,7 +88,7 @@ describe('tools/schema — assertValidDefinition', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ assertValidDefinition } = await import('../packages/tools/src/core/schema.js'))
+    ;({ assertValidDefinition } = await import('../src/core/schema.js'))
   })
 
   it('should accept valid definition', () => {
@@ -125,7 +125,7 @@ describe('tools/schema — clampNumber', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ clampNumber } = await import('../packages/tools/src/core/schema.js'))
+    ;({ clampNumber } = await import('../src/core/schema.js'))
   })
 
   it('should clamp within range', () => {
@@ -154,7 +154,7 @@ describe('tools/network — assertPublicUrl & isPrivateHost', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ assertPublicUrl, isPrivateHost } = await import('../packages/tools/src/core/network.js'))
+    ;({ assertPublicUrl, isPrivateHost } = await import('../src/core/network.js'))
   })
 
   it('should accept public URLs', () => {
@@ -212,7 +212,7 @@ describe('tools/registry — register and run', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    mod = await import('../packages/tools/src/core/registry.js')
+    mod = await import('../src/core/registry.js')
   })
 
   it('should register tools and retrieve declarations', () => {

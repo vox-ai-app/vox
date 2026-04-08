@@ -89,7 +89,7 @@ describe('channels/adapter — ChannelAdapter base', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ ChannelAdapter } = await import('../packages/channels/src/adapter.js'))
+    ;({ ChannelAdapter } = await import('../src/adapter.js'))
   })
 
   it('should initialize with id, config, and defaults', () => {
@@ -171,7 +171,7 @@ describe('channels/adapter — deduplication', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ ChannelAdapter } = await import('../packages/channels/src/adapter.js'))
+    ;({ ChannelAdapter } = await import('../src/adapter.js'))
   })
 
   it('should deduplicate identical messages', () => {
@@ -217,7 +217,7 @@ describe('channels/adapter — reconnect', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ ChannelAdapter } = await import('../packages/channels/src/adapter.js'))
+    ;({ ChannelAdapter } = await import('../src/adapter.js'))
   })
 
   it('should compute exponential backoff', () => {
@@ -271,7 +271,7 @@ describe('channels/adapter — chunkText', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ chunkText } = await import('../packages/channels/src/adapter.js'))
+    ;({ chunkText } = await import('../src/adapter.js'))
   })
 
   it('should return single chunk for short text', () => {
@@ -312,7 +312,7 @@ describe('channels/whatsapp — WhatsAppChannel', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ WhatsAppChannel } = await import('../packages/channels/src/whatsapp/index.js'))
+    ;({ WhatsAppChannel } = await import('../src/whatsapp/index.js'))
   })
 
   it('should construct with whatsapp id', () => {
@@ -343,7 +343,7 @@ describe('channels/telegram — TelegramChannel', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ TelegramChannel } = await import('../packages/channels/src/telegram/index.js'))
+    ;({ TelegramChannel } = await import('../src/telegram/index.js'))
     mockBot.start.mockClear()
     mockBot.stop.mockClear()
     mockBot.on.mockClear()
@@ -396,7 +396,7 @@ describe('channels/discord — DiscordChannel', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ DiscordChannel } = await import('../packages/channels/src/discord/index.js'))
+    ;({ DiscordChannel } = await import('../src/discord/index.js'))
     mockDiscordClient.on.mockClear()
     mockDiscordClient.login.mockClear()
     mockDiscordClient.destroy.mockClear()
@@ -497,7 +497,7 @@ describe('channels/slack — SlackChannel', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ SlackChannel } = await import('../packages/channels/src/slack/index.js'))
+    ;({ SlackChannel } = await import('../src/slack/index.js'))
     mockSlackApp.event.mockClear()
     mockSlackApp.start.mockClear()
     mockSlackApp.stop.mockClear()

@@ -22,7 +22,7 @@ describeIfSqlite('storage/db — openDb & closeDb', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ openDb, closeDb } = await import('../packages/storage/src/db.js'))
+    ;({ openDb, closeDb } = await import('../src/db.js'))
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'storage-db-'))
   })
 
@@ -78,7 +78,7 @@ describeIfSqlite('storage/messages', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ openDb, closeDb } = await import('../packages/storage/src/db.js'))
+    ;({ openDb, closeDb } = await import('../src/db.js'))
     ;({
       appendMessage,
       getMessages,
@@ -87,7 +87,7 @@ describeIfSqlite('storage/messages', () => {
       saveSummaryCheckpoint,
       loadSummaryCheckpoint,
       clearSummaryCheckpoint
-    } = await import('../packages/storage/src/repos/messages.js'))
+    } = await import('../src/repos/messages.js'))
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'storage-msg-'))
     db = openDb(path.join(tmpDir, 'test.db'))
   })
@@ -181,9 +181,9 @@ describe('storage/settings', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ openDb, closeDb } = await import('../packages/storage/src/db.js'))
+    ;({ openDb, closeDb } = await import('../src/db.js'))
     ;({ getSetting, getSettingJson, setSetting, deleteSetting, getAllSettings } =
-      await import('../packages/storage/src/repos/settings.js'))
+      await import('../src/repos/settings.js'))
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'storage-settings-'))
     db = openDb(path.join(tmpDir, 'test.db'))
   })
@@ -232,8 +232,8 @@ describeIfSqlite('storage/tasks', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ openDb, closeDb } = await import('../packages/storage/src/db.js'))
-    ;({ upsertTask, getTask, loadTasks } = await import('../packages/storage/src/repos/tasks.js'))
+    ;({ openDb, closeDb } = await import('../src/db.js'))
+    ;({ upsertTask, getTask, loadTasks } = await import('../src/repos/tasks.js'))
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'storage-tasks-'))
     db = openDb(path.join(tmpDir, 'test.db'))
   })

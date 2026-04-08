@@ -6,10 +6,10 @@ describe('integrations — tool definitions structure', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ MAIL_TOOL_DEFINITIONS } = await import('../packages/integrations/src/mail/def.js'))
-    ;({ SCREEN_TOOL_DEFINITIONS } = await import('../packages/integrations/src/screen/def.js'))
-    ;({ IMESSAGE_TOOL_DEFINITIONS } = await import('../packages/integrations/src/imessage/def.js'))
-    ;({ ALL_INTEGRATION_TOOLS } = await import('../packages/integrations/src/tools.js'))
+    ;({ MAIL_TOOL_DEFINITIONS } = await import('../src/mail/def.js'))
+    ;({ SCREEN_TOOL_DEFINITIONS } = await import('../src/screen/def.js'))
+    ;({ IMESSAGE_TOOL_DEFINITIONS } = await import('../src/imessage/def.js'))
+    ;({ ALL_INTEGRATION_TOOLS } = await import('../src/tools.js'))
   })
 
   it('should export mail tool definitions as array', () => {
@@ -68,7 +68,7 @@ describe('integrations/screen — queue', () => {
   beforeEach(async () => {
     vi.resetModules()
     ;({ acquireScreen, releaseScreen, getScreenSession, enqueueScreen } =
-      await import('../packages/integrations/src/screen/queue.js'))
+      await import('../src/screen/queue.js'))
   })
 
   it('should acquire screen session', () => {

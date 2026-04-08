@@ -5,7 +5,7 @@ describe('parser — readDocumentFile', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ readDocumentFile, PARSED_EXTENSIONS } = await import('../packages/parser/src/index.js'))
+    ;({ readDocumentFile, PARSED_EXTENSIONS } = await import('../src/index.js'))
   })
 
   it('should export PARSED_EXTENSIONS as a Set', () => {

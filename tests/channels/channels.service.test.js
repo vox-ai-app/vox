@@ -7,7 +7,7 @@ vi.mock('electron', () => ({
   }
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
@@ -69,7 +69,7 @@ describe('channels.service', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    service = await import('../src/main/channels/channels.service.js')
+    service = await import('../../src/main/channels/channels.service.js')
     await service.destroyChannels()
     for (const mock of [mockWhatsApp, mockTelegram, mockDiscord, mockSlack]) {
       mock.on.mockClear()

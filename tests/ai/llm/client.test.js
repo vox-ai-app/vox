@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-vi.mock('../src/main/ai/llm/server.js', () => ({
+vi.mock('../../../src/main/ai/llm/server.js', () => ({
   getBaseUrl: () => 'http://localhost:19741',
   isReady: () => true
 }))
@@ -44,7 +44,7 @@ describe('streamChat', () => {
 
   beforeEach(async () => {
     vi.restoreAllMocks()
-    const mod = await import('../src/main/ai/llm/client.js')
+    const mod = await import('../../../src/main/ai/llm/client.js')
     streamChat = mod.streamChat
   })
 

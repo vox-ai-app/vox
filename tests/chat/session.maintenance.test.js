@@ -17,7 +17,7 @@ const mockMessages = []
 let mockSummaryCheckpoint = null
 const mockStore = {}
 
-vi.mock('../src/main/storage/messages.db', () => ({
+vi.mock('../../src/main/storage/messages.db', () => ({
   getMessages: (_, limit) => {
     if (limit) return mockMessages.slice(-limit)
     return [...mockMessages]
@@ -42,22 +42,22 @@ vi.mock('../src/main/storage/messages.db', () => ({
   setConversationUserInfo: vi.fn()
 }))
 
-vi.mock('../src/main/storage/store', () => ({
+vi.mock('../../src/main/storage/store', () => ({
   storeGet: (key) => mockStore[key] ?? null,
   storeSet: (key, val) => {
     mockStore[key] = val
   }
 }))
 
-vi.mock('../src/main/ipc/shared', () => ({ emitAll: vi.fn() }))
-vi.mock('../src/main/mcp/mcp.service', () => ({ getMcpToolDefinitions: () => [] }))
+vi.mock('../../src/main/ipc/shared', () => ({ emitAll: vi.fn() }))
+vi.mock('../../src/main/mcp/mcp.service', () => ({ getMcpToolDefinitions: () => [] }))
 vi.mock('@vox-ai-app/storage/tools', () => ({
   listTools: vi.fn(() => [])
 }))
-vi.mock('../src/main/storage/db', () => ({
+vi.mock('../../src/main/storage/db', () => ({
   getDb: vi.fn(() => ({}))
 }))
-vi.mock('../src/main/storage/tasks.db', () => ({
+vi.mock('../../src/main/storage/tasks.db', () => ({
   getUnreportedTerminalTasks: () => [],
   markTaskReported: vi.fn(),
   indexTaskEmbedding: vi.fn(async () => {})
@@ -66,7 +66,7 @@ vi.mock('../src/main/storage/tasks.db', () => ({
 const mockSendChatMessage = vi.fn()
 const mockSummarize = vi.fn().mockResolvedValue('condensed summary')
 
-vi.mock('../src/main/ai/llm/bridge', () => ({
+vi.mock('../../src/main/ai/llm/bridge', () => ({
   sendChatMessage: (...args) => mockSendChatMessage(...args),
   abortChat: vi.fn(),
   clearChat: vi.fn().mockResolvedValue(undefined),
@@ -75,11 +75,11 @@ vi.mock('../src/main/ai/llm/bridge', () => ({
   summarizeText: (...args) => mockSummarize(...args)
 }))
 
-vi.mock('../src/main/chat/chat.prompts', () => ({
+vi.mock('../../src/main/chat/chat.prompts', () => ({
   buildDefaultSystemPrompt: () => 'You are Vox.'
 }))
 
-vi.mock('../src/main/chat/spawn.tool', () => ({
+vi.mock('../../src/main/chat/spawn.tool', () => ({
   definition: {
     name: 'spawn_task',
     description: 'test',
@@ -87,7 +87,7 @@ vi.mock('../src/main/chat/spawn.tool', () => ({
   }
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
@@ -100,7 +100,7 @@ beforeEach(async () => {
   for (const k of Object.keys(mockStore)) delete mockStore[k]
   mockSendChatMessage.mockClear()
   mockSummarize.mockClear()
-  mod = await import('../src/main/chat/chat.session.js')
+  mod = await import('../../src/main/chat/chat.session.js')
 })
 
 describe('sanitizeHistory via sendMessage', () => {
@@ -258,7 +258,7 @@ describe('summarization checkpoint persistence', () => {
 
 describe('message persistence across send', () => {
   it('should not persist assistant message if finalText is empty', async () => {
-    const { waitForChatResult } = await import('../src/main/ai/llm/bridge')
+    const { waitForChatResult } = await import('../../src/main/ai/llm/bridge')
     waitForChatResult.mockResolvedValueOnce({ finalText: '', streamId: 'y' })
 
     const before = mockMessages.filter((m) => m.role === 'assistant').length
@@ -270,7 +270,7 @@ describe('message persistence across send', () => {
 
 describe('unreported task injection', () => {
   it('should inject completed task results into message history', async () => {
-    const tasksDb = await import('../src/main/storage/tasks.db')
+    const tasksDb = await import('../../src/main/storage/tasks.db')
     tasksDb.getUnreportedTerminalTasks = vi.fn(() => [
       { id: 't1', status: 'completed', instructions: 'Do X', result: 'Done X' }
     ])

@@ -11,16 +11,16 @@ const mockDestroyStt = vi.fn()
 const mockSetChatStreamHandlers = vi.fn()
 const mockClearChatStreamHandlers = vi.fn()
 
-vi.mock('../src/main/ipc/shared', () => ({
+vi.mock('../../src/main/ipc/shared', () => ({
   emitAll: (...args) => mockEmitAll(...args)
 }))
 
-vi.mock('../src/main/chat/chat.session', () => ({
+vi.mock('../../src/main/chat/chat.session', () => ({
   sendMessage: (...args) => mockSendMessage(...args),
   abort: (...args) => mockAbort(...args)
 }))
 
-vi.mock('../src/main/voice/stt.service', () => ({
+vi.mock('../../src/main/voice/stt.service', () => ({
   feedAudio: (...args) => mockFeedAudio(...args),
   setOnTranscript: (cb) => {
     onTranscriptCb = cb
@@ -32,7 +32,7 @@ vi.mock('../src/main/voice/stt.service', () => ({
   destroyStt: (...args) => mockDestroyStt(...args)
 }))
 
-vi.mock('../src/main/ai/llm/bridge', () => ({
+vi.mock('../../src/main/ai/llm/bridge', () => ({
   setChatStreamHandlers: (...args) => {
     mockSetChatStreamHandlers(...args)
     if (args[1]) {
@@ -42,7 +42,7 @@ vi.mock('../src/main/ai/llm/bridge', () => ({
   clearChatStreamHandlers: (...args) => mockClearChatStreamHandlers(...args)
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
@@ -53,7 +53,7 @@ const {
   isVoiceModeActive,
   handleAudioChunk,
   destroyVoiceOrchestrator
-} = await import('../src/main/voice/voice.orchestrator.js')
+} = await import('../../src/main/voice/voice.orchestrator.js')
 
 beforeEach(() => {
   mockEmitAll.mockClear()

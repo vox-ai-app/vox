@@ -5,11 +5,11 @@ const mockStartAgent = vi.fn()
 const mockAbortAgent = vi.fn()
 let agentEventCallbacks = new Map()
 
-vi.mock('../src/main/ipc/shared', () => ({
+vi.mock('../../src/main/ipc/shared', () => ({
   emitAll: (...args) => mockEmitAll(...args)
 }))
 
-vi.mock('../src/main/ai/llm/bridge', () => ({
+vi.mock('../../src/main/ai/llm/bridge', () => ({
   startAgent: (...args) => mockStartAgent(...args),
   abortAgent: (...args) => mockAbortAgent(...args),
   onAgentEvent: (taskId, callback) => {
@@ -18,13 +18,13 @@ vi.mock('../src/main/ai/llm/bridge', () => ({
   }
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
 const mockTaskRows = []
 const mockActivityRows = []
-vi.mock('../src/main/storage/tasks.db', () => ({
+vi.mock('../../src/main/storage/tasks.db', () => ({
   upsertTask: vi.fn((task) => {
     const idx = mockTaskRows.findIndex((t) => t.id === task.id)
     if (idx >= 0) mockTaskRows[idx] = task
@@ -51,7 +51,7 @@ beforeEach(async () => {
   mockActivityRows.length = 0
 
   vi.resetModules()
-  mod = await import('../src/main/chat/task.queue.js')
+  mod = await import('../../src/main/chat/task.queue.js')
 })
 
 describe('enqueueTask', () => {
@@ -361,7 +361,7 @@ describe('hydration from DB', () => {
 
     vi.resetModules()
 
-    const freshMod = await import('../src/main/chat/task.queue.js')
+    const freshMod = await import('../../src/main/chat/task.queue.js')
     const task = freshMod.getTask('hydrate-1')
     expect(task.status).toBe('failed')
     expect(task.error).toContain('restart')

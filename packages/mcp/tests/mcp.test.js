@@ -15,7 +15,7 @@ describe('mcp/transport — parseCommand', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ parseCommand } = await import('../packages/mcp/src/transport.js'))
+    ;({ parseCommand } = await import('../src/transport.js'))
   })
 
   it('should parse simple command', () => {
@@ -70,7 +70,7 @@ describe('mcp/transport — makeTransport', () => {
     StdioClientTransport.mockClear()
     SSEClientTransport.mockClear()
     StreamableHTTPClientTransport.mockClear()
-    ;({ makeTransport } = await import('../packages/mcp/src/transport.js'))
+    ;({ makeTransport } = await import('../src/transport.js'))
   })
 
   it('should create stdio transport', () => {
@@ -113,8 +113,7 @@ describe('mcp/session', () => {
     const os = await import('node:os')
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mcp-sess-'))
     process.env.VOX_USER_DATA_PATH = tmpDir
-    ;({ getStoredSessionId, persistSessionId, clearSessionId } =
-      await import('../packages/mcp/src/session.js'))
+    ;({ getStoredSessionId, persistSessionId, clearSessionId } = await import('../src/session.js'))
   })
 
   it('should return null for unknown server', () => {

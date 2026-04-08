@@ -9,7 +9,7 @@ const mockMessages = []
 let mockSummaryCheckpoint = null
 const mockStore = {}
 
-vi.mock('../src/main/storage/messages.db', () => ({
+vi.mock('../../src/main/storage/messages.db', () => ({
   getMessages: (_, limit) => {
     if (limit) return mockMessages.slice(-limit)
     return mockMessages
@@ -34,18 +34,18 @@ vi.mock('../src/main/storage/messages.db', () => ({
   setConversationUserInfo: vi.fn()
 }))
 
-vi.mock('../src/main/storage/store', () => ({
+vi.mock('../../src/main/storage/store', () => ({
   storeGet: (key) => mockStore[key] ?? null,
   storeSet: (key, val) => {
     mockStore[key] = val
   }
 }))
 
-vi.mock('../src/main/ipc/shared', () => ({
+vi.mock('../../src/main/ipc/shared', () => ({
   emitAll: vi.fn()
 }))
 
-vi.mock('../src/main/mcp/mcp.service', () => ({
+vi.mock('../../src/main/mcp/mcp.service', () => ({
   getMcpToolDefinitions: () => []
 }))
 
@@ -57,16 +57,16 @@ vi.mock('@vox-ai-app/storage/tools', () => ({
   })
 }))
 
-vi.mock('../src/main/storage/db', () => ({
+vi.mock('../../src/main/storage/db', () => ({
   getDb: vi.fn(() => ({}))
 }))
 
-vi.mock('../src/main/storage/tasks.db', () => ({
+vi.mock('../../src/main/storage/tasks.db', () => ({
   getUnreportedTerminalTasks: () => [],
   markTaskReported: vi.fn()
 }))
 
-vi.mock('../src/main/ai/llm/bridge', () => ({
+vi.mock('../../src/main/ai/llm/bridge', () => ({
   sendChatMessage: vi.fn(),
   abortChat: vi.fn(),
   clearChat: vi.fn().mockResolvedValue(undefined),
@@ -75,11 +75,11 @@ vi.mock('../src/main/ai/llm/bridge', () => ({
   summarizeText: vi.fn().mockResolvedValue('summary result')
 }))
 
-vi.mock('../src/main/chat/chat.prompts', () => ({
+vi.mock('../../src/main/chat/chat.prompts', () => ({
   buildDefaultSystemPrompt: () => 'You are Vox.'
 }))
 
-vi.mock('../src/main/chat/spawn.tool', () => ({
+vi.mock('../../src/main/chat/spawn.tool', () => ({
   definition: {
     name: 'spawn_task',
     description: 'test',
@@ -87,7 +87,7 @@ vi.mock('../src/main/chat/spawn.tool', () => ({
   }
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
@@ -98,7 +98,7 @@ beforeEach(() => {
 })
 
 describe('sanitizeHistory', async () => {
-  const mod = await import('../src/main/chat/chat.session.js')
+  const mod = await import('../../src/main/chat/chat.session.js')
 
   it('should keep short but meaningful assistant messages', () => {
     const msgs = [
@@ -159,10 +159,10 @@ describe('sanitizeHistory', async () => {
 })
 
 describe('sendMessage', async () => {
-  const mod = await import('../src/main/chat/chat.session.js')
+  const mod = await import('../../src/main/chat/chat.session.js')
   const { waitForChatResult, sendChatMessage: _sendChatMessage } =
-    await import('../src/main/ai/llm/bridge')
-  const { emitAll } = await import('../src/main/ipc/shared')
+    await import('../../src/main/ai/llm/bridge')
+  const { emitAll } = await import('../../src/main/ipc/shared')
 
   it('should persist user message to DB before dispatching', async () => {
     await mod.sendMessage({ content: 'hello' })
@@ -243,7 +243,7 @@ describe('sendMessage', async () => {
 })
 
 describe('getSystemPrompt', async () => {
-  const mod = await import('../src/main/chat/chat.session.js')
+  const mod = await import('../../src/main/chat/chat.session.js')
 
   it('should return default prompt when no custom prompt or user info', () => {
     const prompt = mod.getSystemPrompt()
@@ -266,7 +266,7 @@ describe('getSystemPrompt', async () => {
 })
 
 describe('getChatStatus', async () => {
-  const mod = await import('../src/main/chat/chat.session.js')
+  const mod = await import('../../src/main/chat/chat.session.js')
 
   it('should reflect LLM ready state', () => {
     const status = mod.getChatStatus()
@@ -277,7 +277,7 @@ describe('getChatStatus', async () => {
 })
 
 describe('getToolDefinitions', async () => {
-  const mod = await import('../src/main/chat/chat.session.js')
+  const mod = await import('../../src/main/chat/chat.session.js')
 
   it('should always include spawn_task', () => {
     const defs = mod.getToolDefinitions()
@@ -337,7 +337,7 @@ describe('getToolDefinitions', async () => {
 })
 
 describe('loadOlderStoredMessages', async () => {
-  const mod = await import('../src/main/chat/chat.session.js')
+  const mod = await import('../../src/main/chat/chat.session.js')
 
   it('should return page of messages before offset', () => {
     for (let i = 1; i <= 100; i++) {

@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+const { mockStreamChat } = vi.hoisted(() => ({
+  mockStreamChat: vi.fn()
+}))
+
 vi.mock('crypto', () => ({
   randomUUID: () => {
     const hex = () => Math.floor(Math.random() * 16).toString(16)
@@ -10,38 +14,46 @@ vi.mock('crypto', () => ({
   })
 }))
 
-vi.mock('../src/main/ai/llm/client.js', () => ({
-  streamChat: vi.fn(async function* () {
-    yield { type: 'text', content: '' }
-  }),
-  chatCompletion: vi.fn(),
-  nonStreamChat: vi.fn(),
-  healthCheck: vi.fn()
+vi.mock('electron-log', () => ({
+  default: {
+    initialize: vi.fn(),
+    transports: {
+      file: { level: 'info', format: '' },
+      console: { level: 'warn' }
+    }
+  }
 }))
 
-vi.mock('../src/main/ai/llm/server.js', () => ({
-  getBaseUrl: () => 'http://localhost:19741',
-  isReady: () => true,
-  startServer: vi.fn(),
-  stopServer: vi.fn(),
-  onLoadProgress: vi.fn(),
-  getModelPath: () => '/test/model.gguf'
+vi.mock('@electron-toolkit/utils', () => ({
+  is: { dev: false }
 }))
 
-vi.mock('../src/main/ai/config.js', () => ({
+vi.mock('../../../../src/main/ai/config.js', () => ({
   CONTEXT_SIZE: 4096,
   CONTEXT_KEEP_RECENT_CHARS: 8000
 }))
 
-vi.mock('../src/main/storage/tasks.db.js', () => ({
+vi.mock('../../../../src/main/storage/tasks.db.js', () => ({
   searchTasksFts: vi.fn(() => []),
   searchKnowledgePatterns: vi.fn(() => []),
   insertKnowledgePattern: vi.fn(),
   indexTaskEmbedding: vi.fn(async () => {})
 }))
 
+vi.mock('../../../../src/main/core/logger', () => ({
+  logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
+}))
+
+beforeEach(() => {
+  mockStreamChat.mockReset()
+  mockStreamChat.mockImplementation(async function* () {
+    yield { type: 'text', content: '' }
+  })
+})
+
 describe('createJournal', async () => {
-  const { createJournal } = await import('../src/main/chat/agent/journal/journal.schema.js')
+  const { createJournal } =
+    await import('../../../../src/main/chat/agent/journal/journal.schema.js')
 
   it('should create journal with all required fields', () => {
     const j = createJournal()
@@ -65,8 +77,10 @@ describe('createJournal', async () => {
 })
 
 describe('createJournalTool', async () => {
-  const { createJournal } = await import('../src/main/chat/agent/journal/journal.schema.js')
-  const { createJournalTool } = await import('../src/main/chat/agent/journal/journal.tool.js')
+  const { createJournal } =
+    await import('../../../../src/main/chat/agent/journal/journal.schema.js')
+  const { createJournalTool } =
+    await import('../../../../src/main/chat/agent/journal/journal.tool.js')
 
   let journal
   let onUpdate
@@ -141,12 +155,13 @@ describe('createJournalTool', async () => {
 })
 
 describe('createStallDetector', async () => {
-  vi.mock('../src/main/chat/agent/prompts/index.js', () => ({
+  vi.mock('../../../../src/main/chat/agent/prompts/index.js', () => ({
     stallNudge: (count) => `Stalled for ${count} iterations`,
     assumptionCheckPrompt: (blockers) => `Check assumptions about: ${blockers.join(', ')}`
   }))
 
-  const { createStallDetector } = await import('../src/main/chat/agent/detectors/stall.detector.js')
+  const { createStallDetector } =
+    await import('../../../../src/main/chat/agent/detectors/stall.detector.js')
 
   let detector
 
@@ -207,7 +222,7 @@ describe('createStallDetector', async () => {
 
 describe('createRepetitionDetector', async () => {
   const { createRepetitionDetector } =
-    await import('../src/main/chat/agent/detectors/repetition.detector.js')
+    await import('../../../../src/main/chat/agent/detectors/repetition.detector.js')
 
   let detector
 
@@ -266,7 +281,7 @@ describe('createRepetitionDetector', async () => {
 
 describe('validateToolResult', async () => {
   const { validateToolResult, buildValidationPrompt } =
-    await import('../src/main/chat/agent/detectors/result.validator.js')
+    await import('../../../../src/main/chat/agent/detectors/result.validator.js')
 
   it('should return empty array for normal result', () => {
     const warnings = validateToolResult('test', { output: 'some data' })
@@ -339,7 +354,7 @@ describe('result.store', async () => {
   }))
 
   const { storeResult, readResult, createReadResultTool, STORE_THRESHOLD } =
-    await import('../src/main/chat/agent/result.store.js')
+    await import('../../../../src/main/chat/agent/result.store.js')
 
   it('should have STORE_THRESHOLD of 50000', () => {
     expect(STORE_THRESHOLD).toBe(50000)
@@ -379,7 +394,7 @@ describe('task.builders', async () => {
     buildTaskStatusResponse,
     buildHistoryTask,
     buildActivityEvent
-  } = await import('../src/main/chat/task.builders.js')
+  } = await import('../../../../src/main/chat/task.builders.js')
 
   it('normalizeLimit should handle valid numbers', () => {
     expect(normalizeLimit(25)).toBe(25)
@@ -506,10 +521,15 @@ describe('task.builders', async () => {
   })
 })
 
-describe('runAgentLoop', async () => {
-  const { createJournal: _createJournal } =
-    await import('../src/main/chat/agent/journal/journal.schema.js')
-  const { runAgentLoop } = await import('../src/main/chat/agent/agent.runner.js')
+describe('runAgentLoop', () => {
+  let runAgentLoop
+
+  beforeEach(async () => {
+    vi.resetModules()
+    const clientModule = await import('../../../../src/main/ai/llm/client.js')
+    vi.spyOn(clientModule, 'streamChat').mockImplementation((...args) => mockStreamChat(...args))
+    ;({ runAgentLoop } = await import('../../../../src/main/chat/agent/agent.runner.js'))
+  })
 
   function _makeToolEmit(toolCalls, followupText) {
     let callCount = 0
@@ -526,11 +546,10 @@ describe('runAgentLoop', async () => {
   }
 
   it('should assign correct tool_call_id when same tool called multiple times', async () => {
-    const { streamChat } = await import('../src/main/ai/llm/client.js')
     const capturedMessages = []
     let callCount = 0
 
-    streamChat.mockImplementation(async function* () {
+    mockStreamChat.mockImplementation(async function* () {
       callCount++
       if (callCount === 1) {
         yield { type: 'tool_call', id: 'call_x1', name: 'web_search', args: { q: 'first' } }
@@ -586,10 +605,9 @@ describe('runAgentLoop', async () => {
   })
 
   it('should emit tool_call and tool_result events for each tool', async () => {
-    const { streamChat } = await import('../src/main/ai/llm/client.js')
     let callCount = 0
 
-    streamChat.mockImplementation(async function* () {
+    mockStreamChat.mockImplementation(async function* () {
       callCount++
       if (callCount === 1) {
         yield { type: 'tool_call', id: 'call_s', name: 'search', args: { q: 'test' } }
@@ -626,9 +644,7 @@ describe('runAgentLoop', async () => {
   })
 
   it('should stop after max no-progress iterations', async () => {
-    const { streamChat } = await import('../src/main/ai/llm/client.js')
-
-    streamChat.mockImplementation(async function* () {
+    mockStreamChat.mockImplementation(async function* () {
       yield { type: 'text', content: 'thinking...' }
     })
 
@@ -652,11 +668,10 @@ describe('runAgentLoop', async () => {
   })
 
   it('should respect abort signal', async () => {
-    const { streamChat } = await import('../src/main/ai/llm/client.js')
     const controller = new AbortController()
     controller.abort()
 
-    streamChat.mockImplementation(async function* () {
+    mockStreamChat.mockImplementation(async function* () {
       yield { type: 'text', content: 'should not see this' }
     })
 

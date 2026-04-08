@@ -8,7 +8,7 @@ vi.mock('electron', () => ({
   }
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
@@ -27,7 +27,7 @@ describe('skills.service', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    const mod = await import('../src/main/chat/skills.service.js')
+    const mod = await import('../../src/main/chat/skills.service.js')
     loadSkills = mod.loadSkills
     getSkillsPrompt = mod.getSkillsPrompt
     getLoadedSkills = mod.getLoadedSkills

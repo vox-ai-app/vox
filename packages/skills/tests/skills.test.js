@@ -8,7 +8,7 @@ describe('skills/parser — parseFrontmatter', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ parseFrontmatter } = await import('../packages/skills/src/parser.js'))
+    ;({ parseFrontmatter } = await import('../src/parser.js'))
   })
 
   it('should parse basic frontmatter fields', () => {
@@ -106,7 +106,7 @@ describe('skills/loader — loadSkillsFromDir', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ loadSkillsFromDir } = await import('../packages/skills/src/loader.js'))
+    ;({ loadSkillsFromDir } = await import('../src/loader.js'))
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'skills-test-'))
   })
 
@@ -230,7 +230,7 @@ describe('skills/loader — loadAllSkills', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ loadAllSkills } = await import('../packages/skills/src/loader.js'))
+    ;({ loadAllSkills } = await import('../src/loader.js'))
     tmpDir1 = fs.mkdtempSync(path.join(os.tmpdir(), 'skills-all1-'))
     tmpDir2 = fs.mkdtempSync(path.join(os.tmpdir(), 'skills-all2-'))
   })
@@ -286,7 +286,7 @@ describe('skills/prompt — formatSkillsForPrompt', () => {
 
   beforeEach(async () => {
     vi.resetModules()
-    ;({ formatSkillsForPrompt, formatSkillBody } = await import('../packages/skills/src/prompt.js'))
+    ;({ formatSkillsForPrompt, formatSkillBody } = await import('../src/prompt.js'))
   })
 
   it('should format skills as XML', () => {

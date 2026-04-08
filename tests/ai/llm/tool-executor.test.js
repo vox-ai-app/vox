@@ -43,7 +43,7 @@ vi.mock('electron', () => ({
   }
 }))
 
-vi.mock('../src/main/storage/store', () => {
+vi.mock('../../../src/main/storage/store', () => {
   const store = {}
   return {
     storeGet: (key) => {
@@ -66,11 +66,11 @@ vi.mock('../src/main/storage/store', () => {
   }
 })
 
-vi.mock('../src/main/storage/secrets', () => ({
+vi.mock('../../../src/main/storage/secrets', () => ({
   getToolSecrets: (_name) => ({ api_key: 'secret-123' })
 }))
 
-vi.mock('../src/main/mcp/mcp.service', () => ({
+vi.mock('../../../src/main/mcp/mcp.service', () => ({
   getMcpToolDefinitions: () => [],
   executeMcpTool: vi.fn()
 }))
@@ -127,7 +127,7 @@ vi.mock('@vox-ai-app/indexing', () => ({
   ]
 }))
 
-vi.mock('../src/main/chat/task.queue', () => ({
+vi.mock('../../../src/main/chat/task.queue', () => ({
   enqueueTask: vi.fn(),
   waitForTaskCompletion: vi
     .fn()
@@ -136,22 +136,22 @@ vi.mock('../src/main/chat/task.queue', () => ({
   listTaskHistory: vi.fn(() => ({ tasks: [], has_more: false }))
 }))
 
-vi.mock('../src/main/chat/chat.session', () => ({
+vi.mock('../../../src/main/chat/chat.session', () => ({
   getToolDefinitions: () => [],
   invalidateToolDefinitions: vi.fn()
 }))
 
-vi.mock('../src/main/storage/tasks.db', () => ({
+vi.mock('../../../src/main/storage/tasks.db', () => ({
   searchTasksFts: vi.fn(() => []),
   searchTasksSemantic: vi.fn(async () => [])
 }))
 
-vi.mock('../src/main/storage/tasks.db.js', () => ({
+vi.mock('../../../src/main/storage/tasks.db.js', () => ({
   searchTasksFts: vi.fn(() => []),
   searchTasksSemantic: vi.fn(async () => [])
 }))
 
-vi.mock('../src/main/storage/messages.db', () => {
+vi.mock('../../../src/main/storage/messages.db', () => {
   let userInfo = {}
   return {
     searchMessagesSemantic: vi.fn(async () => [
@@ -169,7 +169,7 @@ vi.mock('../src/main/storage/messages.db', () => {
   }
 })
 
-vi.mock('../src/main/storage/messages.db.js', () => {
+vi.mock('../../../src/main/storage/messages.db.js', () => {
   let userInfo = {}
   return {
     searchMessagesSemantic: vi.fn(async () => [
@@ -216,24 +216,24 @@ vi.mock('@vox-ai-app/storage/tools', () => ({
   getTool: vi.fn((db, id) => mockToolStore.find((t) => t.id === id) || null)
 }))
 
-vi.mock('../src/main/storage/db', () => ({
+vi.mock('../../../src/main/storage/db', () => ({
   getDb: vi.fn(() => ({}))
 }))
 
-vi.mock('../src/main/storage/db.js', () => ({
+vi.mock('../../../src/main/storage/db.js', () => ({
   getDb: vi.fn(() => ({}))
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
-const { executeElectronTool } = await import('../src/main/ai/llm/tool-executor.js')
-const storeMod = await import('../src/main/storage/store')
+const { executeElectronTool } = await import('../../../src/main/ai/llm/tool-executor.js')
+const storeMod = await import('../../../src/main/storage/store')
 
 beforeEach(async () => {
   storeMod._reset()
-  const msgDb = await import('../src/main/storage/messages.db.js')
+  const msgDb = await import('../../../src/main/storage/messages.db.js')
   if (msgDb._resetUserInfo) msgDb._resetUserInfo()
 })
 
@@ -272,7 +272,7 @@ describe('executeElectronTool - save_user_info', () => {
   it('should accumulate user info across calls', async () => {
     await executeElectronTool('save_user_info', { info_key: 'name', info_value: 'Alice' })
     await executeElectronTool('save_user_info', { info_key: 'age', info_value: '30' })
-    const { getConversationUserInfo } = await import('../src/main/storage/messages.db.js')
+    const { getConversationUserInfo } = await import('../../../src/main/storage/messages.db.js')
     const stored = getConversationUserInfo()
     expect(stored.name).toBe('Alice')
     expect(stored.age).toBe('30')
@@ -348,7 +348,7 @@ describe('executeElectronTool - search_messages', () => {
   })
 
   it('should pass custom limit', async () => {
-    const { searchMessagesSemantic } = await import('../src/main/storage/messages.db')
+    const { searchMessagesSemantic } = await import('../../../src/main/storage/messages.db')
     await executeElectronTool('search_messages', { query: 'test', limit: 5 })
     expect(searchMessagesSemantic).toHaveBeenCalledWith('test', 5)
   })
@@ -970,7 +970,7 @@ describe('manage_tool', () => {
   })
 
   it('should invalidate tool definitions after create', async () => {
-    const { invalidateToolDefinitions } = await import('../src/main/chat/chat.session.js')
+    const { invalidateToolDefinitions } = await import('../../../src/main/chat/chat.session.js')
     storeMod.storeSet('customTools', [])
     invalidateToolDefinitions.mockClear()
     await executeElectronTool('manage_tool', {

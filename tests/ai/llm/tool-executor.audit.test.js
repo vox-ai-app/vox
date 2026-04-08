@@ -53,7 +53,7 @@ vi.mock('electron', () => ({
   }
 }))
 
-vi.mock('../src/main/storage/store', () => {
+vi.mock('../../../src/main/storage/store', () => {
   const store = {}
   return {
     storeGet: (key) => store[key] ?? null,
@@ -77,16 +77,16 @@ vi.mock('../src/main/storage/store', () => {
   }
 })
 
-vi.mock('../src/main/storage/secrets', () => ({
+vi.mock('../../../src/main/storage/secrets', () => ({
   getToolSecrets: () => ({})
 }))
 
-vi.mock('../src/main/mcp/mcp.service', () => ({
+vi.mock('../../../src/main/mcp/mcp.service', () => ({
   getMcpToolDefinitions: () => [],
   executeMcpTool: vi.fn()
 }))
 
-vi.mock('../src/main/chat/task.queue', () => ({
+vi.mock('../../../src/main/chat/task.queue', () => ({
   enqueueTask: vi.fn(),
   waitForTaskCompletion: vi
     .fn()
@@ -95,21 +95,21 @@ vi.mock('../src/main/chat/task.queue', () => ({
   listTaskHistory: vi.fn(() => ({ tasks: [], has_more: false }))
 }))
 
-vi.mock('../src/main/chat/chat.session', () => ({
+vi.mock('../../../src/main/chat/chat.session', () => ({
   getToolDefinitions: () => []
 }))
 
-vi.mock('../src/main/storage/tasks.db', () => ({
+vi.mock('../../../src/main/storage/tasks.db', () => ({
   searchTasksFts: vi.fn(() => []),
   searchTasksSemantic: vi.fn(async () => [])
 }))
 
-vi.mock('../src/main/storage/tasks.db.js', () => ({
+vi.mock('../../../src/main/storage/tasks.db.js', () => ({
   searchTasksFts: vi.fn(() => []),
   searchTasksSemantic: vi.fn(async () => [])
 }))
 
-vi.mock('../src/main/storage/messages.db.js', () => {
+vi.mock('../../../src/main/storage/messages.db.js', () => {
   let userInfo = {}
   return {
     searchMessagesSemantic: vi.fn(async () => []),
@@ -153,11 +153,11 @@ vi.mock('@vox-ai-app/storage/tools', () => ({
   getTool: vi.fn((db, id) => mockToolStore.find((t) => t.id === id) || null)
 }))
 
-vi.mock('../src/main/storage/db.js', () => ({
+vi.mock('../../../src/main/storage/db.js', () => ({
   getDb: vi.fn(() => ({}))
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
@@ -165,7 +165,7 @@ describe('FS TOOLS - real execution', () => {
   const testFile = join(testDir, 'test-write.txt')
 
   it('write_local_file: creates a new file', async () => {
-    const { writeLocalFile } = await import('../packages/tools/src/tools/fs/execute.js')
+    const { writeLocalFile } = await import('../../../packages/tools/src/tools/fs/execute.js')
     await writeLocalFile({ path: testFile, content: 'hello world' })
     expect(existsSync(testFile)).toBe(true)
     expect(readFileSync(testFile, 'utf8')).toBe('hello world')
@@ -173,7 +173,7 @@ describe('FS TOOLS - real execution', () => {
 
   it('read_local_file: reads the created file', async () => {
     writeFileSync(testFile, 'hello world')
-    const { readLocalFile } = await import('../packages/tools/src/tools/fs/execute.js')
+    const { readLocalFile } = await import('../../../packages/tools/src/tools/fs/execute.js')
     const result = await readLocalFile({ path: testFile })
     const content = typeof result === 'string' ? result : result.content
     expect(content).toContain('hello world')
@@ -181,9 +181,9 @@ describe('FS TOOLS - real execution', () => {
 
   it('edit_local_file: replaces content in file', async () => {
     writeFileSync(testFile, 'hello world')
-    const { readLocalFile } = await import('../packages/tools/src/tools/fs/execute.js')
+    const { readLocalFile } = await import('../../../packages/tools/src/tools/fs/execute.js')
     await readLocalFile({ path: testFile })
-    const { editLocalFile } = await import('../packages/tools/src/tools/fs/edit.execute.js')
+    const { editLocalFile } = await import('../../../packages/tools/src/tools/fs/edit.execute.js')
     await editLocalFile({
       path: testFile,
       old_string: 'hello world',
@@ -194,7 +194,7 @@ describe('FS TOOLS - real execution', () => {
 
   it('list_local_directory: lists the temp directory', async () => {
     writeFileSync(join(testDir, 'listme.txt'), 'x')
-    const { listLocalDirectory } = await import('../packages/tools/src/tools/fs/execute.js')
+    const { listLocalDirectory } = await import('../../../packages/tools/src/tools/fs/execute.js')
     const result = await listLocalDirectory({ path: testDir })
     const entries = result.entries || result.items || result
     expect(Array.isArray(entries)).toBe(true)
@@ -203,7 +203,7 @@ describe('FS TOOLS - real execution', () => {
   })
 
   it('get_scratch_dir: returns a scratch directory', async () => {
-    const { getScratchDir } = await import('../packages/tools/src/tools/fs/execute.js')
+    const { getScratchDir } = await import('../../../packages/tools/src/tools/fs/execute.js')
     const result = await getScratchDir({})
     const dirPath = result.path || result.dir || (typeof result === 'string' ? result : null)
     expect(dirPath).toBeTruthy()
@@ -213,7 +213,7 @@ describe('FS TOOLS - real execution', () => {
   it('delete_local_path: deletes a file', async () => {
     const delTarget = join(testDir, 'to-delete.txt')
     writeFileSync(delTarget, 'delete me')
-    const { deleteLocalPath } = await import('../packages/tools/src/tools/fs/execute.js')
+    const { deleteLocalPath } = await import('../../../packages/tools/src/tools/fs/execute.js')
     await deleteLocalPath({ path: delTarget })
     expect(existsSync(delTarget)).toBe(false)
   })
@@ -221,19 +221,19 @@ describe('FS TOOLS - real execution', () => {
 
 describe('SHELL TOOL - real execution', () => {
   it('runs an echo command', async () => {
-    const { runLocalCommand } = await import('../packages/tools/src/tools/shell/execute.js')
+    const { runLocalCommand } = await import('../../../packages/tools/src/tools/shell/execute.js')
     const result = await runLocalCommand({ command: 'echo "tool test"' })
     expect(result.exitCode).toBe(0)
     expect(result.stdout.trim()).toContain('tool test')
   })
 
   it('blocks dangerous commands', async () => {
-    const { runLocalCommand } = await import('../packages/tools/src/tools/shell/execute.js')
+    const { runLocalCommand } = await import('../../../packages/tools/src/tools/shell/execute.js')
     await expect(runLocalCommand({ command: '; rm -rf /' })).rejects.toThrow('blocked')
   })
 
   it('returns non-zero exit for bad commands', async () => {
-    const { runLocalCommand } = await import('../packages/tools/src/tools/shell/execute.js')
+    const { runLocalCommand } = await import('../../../packages/tools/src/tools/shell/execute.js')
     const result = await runLocalCommand({ command: 'false' })
     expect(result.exitCode).not.toBe(0)
   })
@@ -242,7 +242,7 @@ describe('SHELL TOOL - real execution', () => {
 describe('GREP TOOL - real execution', () => {
   it('finds pattern in test dir', async () => {
     writeFileSync(join(testDir, 'grepme.txt'), 'findthisunique42 in line\nanother line')
-    const { grepLocal } = await import('../packages/tools/src/tools/grep/execute.js')
+    const { grepLocal } = await import('../../../packages/tools/src/tools/grep/execute.js')
     const result = await grepLocal({ pattern: 'findthisunique42', path: testDir })
     expect(result.matchCount).toBeGreaterThan(0)
     expect(result.content).toContain('findthisunique42')
@@ -252,7 +252,7 @@ describe('GREP TOOL - real execution', () => {
 describe('GLOB TOOL - real execution', () => {
   it('finds .txt files in test dir', async () => {
     writeFileSync(join(testDir, 'globtest.txt'), 'x')
-    const { globLocal } = await import('../packages/tools/src/tools/glob/execute.js')
+    const { globLocal } = await import('../../../packages/tools/src/tools/glob/execute.js')
     const result = await globLocal({ pattern: '*.txt', path: testDir })
     const files = result.files || result.results || result
     expect(Array.isArray(files)).toBe(true)
@@ -262,7 +262,7 @@ describe('GLOB TOOL - real execution', () => {
 
 describe('FETCH TOOL - real execution', () => {
   it('fetches a real URL', async () => {
-    const { execute } = await import('../packages/tools/src/tools/fetch/execute.js')
+    const { execute } = await import('../../../packages/tools/src/tools/fetch/execute.js')
     const fetchFn = execute({})
     const result = await fetchFn({ url: 'https://example.com' })
     expect(result).toBeDefined()
@@ -277,14 +277,16 @@ describe('FETCH TOOL - real execution', () => {
 
 describe('DOCUMENT TOOLS - real execution', () => {
   it('create_word_document: creates a .docx file', async () => {
-    const { createWordDocument } = await import('../packages/tools/src/tools/docs/word/execute.js')
+    const { createWordDocument } =
+      await import('../../../packages/tools/src/tools/docs/word/execute.js')
     const outPath = join(testDir, 'test.docx')
     await createWordDocument({ path: outPath, content: 'Hello from Vox tool audit' })
     expect(existsSync(outPath)).toBe(true)
   })
 
   it('create_pdf_document: creates a .pdf file', async () => {
-    const { createPdfDocument } = await import('../packages/tools/src/tools/docs/pdf/execute.js')
+    const { createPdfDocument } =
+      await import('../../../packages/tools/src/tools/docs/pdf/execute.js')
     const outPath = join(testDir, 'test.pdf')
     await createPdfDocument({ path: outPath, content: 'Hello from Vox PDF audit' })
     expect(existsSync(outPath)).toBe(true)
@@ -292,7 +294,7 @@ describe('DOCUMENT TOOLS - real execution', () => {
 
   it('create_presentation_document: creates a .pptx file', async () => {
     const { createPresentationDocument } =
-      await import('../packages/tools/src/tools/docs/pptx/execute.js')
+      await import('../../../packages/tools/src/tools/docs/pptx/execute.js')
     const outPath = join(testDir, 'test.pptx')
     await createPresentationDocument({
       path: outPath,
@@ -305,50 +307,50 @@ describe('DOCUMENT TOOLS - real execution', () => {
 
 describe('MAIL TOOLS - validation', () => {
   it('sendEmail: validates required "to" field', async () => {
-    const { sendEmail } = await import('../packages/integrations/src/mail/index.js')
+    const { sendEmail } = await import('../../../packages/integrations/src/mail/index.js')
     await expect(sendEmail({})).rejects.toThrow(/"to" is required/)
   })
 
   it('replyToEmail: validates required fields', async () => {
-    const { replyToEmail } = await import('../packages/integrations/src/mail/index.js')
+    const { replyToEmail } = await import('../../../packages/integrations/src/mail/index.js')
     await expect(replyToEmail({})).rejects.toThrow(/"message_id" is required/)
     await expect(replyToEmail({ message_id: '123' })).rejects.toThrow(/"body" is required/)
   })
 
   it('forwardEmail: validates required fields', async () => {
-    const { forwardEmail } = await import('../packages/integrations/src/mail/index.js')
+    const { forwardEmail } = await import('../../../packages/integrations/src/mail/index.js')
     await expect(forwardEmail({})).rejects.toThrow(/"message_id" is required/)
     await expect(forwardEmail({ message_id: '123' })).rejects.toThrow(/"to" is required/)
   })
 
   it('markEmailRead: validates required fields', async () => {
-    const { markEmailRead } = await import('../packages/integrations/src/mail/index.js')
+    const { markEmailRead } = await import('../../../packages/integrations/src/mail/index.js')
     await expect(markEmailRead({})).rejects.toThrow(/"message_id" is required/)
   })
 
   it('flagEmail: validates required fields', async () => {
-    const { flagEmail } = await import('../packages/integrations/src/mail/index.js')
+    const { flagEmail } = await import('../../../packages/integrations/src/mail/index.js')
     await expect(flagEmail({})).rejects.toThrow(/"message_id" is required/)
   })
 
   it('deleteEmail: validates required fields', async () => {
-    const { deleteEmail } = await import('../packages/integrations/src/mail/index.js')
+    const { deleteEmail } = await import('../../../packages/integrations/src/mail/index.js')
     await expect(deleteEmail({})).rejects.toThrow(/"message_id" is required/)
   })
 
   it('moveEmail: validates required fields', async () => {
-    const { moveEmail } = await import('../packages/integrations/src/mail/index.js')
+    const { moveEmail } = await import('../../../packages/integrations/src/mail/index.js')
     await expect(moveEmail({})).rejects.toThrow(/"message_id" is required/)
     await expect(moveEmail({ message_id: '123' })).rejects.toThrow(/"target_folder" is required/)
   })
 
   it('createDraft: validates required "to" field', async () => {
-    const { createDraft } = await import('../packages/integrations/src/mail/index.js')
+    const { createDraft } = await import('../../../packages/integrations/src/mail/index.js')
     await expect(createDraft({})).rejects.toThrow(/"to" is required/)
   })
 
   it('saveAttachment: validates required fields', async () => {
-    const { saveAttachment } = await import('../packages/integrations/src/mail/index.js')
+    const { saveAttachment } = await import('../../../packages/integrations/src/mail/index.js')
     await expect(saveAttachment({})).rejects.toThrow(/"message_id" is required/)
     await expect(saveAttachment({ message_id: '123' })).rejects.toThrow(
       /"attachment_name" is required/
@@ -359,7 +361,7 @@ describe('MAIL TOOLS - validation', () => {
 describe('MAIL TOOLS - read_emails live (macOS only)', () => {
   it('reads from Mail DB if accessible', async () => {
     if (process.platform !== 'darwin') return
-    const { readEmails } = await import('../packages/integrations/src/mail/index.js')
+    const { readEmails } = await import('../../../packages/integrations/src/mail/index.js')
     try {
       const result = await readEmails({ folder: 'INBOX', limit: 1 })
       expect(result).toHaveProperty('messages')
@@ -381,7 +383,7 @@ describe('MAIL TOOLS - read_emails live (macOS only)', () => {
 describe('IMESSAGE TOOLS - validation', () => {
   it('send_imessage: validates required fields', async () => {
     if (process.platform !== 'darwin') return
-    const { IMESSAGE_TOOLS } = await import('../packages/integrations/src/imessage/tools.js')
+    const { IMESSAGE_TOOLS } = await import('../../../packages/integrations/src/imessage/tools.js')
     const sendTool = IMESSAGE_TOOLS.find((t) => t.definition.name === 'send_imessage')
     expect(sendTool).toBeDefined()
     const fn = sendTool.execute(null)
@@ -395,7 +397,7 @@ describe('IMESSAGE TOOLS - list conversations (macOS only)', () => {
     if (process.platform !== 'darwin') return
     try {
       const { listConversations } =
-        await import('../packages/integrations/src/imessage/mac/data.js')
+        await import('../../../packages/integrations/src/imessage/mac/data.js')
       const convos = listConversations()
       expect(Array.isArray(convos)).toBe(true)
     } catch (err) {
@@ -411,7 +413,7 @@ describe('IMESSAGE TOOLS - list conversations (macOS only)', () => {
 describe('SCREEN TOOLS - live execution (macOS only)', () => {
   it('list_apps: lists applications', async () => {
     if (process.platform !== 'darwin') return
-    const { listApps } = await import('../packages/integrations/src/screen/control/index.js')
+    const { listApps } = await import('../../../packages/integrations/src/screen/control/index.js')
     const result = await listApps()
     const apps = result.apps || result
     expect(Array.isArray(apps)).toBe(true)
@@ -420,7 +422,7 @@ describe('SCREEN TOOLS - live execution (macOS only)', () => {
 
   it.skipIf(!hasQuartz)('get_mouse_position: returns coordinates', async () => {
     const { getMousePosition } =
-      await import('../packages/integrations/src/screen/control/index.js')
+      await import('../../../packages/integrations/src/screen/control/index.js')
     const result = await getMousePosition()
     expect(result).toHaveProperty('x')
     expect(result).toHaveProperty('y')
@@ -428,14 +430,15 @@ describe('SCREEN TOOLS - live execution (macOS only)', () => {
 
   it('clipboard_read: reads clipboard', async () => {
     if (process.platform !== 'darwin') return
-    const { clipboardRead } = await import('../packages/integrations/src/screen/control/index.js')
+    const { clipboardRead } =
+      await import('../../../packages/integrations/src/screen/control/index.js')
     const result = await clipboardRead()
     expect(result).toBeDefined()
   })
 
   it('acquire_screen + release_screen: manages lock', async () => {
     const { acquireScreen, releaseScreen } =
-      await import('../packages/integrations/src/screen/queue.js')
+      await import('../../../packages/integrations/src/screen/queue.js')
     const sessionId = 'audit-test-' + Date.now()
     const acq = await acquireScreen({ sessionId })
     expect(acq.sessionId).toBe(sessionId)
@@ -448,18 +451,18 @@ describe('ELECTRON-LEVEL TOOLS - via tool executor', () => {
   let executeElectronTool, storeMod
 
   beforeEach(async () => {
-    const mod = await import('../src/main/ai/llm/tool-executor.js')
+    const mod = await import('../../../src/main/ai/llm/tool-executor.js')
     executeElectronTool = mod.executeElectronTool
-    storeMod = await import('../src/main/storage/store')
+    storeMod = await import('../../../src/main/storage/store')
     storeMod._reset()
-    const msgDb = await import('../src/main/storage/messages.db.js')
+    const msgDb = await import('../../../src/main/storage/messages.db.js')
     if (msgDb._resetUserInfo) msgDb._resetUserInfo()
   })
 
   it('save_user_info: saves and accumulates', async () => {
     await executeElectronTool('save_user_info', { info_key: 'city', info_value: 'NYC' })
     await executeElectronTool('save_user_info', { info_key: 'job', info_value: 'eng' })
-    const { getConversationUserInfo } = await import('../src/main/storage/messages.db.js')
+    const { getConversationUserInfo } = await import('../../../src/main/storage/messages.db.js')
     const info = getConversationUserInfo()
     expect(info.city).toBe('NYC')
     expect(info.job).toBe('eng')
@@ -537,7 +540,7 @@ describe('ELECTRON-LEVEL TOOLS - via tool executor', () => {
 
 describe('TOOL REGISTRY - integration', () => {
   it('getDeclarations returns all registered tools', async () => {
-    const { getDeclarations } = await import('../packages/tools/src/core/registry.js')
+    const { getDeclarations } = await import('../../../packages/tools/src/core/registry.js')
     const decls = getDeclarations()
     expect(Array.isArray(decls)).toBe(true)
     expect(decls.length).toBeGreaterThan(0)
@@ -548,7 +551,7 @@ describe('TOOL REGISTRY - integration', () => {
   })
 
   it('run dispatches to a registered tool', async () => {
-    const { run } = await import('../packages/tools/src/core/registry.js')
+    const { run } = await import('../../../packages/tools/src/core/registry.js')
     const outPath = join(testDir, 'registry-test.txt')
     await run('write_local_file', { path: outPath, content: 'registry integration test' })
     expect(existsSync(outPath)).toBe(true)
@@ -556,7 +559,7 @@ describe('TOOL REGISTRY - integration', () => {
   })
 
   it('run throws for unknown tool', async () => {
-    const { run } = await import('../packages/tools/src/core/registry.js')
+    const { run } = await import('../../../packages/tools/src/core/registry.js')
     await expect(run('totally_fake_tool_xyz', {})).rejects.toThrow()
   })
 })

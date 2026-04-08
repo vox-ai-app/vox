@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 let streamChatYield = []
 let mockIsReady = true
 
-vi.mock('../src/main/ai/llm/server.js', () => ({
+vi.mock('../../../src/main/ai/llm/server.js', () => ({
   startServer: vi.fn(),
   stopServer: vi.fn(),
   onLoadProgress: vi.fn(),
@@ -12,7 +12,7 @@ vi.mock('../src/main/ai/llm/server.js', () => ({
   getProcess: () => null
 }))
 
-vi.mock('../src/main/ai/llm/client.js', () => ({
+vi.mock('../../../src/main/ai/llm/client.js', () => ({
   streamChat: async function* () {
     for (const event of streamChatYield) {
       yield event
@@ -24,24 +24,24 @@ vi.mock('../src/main/ai/llm/client.js', () => ({
 }))
 
 const mockEmitAll = vi.fn()
-vi.mock('../src/main/ipc/shared', () => ({
+vi.mock('../../../src/main/ipc/shared', () => ({
   emitAll: (...args) => mockEmitAll(...args)
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
-vi.mock('../src/main/ai/llm/tool-executor.js', () => ({
+vi.mock('../../../src/main/ai/llm/tool-executor.js', () => ({
   executeElectronTool: vi.fn()
 }))
 
-vi.mock('../src/main/ai/config.js', () => ({
+vi.mock('../../../src/main/ai/config.js', () => ({
   CONTEXT_SIZE: 4096
 }))
 
 const mockHandleChatEvent = vi.fn()
-vi.mock('../src/main/ai/llm/stream.js', () => ({
+vi.mock('../../../src/main/ai/llm/stream.js', () => ({
   handleChatEventForRenderer: (...args) => mockHandleChatEvent(...args),
   resetStreamState: vi.fn(),
   setChatStreamHandlers: vi.fn(),
@@ -56,7 +56,7 @@ beforeEach(async () => {
   mockEmitAll.mockClear()
   mockHandleChatEvent.mockClear()
   vi.resetModules()
-  bridge = await import('../src/main/ai/llm/bridge.js')
+  bridge = await import('../../../src/main/ai/llm/bridge.js')
 })
 
 describe('sendChatMessage + waitForChatResult race condition', () => {
@@ -306,7 +306,7 @@ describe('renderer event flow', () => {
 
 describe('tool_call_id matching with duplicate tool names', () => {
   it('should handle two calls to the same tool in one round', async () => {
-    const { executeElectronTool } = await import('../src/main/ai/llm/tool-executor.js')
+    const { executeElectronTool } = await import('../../../src/main/ai/llm/tool-executor.js')
     executeElectronTool.mockResolvedValue('result')
 
     let callNum = 0
@@ -318,7 +318,7 @@ describe('tool_call_id matching with duplicate tool names', () => {
     })
 
     streamChatYield = null
-    const mod = await import('../src/main/ai/llm/client.js')
+    const mod = await import('../../../src/main/ai/llm/client.js')
     vi.spyOn(mod, 'streamChat').mockImplementation(async function* () {
       callNum++
       if (callNum === 1) {

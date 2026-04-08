@@ -2,15 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockEmitAll = vi.fn()
 
-vi.mock('../src/main/ipc/shared', () => ({
+vi.mock('../../../src/main/ipc/shared', () => ({
   emitAll: (...args) => mockEmitAll(...args)
 }))
 
-vi.mock('../src/main/core/logger', () => ({
+vi.mock('../../../src/main/core/logger', () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 
-vi.mock('../src/main/ai/config.js', () => ({
+vi.mock('../../../src/main/ai/config.js', () => ({
   CONTEXT_SIZE: 4096
 }))
 
@@ -19,7 +19,7 @@ const {
   resetStreamState,
   setChatStreamHandlers,
   clearChatStreamHandlers
-} = await import('../src/main/ai/llm/stream.js')
+} = await import('../../../src/main/ai/llm/stream.js')
 
 beforeEach(() => {
   mockEmitAll.mockClear()

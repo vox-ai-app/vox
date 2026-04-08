@@ -6,7 +6,7 @@ describe('scheduler/cron', () => {
   beforeEach(async () => {
     vi.resetModules()
     ;({ scheduleJob, cancelJob, cancelAllJobs, getJob, listJobs, computeNextRun } =
-      await import('../packages/scheduler/src/cron.js'))
+      await import('../src/cron.js'))
   })
 
   afterEach(() => {
