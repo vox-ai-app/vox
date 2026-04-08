@@ -5,6 +5,7 @@
   <a href="https://www.vox-ai.chat/download/mac"><img src="https://img.shields.io/badge/download-macOS-111827?logo=apple&logoColor=white&style=flat-square" alt="Download Vox for macOS" /></a>
   <a href="https://www.vox-ai.chat/blog"><img src="https://img.shields.io/badge/updates-blog-355070?style=flat-square" alt="Vox blog" /></a>
   <a href="https://www.vox-ai.chat/privacy"><img src="https://img.shields.io/badge/privacy-policy-0F766E?style=flat-square" alt="Privacy policy" /></a>
+  <a href="https://deepscan.io/dashboard#view=project&tid=29467&pid=31403&bid=1017248"><img src="https://deepscan.io/api/teams/29467/projects/31403/branches/1017248/badge/grade.svg" alt="DeepScan grade" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-0F766E?style=flat-square" alt="MIT license" /></a>
   <a href="https://www.producthunt.com/products/vox-3"><img src="https://img.shields.io/badge/Product%20Hunt-Vox-DA552F?logo=producthunt&logoColor=white&style=flat-square" alt="Product Hunt" /></a>
 </p>
@@ -142,11 +143,11 @@ Nothing is sent off-device.
 
 ## Platform roadmap
 
-| Platform    | Status          | Notes                                                                                                               |
-| ----------- | --------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **macOS**   | Stable          | Full feature set — voice, iMessage, screen control, email, overlay. Tested on Apple Silicon (M1–M4) and Intel Macs. |
-| **Windows** | Planned         | Core architecture is ready. Needs platform integrations. [Help wanted.](https://github.com/vox-ai-app/vox/issues)   |
-| **Linux**   | Planned         | Same path as Windows. [Help wanted.](https://github.com/vox-ai-app/vox/issues)                                      |
+| Platform    | Status  | Notes                                                                                                               |
+| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| **macOS**   | Stable  | Full feature set — voice, iMessage, screen control, email, overlay. Tested on Apple Silicon (M1–M4) and Intel Macs. |
+| **Windows** | Planned | Core architecture is ready. Needs platform integrations. [Help wanted.](https://github.com/vox-ai-app/vox/issues)   |
+| **Linux**   | Planned | Same path as Windows. [Help wanted.](https://github.com/vox-ai-app/vox/issues)                                      |
 
 Most of the codebase is already portable. Today, platform-specific work is concentrated in `@vox-ai-app/integrations`, and the current voice stack is still tuned for the macOS app build. Adding Windows or Linux mainly means implementing the platform adapters alongside the existing `mac/` directories and validating the voice/runtime packaging on those targets.
 
@@ -155,7 +156,6 @@ Most of the codebase is already portable. Today, platform-specific work is conce
 ## System architecture
 
 Vox is a layered Electron app. The renderer surfaces stay thin, the preload script exposes a narrow IPC contract, and the main process owns orchestration, tool execution, model lifecycle, storage, and OS-facing automation.
-
 
 - `src/renderer` contains the product UI for the main app, overlay, and voice surfaces.
 - `src/preload/index.js` is the trust boundary. Renderer code does not reach into Node or Electron directly; it calls a curated `window.api`.
@@ -168,19 +168,19 @@ Vox is a layered Electron app. The renderer surfaces stay thin, the preload scri
 
 The workspace is split into 11 packages. The Electron app in `src/` composes them; most are reusable in other Electron apps, and several are plain Node libraries.
 
-| Package                                             | Platform        | Description                                             |
-| --------------------------------------------------- | --------------- | ------------------------------------------------------- |
-| [`@vox-ai-app/mcp`](packages/mcp)                   | any             | MCP client (stdio, SSE, HTTP)                           |
-| [`@vox-ai-app/tools`](packages/tools)               | any             | Registry, builtins (fs, shell, fetch, grep, glob), docs |
-| [`@vox-ai-app/integrations`](packages/integrations) | macOS (for now) | Mail, Screen, iMessage integrations                     |
+| Package                                             | Platform        | Description                                              |
+| --------------------------------------------------- | --------------- | -------------------------------------------------------- |
+| [`@vox-ai-app/mcp`](packages/mcp)                   | any             | MCP client (stdio, SSE, HTTP)                            |
+| [`@vox-ai-app/tools`](packages/tools)               | any             | Registry, builtins (fs, shell, fetch, grep, glob), docs  |
+| [`@vox-ai-app/integrations`](packages/integrations) | macOS (for now) | Mail, Screen, iMessage integrations                      |
 | [`@vox-ai-app/voice`](packages/voice)               | macOS today     | Wake word detection, shortcut handling, and voice window |
-| [`@vox-ai-app/indexing`](packages/indexing)         | any             | File indexing and full-text search                      |
-| [`@vox-ai-app/parser`](packages/parser)             | any             | Document parsing (PDF, DOCX, PPTX, etc.)                |
-| [`@vox-ai-app/storage`](packages/storage)           | any             | Local message and config persistence (SQLite)           |
-| [`@vox-ai-app/ui`](packages/ui)                     | any             | React UI components and design tokens                   |
-| [`@vox-ai-app/scheduler`](packages/scheduler)       | any             | Cron-based job scheduling with timezone support         |
-| [`@vox-ai-app/skills`](packages/skills)             | any             | SKILL.md loader and LLM prompt formatter                |
-| [`@vox-ai-app/channels`](packages/channels)         | any             | Chat adapters (WhatsApp, Telegram, Discord, Slack)      |
+| [`@vox-ai-app/indexing`](packages/indexing)         | any             | File indexing and full-text search                       |
+| [`@vox-ai-app/parser`](packages/parser)             | any             | Document parsing (PDF, DOCX, PPTX, etc.)                 |
+| [`@vox-ai-app/storage`](packages/storage)           | any             | Local message and config persistence (SQLite)            |
+| [`@vox-ai-app/ui`](packages/ui)                     | any             | React UI components and design tokens                    |
+| [`@vox-ai-app/scheduler`](packages/scheduler)       | any             | Cron-based job scheduling with timezone support          |
+| [`@vox-ai-app/skills`](packages/skills)             | any             | SKILL.md loader and LLM prompt formatter                 |
+| [`@vox-ai-app/channels`](packages/channels)         | any             | Chat adapters (WhatsApp, Telegram, Discord, Slack)       |
 
 The package boundaries are intentionally narrow: packages encapsulate reusable capabilities, while the app layer handles Electron-specific lifecycle, window management, IPC, and product behavior.
 
