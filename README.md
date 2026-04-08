@@ -186,6 +186,16 @@ The package boundaries are intentionally narrow: packages encapsulate reusable c
 
 ---
 
+## Experimental research
+
+The repo also has an [`experiments/`](experiments) area for future-facing work that is intentionally outside the shipped app runtime.
+
+The first track is [`experiments/vox-model`](experiments/vox-model): a PyTorch-based playground for exploring what it would look like to build and train a Vox-oriented model, study evaluation and export workflows, and potentially grow that work into a standalone system later.
+
+This is research, not the current product path. Vox still runs local GGUF models through `llama.cpp` today.
+
+---
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
