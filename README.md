@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/vox-ai-app/vox/releases/latest"><img src="https://img.shields.io/github/v/release/vox-ai-app/vox?display_name=tag&label=release&style=flat-square" alt="Latest release" /></a>
-  <a href="https://github.com/vox-ai-app/vox/releases/latest"><img src="https://img.shields.io/github/downloads/vox-ai-app/vox/latest/total?style=flat-square" alt="Downloads" /></a>
+  <a href="https://github.com/vox-ai-app/vox/releases/latest"><img src="https://img.shields.io/github/downloads/vox-ai-app/vox/total?style=flat-square" alt="Downloads" /></a>
   <a href="https://www.vox-ai.chat/download/mac"><img src="https://img.shields.io/badge/download-macOS-111827?logo=apple&logoColor=white&style=flat-square" alt="Download Vox for macOS" /></a>
   <a href="https://www.vox-ai.chat/blog"><img src="https://img.shields.io/badge/updates-blog-355070?style=flat-square" alt="Vox blog" /></a>
   <a href="https://www.vox-ai.chat/privacy"><img src="https://img.shields.io/badge/privacy-policy-0F766E?style=flat-square" alt="Privacy policy" /></a>
