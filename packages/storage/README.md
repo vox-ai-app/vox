@@ -96,12 +96,52 @@ const activity = loadTaskActivity(db, 'abc-123')
 ## Settings
 
 ```js
-import { getSetting, setSetting, getAllSettings, deleteSetting } from '@vox-ai-app/storage/settings'
+import { getSetting, setSetting, getSettingJson, getAllSettings, deleteSetting } from '@vox-ai-app/storage/settings'
 
 setSetting(db, 'theme', 'dark')
-const theme = getSetting(db, 'theme')
-const all = getAllSettings(db)
+const theme = getSetting(db, 'theme')      // raw string
+const json  = getSettingJson(db, 'prefs', {}) // parsed JSON with fallback
+const all   = getAllSettings(db)           // { key: rawString, ... }
 deleteSetting(db, 'theme')
+```
+
+## MCP Servers
+
+```js
+import {
+  createMcpServer,
+  updateMcpServer,
+  deleteMcpServer,
+  getMcpServer,
+  listMcpServers
+} from '@vox-ai-app/storage/mcp-servers'
+
+const srv = createMcpServer(db, {
+  name: 'filesystem',
+  transport: 'stdio',
+  command: 'npx -y @modelcontextprotocol/server-filesystem /home',
+  isEnabled: true
+})
+
+const all = listMcpServers(db)                    // all servers
+const enabled = listMcpServers(db, true)           // enabled only
+updateMcpServer(db, srv.id, { isEnabled: false })
+deleteMcpServer(db, srv.id)
+```
+
+## Vectors
+
+Cosine-similarity vector store backed by SQLite. Intended for small local knowledge bases (< ~50 k vectors).
+
+```js
+import { vectorUpsert, vectorSearch } from '@vox-ai-app/storage/vectors'
+
+// Store an embedding (Float32Array or number[])
+vectorUpsert(db, 'knowledge', 'doc-1', embeddingValues, { path: '/docs/readme.md' })
+
+// Cosine-similarity search with optional BM25 reranking
+const results = vectorSearch(db, 'knowledge', queryEmbedding, 'search text', 10)
+// [{ id, score, metadata }]
 ```
 
 ## License

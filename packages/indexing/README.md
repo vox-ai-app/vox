@@ -74,12 +74,12 @@ getIndexingStatus() // current status + progress
 
 ### IPC registration
 
-For Electron apps that expose indexing over IPC:
+For Electron apps that expose indexing over IPC, import from the `./ipc` sub-export and pass your app's IPC helper factories:
 
 ```js
 import { registerIndexingIpc } from '@vox-ai-app/indexing/ipc'
 
-registerIndexingIpc()
+registerIndexingIpc({ createHandler, registerHandler })
 // Registers: indexing:get-folders, indexing:add-folder, indexing:remove-folder,
 //            indexing:rebuild, indexing:get-status, indexing:pick-folder,
 //            indexing:get-indexed-children, indexing:reset-state
@@ -87,7 +87,7 @@ registerIndexingIpc()
 
 ### Process status subscription (advanced)
 
-For apps that want push-based status updates from the utility process:
+Push-based status updates are available via the `./process` sub-export:
 
 ```js
 import { setOnStatusChange } from '@vox-ai-app/indexing/process'
@@ -105,7 +105,7 @@ setOnStatusChange((status) => {
 
 ## Build
 
-Register two additional entry points in your Electron build config:
+The indexing package needs two additional Electron entry points — the utility process and the parser worker. They are resolved at runtime from the built output, so register them in your build config:
 
 ```js
 // electron.vite.config.js
@@ -123,6 +123,8 @@ export default {
   }
 }
 ```
+
+At runtime the host resolves the process entry as `out/main/indexing.process.js` (relative to `app.getAppPath()`).
 
 ## License
 

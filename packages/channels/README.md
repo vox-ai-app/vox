@@ -51,7 +51,7 @@ All channels extend `ChannelAdapter` which provides:
 - **Reconnection** — exponential backoff with configurable `initialMs`, `maxMs`, `factor`, `jitter`, and `maxAttempts`
 - **Deduplication** — automatic message dedup with configurable `dedupeMaxSize` and `dedupeTtlMs`
 - **Text chunking** — `chunkText(text, maxLen)` splits long messages at newline boundaries while preserving code fences
-- **Safe disconnect** — `disconnect()` aborts the reconnect controller before closing the underlying client, preventing zombie socket races
+- **Safe disconnect** — `disconnect()` aborts the reconnect controller before closing the underlying client
 
 ```js
 import { ChannelAdapter, chunkText } from '@vox-ai-app/channels/adapter'
@@ -59,23 +59,51 @@ import { ChannelAdapter, chunkText } from '@vox-ai-app/channels/adapter'
 const chunks = chunkText(longMessage, 2000)
 ```
 
+### Reconnect config
+
+Pass `reconnect` in the channel config to tune the backoff:
+
+| Option         | Default | Description                                          |
+| -------------- | ------- | ---------------------------------------------------- |
+| `initialMs`    | `2000`  | Delay before the first reconnect attempt.            |
+| `maxMs`        | `30000` | Maximum delay cap.                                   |
+| `factor`       | `1.8`   | Exponential backoff multiplier.                      |
+| `jitter`       | `0.25`  | Random jitter fraction applied to each delay.        |
+| `maxAttempts`  | `12`    | Give up after this many consecutive failed attempts. |
+
+```js
+const channel = new TelegramChannel({
+  botToken: '...',
+  reconnect: { initialMs: 1000, maxAttempts: 5 }
+})
+```
+
 ## API
 
-Every channel implements:
+Every channel implements the following interface:
 
 ```js
 await channel.connect()
-await channel.send(peerId, text, options?)
 await channel.disconnect()
-channel.toJSON() // { id, connected }
+await channel.send(peerId, text, options?)         // send a text message
+await channel.editMessage(peerId, messageId, text) // edit a sent message (if supported)
+await channel.deleteMessage(peerId, messageId)     // delete a message (if supported)
+await channel.react(peerId, messageId, emoji)      // react to a message (if supported)
+await channel.readMessages(peerId, options?)       // read message history (if supported)
+await channel.sendTyping(peerId)                   // show typing indicator
+await channel.executeAction(action)                // dispatch a structured action object
+channel.toJSON()                                   // { id, connected }
 ```
+
+`executeAction` dispatches to the above methods based on `action.action`:
+`'send'`, `'edit'`, `'delete'`, `'react'`, `'read'`, `'typing'`.
 
 Events:
 
 ```js
 channel.on('message', ({ channel, peerId, text, timestamp, raw }) => {})
-channel.on('status', ({ channel, status }) => {})
-channel.on('error', ({ channel, error }) => {})
+channel.on('status',  ({ channel, status }) => {})  // 'connected' | 'disconnected' | 'reconnecting'
+channel.on('error',   ({ channel, error }) => {})
 ```
 
 ## License
