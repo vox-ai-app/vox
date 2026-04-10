@@ -7,6 +7,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.1.6] - 2026-04-10
+
+### Fixed
+
+- **Dock icon oversized** — Removed `app.dock.setIcon()` call which overrode the correctly-sized `.app` bundle icon with a raw `nativeImage`, causing an oversized dock icon. The `.icns` is already bundled by electron-builder via `buildResources: build`; only `app.dock.show()` is needed. Cleaned up unused `nativeImage` import.
+
+---
+
 ## [2.1.5] - 2026-04-10
 
 ### Fixed

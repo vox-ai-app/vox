@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, nativeImage } from 'electron'
+import { app, BrowserWindow, shell, ipcMain } from 'electron'
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
 import { join } from 'path'
@@ -282,10 +282,6 @@ app
     createMainWindow()
 
     if (process.platform === 'darwin' && app.dock) {
-      const icns = nativeImage.createFromPath(join(__dirname, '../../build/icon.icns'))
-      const fallback = nativeImage.createFromPath(join(__dirname, '../../resources/icon.png'))
-      const icon = icns.isEmpty() ? fallback : icns
-      if (!icon.isEmpty()) app.dock.setIcon(icon)
       app.dock.show()
     }
 
