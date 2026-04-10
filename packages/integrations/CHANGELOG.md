@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.3] - 2026-04-10
+
+### Fixed
+
+- `pyTypeText` now uses the correct macOS virtual keycode per character instead of always sending keycode `0` (`a`). Uppercase letters and shifted symbols now apply the shift flag correctly, with Unicode-string fallback retained for characters that do not have a known keycode.
+
 ## [1.0.2] - 2026-04-05
 
 ### Fixed
