@@ -7,6 +7,18 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.1.3] - 2026-04-10
+
+### Fixed
+
+- **Screen typing tool only producing "aaaa"** — `pyTypeText` was using virtual keycode `0` (the `a` key) for every character. `CGEventKeyboardSetUnicodeString` was meant to override the character but many macOS apps read the keycode instead. Now uses the correct macOS virtual keycode per character with shift flag for uppercase and shifted symbols (`!@#$%` etc.), falling back to Unicode string only for characters without a known keycode (emoji, non-Latin scripts).
+
+### Changed
+
+- **`@vox-ai-app/integrations` 1.0.2 → 1.0.3** — fixed `pyTypeText` keycode mapping.
+
+---
+
 ## [2.1.2] - 2026-04-06
 
 ### Fixed
