@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, nativeImage } from 'electron'
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
 import { join } from 'path'
@@ -81,6 +81,7 @@ logger.hooks.push((message) => {
 
 const SHUTDOWN_TIMEOUT_MS = 5000
 
+let quitting = false
 let mainWindow = null
 let _setupPhase = 'checking'
 
@@ -109,6 +110,13 @@ function createMainWindow() {
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url)
     return { action: 'deny' }
+  })
+
+  mainWindow.on('close', (e) => {
+    if (!quitting) {
+      e.preventDefault()
+      mainWindow.hide()
+    }
   })
 
   mainWindow.once('ready-to-show', () => mainWindow.show())
@@ -272,6 +280,15 @@ app
     }
 
     createMainWindow()
+
+    if (process.platform === 'darwin' && app.dock) {
+      const icns = nativeImage.createFromPath(join(__dirname, '../../build/icon.icns'))
+      const fallback = nativeImage.createFromPath(join(__dirname, '../../resources/icon.png'))
+      const icon = icns.isEmpty() ? fallback : icns
+      if (!icon.isEmpty()) app.dock.setIcon(icon)
+      app.dock.show()
+    }
+
     createVoiceWindow()
     createOverlayWindow()
     registerOverlayShortcut()
@@ -319,7 +336,7 @@ app
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
-      else mainWindow?.show()
+      else if (mainWindow && !mainWindow.isDestroyed()) mainWindow.show()
     })
   })
   .catch((err) => {
@@ -331,8 +348,6 @@ app
       logger.error('[main] Failed to create fallback window:', windowErr)
     }
   })
-
-let quitting = false
 
 app.on('before-quit', (e) => {
   if (quitting) return

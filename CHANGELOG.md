@@ -7,6 +7,16 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.1.5] - 2026-04-10
+
+### Fixed
+
+- **Fatal crash on dock icon click (Sentry VOX-CHAT-LOCAL-APP-5)** — Clicking the dock icon after closing the main window threw `TypeError: Object has been destroyed`. The `app.activate` handler used optional chaining (`mainWindow?.show()`) which doesn't detect a natively destroyed Electron `BrowserWindow`. Added `isDestroyed()` guard and hide-on-close behavior so the window hides instead of being destroyed on macOS (standard macOS app pattern).
+- **Dock icon not showing / wrong size** — Explicitly set the dock icon via `app.dock.setIcon()` using `build/icon.icns` (multi-resolution) with PNG fallback. Ensures the Vox icon appears in the dock in both dev and production.
+- **`quitting` variable referenced before declaration** — Moved `let quitting` declaration above the `close` handler that reads it, preventing potential temporal dead zone issues.
+
+---
+
 ## [2.1.4] - 2026-04-10
 
 ### Fixed
