@@ -7,6 +7,14 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.1.7] - 2026-04-10
+
+### Fixed
+
+- **UI freeze during engine startup** — `killStaleProcessOnPort` (`lsof`) and `validate` (`--version`) were blocking the main Electron thread with `execSync`. Converted both to async `execAsync` so the renderer stays responsive while the inference engine initializes.
+
+---
+
 ## [2.1.6] - 2026-04-10
 
 ### Fixed

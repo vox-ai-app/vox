@@ -1,5 +1,8 @@
-import { spawn, execSync } from 'child_process'
+import { spawn, exec } from 'child_process'
+import { promisify } from 'util'
 import { logger } from '../../core/logger'
+
+const execAsync = promisify(exec)
 import { emitAll } from '../../ipc/shared'
 import { ensure as ensureBinary, purge as purgeBinary } from './binary.manager.js'
 
@@ -72,9 +75,10 @@ async function waitForHealth() {
   }
 }
 
-function killStaleProcessOnPort(port) {
+async function killStaleProcessOnPort(port) {
   try {
-    const pids = execSync(`lsof -ti :${port}`, { encoding: 'utf-8' }).trim()
+    const { stdout } = await execAsync(`lsof -ti :${port}`)
+    const pids = stdout.trim()
     if (!pids) return
     logger.warn(`[llm.server] Killing stale process(es) on port ${port}: ${pids}`)
     for (const pid of pids.split('\n').filter(Boolean)) {
