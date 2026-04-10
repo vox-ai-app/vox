@@ -44,22 +44,23 @@ for char in text:
         needs_shift = False
 
     if keycode is not None:
+        flags = Quartz.kCGEventFlagMaskShift if needs_shift else 0
         e = Quartz.CGEventCreateKeyboardEvent(src, keycode, True)
-        if needs_shift:
-            Quartz.CGEventSetFlags(e, Quartz.kCGEventFlagMaskShift)
+        Quartz.CGEventSetFlags(e, flags)
         Quartz.CGEventPost(Quartz.kCGHIDEventTap, e)
         time.sleep(0.01)
         e = Quartz.CGEventCreateKeyboardEvent(src, keycode, False)
-        if needs_shift:
-            Quartz.CGEventSetFlags(e, Quartz.kCGEventFlagMaskShift)
+        Quartz.CGEventSetFlags(e, flags)
         Quartz.CGEventPost(Quartz.kCGHIDEventTap, e)
     else:
-        e = Quartz.CGEventCreateKeyboardEvent(src, 0, True)
+        e = Quartz.CGEventCreateKeyboardEvent(src, 10, True)
         Quartz.CGEventKeyboardSetUnicodeString(e, 1, char)
+        Quartz.CGEventSetFlags(e, 0)
         Quartz.CGEventPost(Quartz.kCGHIDEventTap, e)
         time.sleep(0.01)
-        e = Quartz.CGEventCreateKeyboardEvent(src, 0, False)
+        e = Quartz.CGEventCreateKeyboardEvent(src, 10, False)
         Quartz.CGEventKeyboardSetUnicodeString(e, 1, char)
+        Quartz.CGEventSetFlags(e, 0)
         Quartz.CGEventPost(Quartz.kCGHIDEventTap, e)
     time.sleep(0.02)
 `
@@ -73,13 +74,11 @@ for m in ${JSON.stringify(mods)}:
     flags |= MOD_FLAGS.get(m.lower(), 0)
 src = Quartz.CGEventSourceCreate(Quartz.kCGEventSourceStateHIDSystemState)
 e = Quartz.CGEventCreateKeyboardEvent(src, ${keyCode}, True)
-if flags:
-    Quartz.CGEventSetFlags(e, flags)
+Quartz.CGEventSetFlags(e, flags)
 Quartz.CGEventPost(Quartz.kCGHIDEventTap, e)
 time.sleep(0.05)
 e = Quartz.CGEventCreateKeyboardEvent(src, ${keyCode}, False)
-if flags:
-    Quartz.CGEventSetFlags(e, flags)
+Quartz.CGEventSetFlags(e, flags)
 Quartz.CGEventPost(Quartz.kCGHIDEventTap, e)
 `
 
@@ -92,14 +91,14 @@ for m in ${JSON.stringify(mods)}:
 text = base64.b64decode('${b64}').decode('utf-8')
 src = Quartz.CGEventSourceCreate(Quartz.kCGEventSourceStateHIDSystemState)
 for char in text:
-    e = Quartz.CGEventCreateKeyboardEvent(src, 0, True)
+    e = Quartz.CGEventCreateKeyboardEvent(src, 10, True)
     Quartz.CGEventKeyboardSetUnicodeString(e, 1, char)
-    if flags:
-        Quartz.CGEventSetFlags(e, flags)
+    Quartz.CGEventSetFlags(e, flags)
     Quartz.CGEventPost(Quartz.kCGHIDEventTap, e)
     time.sleep(0.01)
-    e = Quartz.CGEventCreateKeyboardEvent(src, 0, False)
+    e = Quartz.CGEventCreateKeyboardEvent(src, 10, False)
     Quartz.CGEventKeyboardSetUnicodeString(e, 1, char)
+    Quartz.CGEventSetFlags(e, flags)
     Quartz.CGEventPost(Quartz.kCGHIDEventTap, e)
     time.sleep(0.02)
 `

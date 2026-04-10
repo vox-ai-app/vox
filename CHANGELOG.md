@@ -7,6 +7,18 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.1.4] - 2026-04-10
+
+### Fixed
+
+- **Keyboard input bug:** All macOS screen typing tools now set modifier flags explicitly for every key event, preventing sticky shift/ctrl/alt bugs. Unicode fallback now uses keycode 10 (unused) instead of 0 (the 'a' key), so no extra 'a' appears in any app. All keys (a-z, A-Z, 0-9, punctuation, shifted symbols, Unicode) now type correctly in every tested app.
+
+### Changed
+
+- **@vox-ai-app/integrations** 1.0.3 → 1.0.4 — keyboard event bugfix.
+
+---
+
 ## [2.1.3] - 2026-04-10
 
 ### Fixed
@@ -200,7 +212,7 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Email send defaults for `cc`, `bcc`, and `attachments` parameters
 - Model download crash — `reader.pipeTo()` replaced with `resp.body.pipeTo()` (`ReadableStreamDefaultReader` lacks `pipeTo`)
 - Mail date parsing — removed incorrect Core Data epoch offset (Apple Mail `date_received` is already a Unix timestamp)
-- Bridge streaming — cross-chunk `<think>` tag handling for blocks split across SSE chunks
+- Bridge streaming — cross-chunk `leshoot` tag handling for blocks split across SSE chunks
 - Unicode literal rendering — replaced `\u2014` and `\u2026` with actual characters across source and UI
 - STT worker crash on packaged app — added `asarUnpack` for ONNX voice models
 - STT service error emission — fixed missing error event forwarding
