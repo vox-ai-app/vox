@@ -1,5 +1,8 @@
-import { execSync } from 'child_process'
+import { execSync, exec } from 'child_process'
+import { promisify } from 'util'
 import { join, dirname } from 'path'
+
+const execAsync = promisify(exec)
 import {
   existsSync,
   mkdirSync,
@@ -200,8 +203,8 @@ function removeQuarantine(dir) {
   }
 }
 
-function validate(binaryPath) {
-  execSync(`"${binaryPath}" --version`, {
+async function validate(binaryPath) {
+  await execAsync(`"${binaryPath}" --version`, {
     timeout: 30000,
     encoding: 'utf-8',
     env: { ...process.env, GGML_METAL: '0' }
@@ -231,7 +234,7 @@ export async function ensure() {
 
     const binaryPath = getBinaryPath()
     try {
-      validate(binaryPath)
+      await validate(binaryPath)
     } catch (err) {
       logger.error(LOG_PREFIX, 'Validation failed:', err.message)
       purge()
