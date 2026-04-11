@@ -24,6 +24,6 @@
     "README.md"
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.27.0"
+    "@modelcontextprotocol/sdk": "^1.29.0"
   }
 }
