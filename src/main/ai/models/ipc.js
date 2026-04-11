@@ -1,4 +1,5 @@
 import { registerHandler, createHandler, emitAll } from '../../ipc/shared'
+import { getContextSize } from '../config.js'
 import {
   listModels,
   getActiveModelPath,
@@ -91,5 +92,10 @@ export function registerModelsIpc() {
   registerHandler(
     'models:get-recommended',
     createHandler(() => getRecommendedModel())
+  )
+
+  registerHandler(
+    'models:get-context-size',
+    createHandler(() => getContextSize())
   )
 }

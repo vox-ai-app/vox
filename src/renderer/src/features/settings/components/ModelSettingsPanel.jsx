@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { TEMPERATURE, MAX_TOKENS } from '../../main/config/settings'
 
 function formatBytes(bytes) {
   if (!bytes) return ''
@@ -38,6 +39,11 @@ export default function ModelSettingsPanel() {
   const [modelLoading, setModelLoading] = useState(false)
   const [loadPercent, setLoadPercent] = useState(0)
 
+  // Inference settings state
+  const [temperature, setTemperature] = useState(TEMPERATURE.default)
+  const [maxTokens, setMaxTokens] = useState(MAX_TOKENS.default)
+  const [contextSize, setContextSize] = useState(null)
+
   const refresh = useCallback(async () => {
     try {
       const [list, active] = await Promise.all([
@@ -51,8 +57,23 @@ export default function ModelSettingsPanel() {
   }, [])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh()
+
+    // Load inference settings
+    async function loadInferenceSettings() {
+      try {
+        const storedTemp = await window.api.store.get(TEMPERATURE.key)
+        const storedMax = await window.api.store.get(MAX_TOKENS.key)
+        if (storedTemp != null) setTemperature(storedTemp)
+        if (storedMax != null) setMaxTokens(storedMax)
+      } catch {}
+
+      try {
+        const ctx = await window.api.models.getContextSize()
+        setContextSize(ctx)
+      } catch {}
+    }
+    loadInferenceSettings()
 
     window.api.models
       .getDownloads?.()
@@ -190,285 +211,443 @@ export default function ModelSettingsPanel() {
     })
   }
 
+  const handleTemperatureChange = async (e) => {
+    const val = parseFloat(e.target.value)
+    setTemperature(val)
+    try {
+      await window.api.store.set(TEMPERATURE.key, val)
+    } catch {}
+  }
+
+  const handleMaxTokensChange = async (e) => {
+    const val = parseInt(e.target.value, 10)
+    setMaxTokens(val)
+    try {
+      await window.api.store.set(MAX_TOKENS.key, val)
+    } catch {}
+  }
+
   return (
-    <article className="workspace-panel-card">
-      <h2>Models</h2>
+    <>
+      <article className="workspace-panel-card">
+        <h2>Models</h2>
 
-      {feedback && (
-        <p
-          className={`knowledge-rail-feedback knowledge-rail-feedback-${feedback.type}`}
-          style={{ marginBottom: '10px' }}
-        >
-          {feedback.text}
-        </p>
-      )}
+        {feedback && (
+          <p
+            className={`knowledge-rail-feedback knowledge-rail-feedback-${feedback.type}`}
+            style={{ marginBottom: '10px' }}
+          >
+            {feedback.text}
+          </p>
+        )}
 
-      {modelLoading && (
-        <div
-          style={{
-            marginBottom: '12px',
-            padding: '10px 12px',
-            borderRadius: '10px',
-            border: '1px solid rgba(236,137,184,0.25)',
-            background: 'rgba(236,137,184,0.04)'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <span
-              style={{
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                border: '2px solid rgba(236,137,184,0.2)',
-                borderTopColor: '#ec89b8',
-                display: 'inline-block',
-                animation: 'workspaceButtonSpin 0.8s linear infinite',
-                flexShrink: 0
-              }}
-            />
-            <span style={{ fontSize: '0.82rem', color: 'var(--vox-text-primary)' }}>
-              Loading model… {loadPercent}%
-            </span>
-          </div>
+        {modelLoading && (
           <div
             style={{
-              height: '4px',
-              borderRadius: '999px',
-              background: 'var(--vox-border-soft)',
-              overflow: 'hidden'
+              marginBottom: '12px',
+              padding: '10px 12px',
+              borderRadius: '10px',
+              border: '1px solid rgba(236,137,184,0.25)',
+              background: 'rgba(236,137,184,0.04)'
             }}
           >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+              <span
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  border: '2px solid rgba(236,137,184,0.2)',
+                  borderTopColor: '#ec89b8',
+                  display: 'inline-block',
+                  animation: 'workspaceButtonSpin 0.8s linear infinite',
+                  flexShrink: 0
+                }}
+              />
+              <span style={{ fontSize: '0.82rem', color: 'var(--vox-text-primary)' }}>
+                Loading model… {loadPercent}%
+              </span>
+            </div>
             <div
               style={{
-                height: '100%',
+                height: '4px',
                 borderRadius: '999px',
-                background: 'rgba(236,137,184,0.7)',
-                width: `${loadPercent}%`,
-                transition: 'width 0.3s ease'
+                background: 'var(--vox-border-soft)',
+                overflow: 'hidden'
               }}
-            />
-          </div>
-        </div>
-      )}
-
-      {}
-      {models.length > 0 && (
-        <div style={{ display: 'grid', gap: '6px', marginBottom: '14px' }}>
-          {models.map((m) => {
-            const isActive = m.path === activeModel
-            return (
+            >
               <div
-                key={m.path}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '8px 10px',
-                  borderRadius: '10px',
-                  border: `1px solid ${isActive ? 'rgba(236,137,184,0.35)' : 'var(--vox-border-soft)'}`,
-                  background: isActive ? 'rgba(236,137,184,0.06)' : 'rgba(255,255,255,0.02)'
+                  height: '100%',
+                  borderRadius: '999px',
+                  background: 'rgba(236,137,184,0.7)',
+                  width: `${loadPercent}%`,
+                  transition: 'width 0.3s ease'
                 }}
-              >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: '0.86rem',
-                      fontWeight: 500,
-                      color: 'var(--vox-text-primary)',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    {m.filename}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '0.72rem',
-                      color: 'var(--vox-text-muted)',
-                      marginTop: '2px'
-                    }}
-                  >
-                    {formatBytes(m.size)}
-                    {m.hfRepo ? ` · ${m.hfRepo}` : ''}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center' }}>
-                  {isActive ? (
-                    <span
+              />
+            </div>
+          </div>
+        )}
+
+        {models.length > 0 && (
+          <div style={{ display: 'grid', gap: '6px', marginBottom: '14px' }}>
+            {models.map((m) => {
+              const isActive = m.path === activeModel
+              return (
+                <div
+                  key={m.path}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '8px 10px',
+                    borderRadius: '10px',
+                    border: `1px solid ${isActive ? 'rgba(236,137,184,0.35)' : 'var(--vox-border-soft)'}`,
+                    background: isActive ? 'rgba(236,137,184,0.06)' : 'rgba(255,255,255,0.02)'
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
                       style={{
-                        fontSize: '0.72rem',
-                        color: 'rgba(236,137,184,0.9)',
-                        fontWeight: 600,
-                        padding: '2px 8px'
+                        fontSize: '0.86rem',
+                        fontWeight: 500,
+                        color: 'var(--vox-text-primary)',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
                       }}
                     >
-                      Active
-                    </span>
-                  ) : (
-                    <button
-                      className="chat-task-card-btn"
-                      onClick={() => handleSetActive(m.path)}
-                      type="button"
+                      {m.filename}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '0.72rem',
+                        color: 'var(--vox-text-muted)',
+                        marginTop: '2px'
+                      }}
                     >
-                      Use
-                    </button>
-                  )}
-                  {confirmDelete === m.path ? (
-                    <>
-                      <button
-                        className="chat-task-card-btn"
-                        onClick={() => handleDeleteConfirm(m.path)}
-                        style={{ color: 'rgba(255,100,100,0.9)', fontWeight: 600 }}
-                        type="button"
-                      >
-                        Confirm
-                      </button>
-                      <button
-                        className="chat-task-card-btn"
-                        onClick={() => setConfirmDelete(null)}
-                        type="button"
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      className="chat-task-card-btn"
-                      onClick={() => setConfirmDelete(m.path)}
-                      style={{ color: 'rgba(255,100,100,0.75)' }}
-                      type="button"
-                    >
-                      Delete
-                    </button>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {models.length === 0 && Object.keys(downloads).length === 0 && (
-        <p
-          style={{ fontSize: '0.86rem', color: 'var(--vox-text-secondary)', marginBottom: '14px' }}
-        >
-          No models downloaded. Browse for a .gguf file or download one below.
-        </p>
-      )}
-
-      {}
-      <div style={{ display: 'grid', gap: '6px' }}>
-        <button className="knowledge-rail-add" onClick={handlePick} type="button">
-          Browse for .gguf file…
-        </button>
-
-        <details open={models.length === 0} style={{ marginTop: '4px' }}>
-          <summary
-            style={{
-              fontSize: '0.8rem',
-              color: 'var(--vox-text-secondary)',
-              cursor: 'pointer',
-              userSelect: 'none',
-              padding: '4px 0'
-            }}
-          >
-            Download from HuggingFace
-          </summary>
-          <div style={{ display: 'grid', gap: '8px', marginTop: '8px' }}>
-            {SUGGESTED.map((s) => {
-              const dl = downloads[s.hfFile]
-              const inProgress = dl !== undefined
-              const exists = models.some((m) => m.filename === s.hfFile)
-              return (
-                <div key={s.hfFile}>
-                  <button
-                    className="knowledge-rail-add"
-                    disabled={inProgress || exists}
-                    onClick={() => handleDownload(s)}
-                    style={{ justifyContent: 'flex-start', gap: '8px' }}
-                    type="button"
-                  >
-                    {exists ? (
-                      <span style={{ color: 'rgba(140,220,140,0.9)' }}>✓</span>
-                    ) : inProgress ? (
+                      {formatBytes(m.size)}
+                      {m.hfRepo ? ` · ${m.hfRepo}` : ''}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center' }}>
+                    {isActive ? (
                       <span
                         style={{
-                          width: '12px',
-                          height: '12px',
-                          borderRadius: '50%',
-                          border: '2px solid rgba(236,137,184,0.2)',
-                          borderTopColor: '#ec89b8',
-                          display: 'inline-block',
-                          animation: 'workspaceButtonSpin 0.8s linear infinite',
-                          flexShrink: 0
+                          fontSize: '0.72rem',
+                          color: 'rgba(236,137,184,0.9)',
+                          fontWeight: 600,
+                          padding: '2px 8px'
                         }}
-                      />
-                    ) : null}
-                    <span style={{ flex: 1, textAlign: 'left' }}>
-                      {inProgress
-                        ? `Downloading… ${dl.percent > 0 ? `${dl.percent}%` : ''}`
-                        : s.label}
-                    </span>
-                    {inProgress && (
+                      >
+                        Active
+                      </span>
+                    ) : (
                       <button
                         className="chat-task-card-btn"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleCancel(s.hfFile)
-                        }}
-                        style={{
-                          fontSize: '0.7rem',
-                          color: 'rgba(255,100,100,0.8)',
-                          padding: '2px 6px',
-                          flexShrink: 0
-                        }}
+                        onClick={() => handleSetActive(m.path)}
                         type="button"
                       >
-                        Cancel
+                        Use
                       </button>
                     )}
-                  </button>
-                  {inProgress && dl.percent > 0 && (
-                    <div style={{ marginTop: '4px' }}>
-                      <div
-                        style={{
-                          height: '3px',
-                          borderRadius: '999px',
-                          background: 'var(--vox-border-soft)',
-                          overflow: 'hidden'
-                        }}
-                      >
-                        <div
-                          style={{
-                            height: '100%',
-                            borderRadius: '999px',
-                            background: 'rgba(236,137,184,0.7)',
-                            width: `${dl.percent}%`,
-                            transition: 'width 0.3s ease'
-                          }}
-                        />
-                      </div>
-                      {dl.totalBytes > 0 && (
-                        <div
-                          style={{
-                            fontSize: '0.68rem',
-                            color: 'var(--vox-text-muted)',
-                            marginTop: '3px',
-                            textAlign: 'right'
-                          }}
+                    {confirmDelete === m.path ? (
+                      <>
+                        <button
+                          className="chat-task-card-btn"
+                          onClick={() => handleDeleteConfirm(m.path)}
+                          style={{ color: 'rgba(255,100,100,0.9)', fontWeight: 600 }}
+                          type="button"
                         >
-                          {formatBytes(dl.downloadedBytes)} / {formatBytes(dl.totalBytes)}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                          Confirm
+                        </button>
+                        <button
+                          className="chat-task-card-btn"
+                          onClick={() => setConfirmDelete(null)}
+                          type="button"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        className="chat-task-card-btn"
+                        onClick={() => setConfirmDelete(m.path)}
+                        style={{ color: 'rgba(255,100,100,0.75)' }}
+                        type="button"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 </div>
               )
             })}
           </div>
-        </details>
-      </div>
-    </article>
+        )}
+
+        {models.length === 0 && Object.keys(downloads).length === 0 && (
+          <p
+            style={{
+              fontSize: '0.86rem',
+              color: 'var(--vox-text-secondary)',
+              marginBottom: '14px'
+            }}
+          >
+            No models downloaded. Browse for a .gguf file or download one below.
+          </p>
+        )}
+
+        <div style={{ display: 'grid', gap: '6px' }}>
+          <button className="knowledge-rail-add" onClick={handlePick} type="button">
+            Browse for .gguf file…
+          </button>
+
+          <details open={models.length === 0} style={{ marginTop: '4px' }}>
+            <summary
+              style={{
+                fontSize: '0.8rem',
+                color: 'var(--vox-text-secondary)',
+                cursor: 'pointer',
+                userSelect: 'none',
+                padding: '4px 0'
+              }}
+            >
+              Download from HuggingFace
+            </summary>
+            <div style={{ display: 'grid', gap: '8px', marginTop: '8px' }}>
+              {SUGGESTED.map((s) => {
+                const dl = downloads[s.hfFile]
+                const inProgress = dl !== undefined
+                const exists = models.some((m) => m.filename === s.hfFile)
+                return (
+                  <div key={s.hfFile}>
+                    <button
+                      className="knowledge-rail-add"
+                      disabled={inProgress || exists}
+                      onClick={() => handleDownload(s)}
+                      style={{ justifyContent: 'flex-start', gap: '8px' }}
+                      type="button"
+                    >
+                      {exists ? (
+                        <span style={{ color: 'rgba(140,220,140,0.9)' }}>✓</span>
+                      ) : inProgress ? (
+                        <span
+                          style={{
+                            width: '12px',
+                            height: '12px',
+                            borderRadius: '50%',
+                            border: '2px solid rgba(236,137,184,0.2)',
+                            borderTopColor: '#ec89b8',
+                            display: 'inline-block',
+                            animation: 'workspaceButtonSpin 0.8s linear infinite',
+                            flexShrink: 0
+                          }}
+                        />
+                      ) : null}
+                      <span style={{ flex: 1, textAlign: 'left' }}>
+                        {inProgress
+                          ? `Downloading… ${dl.percent > 0 ? `${dl.percent}%` : ''}`
+                          : s.label}
+                      </span>
+                      {inProgress && (
+                        <button
+                          className="chat-task-card-btn"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleCancel(s.hfFile)
+                          }}
+                          style={{
+                            fontSize: '0.7rem',
+                            color: 'rgba(255,100,100,0.8)',
+                            padding: '2px 6px',
+                            flexShrink: 0
+                          }}
+                          type="button"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </button>
+                    {inProgress && dl.percent > 0 && (
+                      <div style={{ marginTop: '4px' }}>
+                        <div
+                          style={{
+                            height: '3px',
+                            borderRadius: '999px',
+                            background: 'var(--vox-border-soft)',
+                            overflow: 'hidden'
+                          }}
+                        >
+                          <div
+                            style={{
+                              height: '100%',
+                              borderRadius: '999px',
+                              background: 'rgba(236,137,184,0.7)',
+                              width: `${dl.percent}%`,
+                              transition: 'width 0.3s ease'
+                            }}
+                          />
+                        </div>
+                        {dl.totalBytes > 0 && (
+                          <div
+                            style={{
+                              fontSize: '0.68rem',
+                              color: 'var(--vox-text-muted)',
+                              marginTop: '3px',
+                              textAlign: 'right'
+                            }}
+                          >
+                            {formatBytes(dl.downloadedBytes)} / {formatBytes(dl.totalBytes)}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </details>
+        </div>
+      </article>
+
+      <article className="workspace-panel-card" style={{ marginTop: '12px' }}>
+        <h2>Inference Settings</h2>
+
+        {/* Temperature */}
+        <div style={{ marginBottom: '16px' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '6px'
+            }}
+          >
+            <span style={{ fontSize: '0.86rem', color: 'var(--vox-text-primary)', fontWeight: 500 }}>
+              Temperature
+            </span>
+            <span
+              style={{
+                fontSize: '0.82rem',
+                color: 'rgba(236,137,184,0.9)',
+                fontWeight: 600,
+                minWidth: '32px',
+                textAlign: 'right'
+              }}
+            >
+              {temperature.toFixed(2)}
+            </span>
+          </div>
+          <input
+            max={TEMPERATURE.max}
+            min={TEMPERATURE.min}
+            onChange={handleTemperatureChange}
+            step={0.05}
+            style={{ width: '100%', accentColor: '#ec89b8' }}
+            type="range"
+            value={temperature}
+          />
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginTop: '3px'
+            }}
+          >
+            <span style={{ fontSize: '0.68rem', color: 'var(--vox-text-muted)' }}>
+              {TEMPERATURE.min} · deterministic
+            </span>
+            <span style={{ fontSize: '0.68rem', color: 'var(--vox-text-muted)' }}>
+              {TEMPERATURE.max} · creative
+            </span>
+          </div>
+        </div>
+
+        {/* Max Tokens */}
+        <div style={{ marginBottom: '16px' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '6px'
+            }}
+          >
+            <span style={{ fontSize: '0.86rem', color: 'var(--vox-text-primary)', fontWeight: 500 }}>
+              Max Tokens
+            </span>
+            <span
+              style={{
+                fontSize: '0.82rem',
+                color: 'rgba(236,137,184,0.9)',
+                fontWeight: 600,
+                minWidth: '48px',
+                textAlign: 'right'
+              }}
+            >
+              {maxTokens.toLocaleString()}
+            </span>
+          </div>
+          <input
+            max={MAX_TOKENS.max}
+            min={MAX_TOKENS.min}
+            onChange={handleMaxTokensChange}
+            step={256}
+            style={{ width: '100%', accentColor: '#ec89b8' }}
+            type="range"
+            value={maxTokens}
+          />
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginTop: '3px'
+            }}
+          >
+            <span style={{ fontSize: '0.68rem', color: 'var(--vox-text-muted)' }}>
+              {MAX_TOKENS.min.toLocaleString()}
+            </span>
+            <span style={{ fontSize: '0.68rem', color: 'var(--vox-text-muted)' }}>
+              {MAX_TOKENS.max.toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        {/* Context Size (read-only) */}
+        <div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}
+          >
+            <span style={{ fontSize: '0.86rem', color: 'var(--vox-text-primary)', fontWeight: 500 }}>
+              Context Size
+            </span>
+            <span
+              style={{
+                fontSize: '0.82rem',
+                color: 'var(--vox-text-secondary)',
+                fontWeight: 500
+              }}
+            >
+              {contextSize !== null ? `${contextSize.toLocaleString()} tokens` : 'Loading…'}
+            </span>
+          </div>
+          <p
+            style={{
+              fontSize: '0.72rem',
+              color: 'var(--vox-text-muted)',
+              marginTop: '4px',
+              marginBottom: 0
+            }}
+          >
+            Auto-detected from the running model server. Load a model to see the value.
+          </p>
+        </div>
+      </article>
+    </>
   )
 }
