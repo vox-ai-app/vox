@@ -1,8 +1,8 @@
 # @vox-ai-app/integrations
 
-macOS system integrations for Vox: Apple Mail, Screen control, and iMessage. Each integration ships with tool implementations and LLM tool definitions.
+macOS system integrations for Vox: Apple Mail, Screen control, iMessage, Contacts, Shortcuts, Music, Calendar, and Reminders. Each integration ships with tool implementations and LLM tool definitions.
 
-- Initial release.## [1.0.0] - 2026-03-24- `openDb` / `closeDb` lifecycle.- WAL journal mode, foreign keys, auto-schema creation.- Initial SQLite-based persistence: conversations, messages, tasks, task activity.### Added## [1.0.2] - 2026-04-01- `checkpointId` type consistency.- `getAllSettings` return type (now returns object instead of array).### Fixed- Added migration system (`src/migrations/runner.js` + `001_initial_schema.js`).- Added new exports: `./tools`, `./settings`, `./mcp-servers`, `./schedules`, `./tool-secrets`, `./patterns`, `./vectors`.- Updated exports map: all repo modules now resolve to `./src/repos/*.js`.- Moved 9 repository files from flat `src/` into `src/repos/` subdirectory.### ChangedRequires macOS. Each integration needs specific system permissions granted by the user.
+Requires macOS. Each integration needs specific system permissions granted by the user.
 
 ## Install
 
@@ -14,18 +14,28 @@ Peer dependency: `electron >= 28`
 
 ## Exports
 
-| Export                                    | Contents                      |
-| ----------------------------------------- | ----------------------------- |
-| `@vox-ai-app/integrations`                | All exports                   |
-| `@vox-ai-app/integrations/defs/mail`      | Mail tool definitions         |
-| `@vox-ai-app/integrations/defs/screen`    | Screen tool definitions       |
-| `@vox-ai-app/integrations/defs/imessage`  | iMessage tool definitions     |
-| `@vox-ai-app/integrations/mail`           | Mail functions                |
-| `@vox-ai-app/integrations/screen`         | Screen capture + control      |
-| `@vox-ai-app/integrations/screen/capture` | Capture only                  |
-| `@vox-ai-app/integrations/screen/control` | Control only                  |
-| `@vox-ai-app/integrations/screen/queue`   | Session acquire/release       |
-| `@vox-ai-app/integrations/imessage`       | iMessage data, reply, service |
+| Export                                      | Contents                      |
+| ------------------------------------------- | ----------------------------- |
+| `@vox-ai-app/integrations`                  | All exports                   |
+| `@vox-ai-app/integrations/defs/mail`        | Mail tool definitions         |
+| `@vox-ai-app/integrations/defs/screen`      | Screen tool definitions       |
+| `@vox-ai-app/integrations/defs/imessage`    | iMessage tool definitions     |
+| `@vox-ai-app/integrations/defs/contacts`    | Contacts tool definitions     |
+| `@vox-ai-app/integrations/defs/shortcuts`   | Shortcuts tool definitions    |
+| `@vox-ai-app/integrations/defs/music`       | Music tool definitions        |
+| `@vox-ai-app/integrations/defs/calendar`    | Calendar tool definitions     |
+| `@vox-ai-app/integrations/defs/reminders`   | Reminders tool definitions    |
+| `@vox-ai-app/integrations/mail`             | Mail functions                |
+| `@vox-ai-app/integrations/screen`           | Screen capture + control      |
+| `@vox-ai-app/integrations/screen/capture`   | Capture only                  |
+| `@vox-ai-app/integrations/screen/control`   | Control only                  |
+| `@vox-ai-app/integrations/screen/queue`     | Session acquire/release       |
+| `@vox-ai-app/integrations/imessage`         | iMessage data, reply, service |
+| `@vox-ai-app/integrations/contacts`         | Contacts search               |
+| `@vox-ai-app/integrations/shortcuts`        | List and run Shortcuts        |
+| `@vox-ai-app/integrations/music`            | Apple Music control           |
+| `@vox-ai-app/integrations/calendar`         | Calendar events CRUD          |
+| `@vox-ai-app/integrations/reminders`        | Reminders management          |
 
 ## Mail
 
@@ -115,6 +125,109 @@ Tool definitions:
 
 ```js
 import { IMESSAGE_TOOL_DEFINITIONS } from '@vox-ai-app/integrations/defs/imessage'
+```
+
+## Contacts
+
+Requires **Contacts permission** (System Settings → Privacy & Security → Contacts).
+
+```js
+import { searchContacts } from '@vox-ai-app/integrations/contacts'
+
+const result = await searchContacts({ query: 'John', limit: 25, offset: 0 })
+// { count, total, limit, offset, has_more, items: [{ name, emails, phones, org, title, addresses, notes }] }
+```
+
+Tool definitions:
+
+```js
+import { CONTACTS_TOOL_DEFINITIONS } from '@vox-ai-app/integrations/defs/contacts'
+```
+
+## Shortcuts
+
+```js
+import { listShortcuts, runShortcut } from '@vox-ai-app/integrations/shortcuts'
+
+const result = await listShortcuts({ limit: 100, offset: 0 })
+// { count, total, limit, offset, has_more, items: ['Shortcut Name', ...] }
+
+const output = await runShortcut({ name: 'My Shortcut', input: 'hello' })
+```
+
+Tool definitions:
+
+```js
+import { SHORTCUTS_TOOL_DEFINITIONS } from '@vox-ai-app/integrations/defs/shortcuts'
+```
+
+## Music
+
+Requires **Media & Apple Music permission** (System Settings → Privacy & Security → Media & Apple Music).
+
+```js
+import {
+  getNowPlaying,
+  playMusic,
+  pauseMusic,
+  nextTrack,
+  previousTrack,
+  setVolume
+} from '@vox-ai-app/integrations/music'
+
+const track = await getNowPlaying()
+await playMusic({ query: 'Bohemian Rhapsody' })
+await pauseMusic()
+await nextTrack()
+await previousTrack()
+await setVolume({ level: 50 })
+```
+
+Tool definitions:
+
+```js
+import { MUSIC_TOOL_DEFINITIONS } from '@vox-ai-app/integrations/defs/music'
+```
+
+## Calendar
+
+Requires **Calendars permission** (System Settings → Privacy & Security → Calendars).
+
+```js
+import { listEvents, createEvent, updateEvent, deleteEvent } from '@vox-ai-app/integrations/calendar'
+
+const result = await listEvents({ from: '2026-04-01', to: '2026-04-30', limit: 25, offset: 0 })
+// { count, total, limit, offset, has_more, items: [{ title, start, end, location, notes, calendar }] }
+
+await createEvent({ title: 'Meeting', start: '2026-04-15T10:00', end: '2026-04-15T11:00' })
+await updateEvent({ title: 'Meeting', newTitle: 'Updated Meeting' })
+await deleteEvent({ title: 'Meeting', date: '2026-04-15' })
+```
+
+Tool definitions:
+
+```js
+import { CALENDAR_TOOL_DEFINITIONS } from '@vox-ai-app/integrations/defs/calendar'
+```
+
+## Reminders
+
+Requires **Reminders permission** (System Settings → Privacy & Security → Reminders).
+
+```js
+import { listReminders, createReminder, completeReminder } from '@vox-ai-app/integrations/reminders'
+
+const result = await listReminders({ list: 'Work', limit: 25, offset: 0 })
+// { count, total, limit, offset, has_more, items: [{ name, list, dueDate, completed, notes }] }
+
+await createReminder({ name: 'Buy groceries', list: 'Personal', dueDate: '2026-04-15' })
+await completeReminder({ name: 'Buy groceries', list: 'Personal' })
+```
+
+Tool definitions:
+
+```js
+import { REMINDERS_TOOL_DEFINITIONS } from '@vox-ai-app/integrations/defs/reminders'
 ```
 
 ## License

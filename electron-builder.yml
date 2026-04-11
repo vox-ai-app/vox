@@ -43,6 +43,9 @@ mac:
     NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
     NSContactsUsageDescription: Application requests access to your contacts to help address emails and messages.
     NSAppleEventsUsageDescription: Application requests permission to automate Mail and Messages on your behalf.
+    NSCalendarsFullAccessUsageDescription: Application requests access to your calendars to view and manage events.
+    NSRemindersFullAccessUsageDescription: Application requests access to your reminders to view and manage tasks.
+    NSAppleMusicUsageDescription: Application requests access to Apple Music to control playback.
   notarize: true
 dmg:
   artifactName: ${name}-${version}.${ext}

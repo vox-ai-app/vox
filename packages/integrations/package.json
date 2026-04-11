@@ -1,9 +1,9 @@
 {
   "name": "@vox-ai-app/integrations",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "type": "module",
   "license": "MIT",
-  "description": "macOS integrations (Mail, Screen, iMessage) for Vox",
+  "description": "macOS integrations (Mail, Screen, iMessage, Contacts, Shortcuts, Music, Calendar, Reminders) for Vox",
   "main": "./src/index.js",
   "private": false,
   "exports": {
@@ -11,12 +11,22 @@
     "./defs/mail": "./src/mail/def.js",
     "./defs/screen": "./src/screen/def.js",
     "./defs/imessage": "./src/imessage/def.js",
+    "./defs/contacts": "./src/contacts/def.js",
+    "./defs/shortcuts": "./src/shortcuts/def.js",
+    "./defs/music": "./src/music/def.js",
+    "./defs/calendar": "./src/calendar/def.js",
+    "./defs/reminders": "./src/reminders/def.js",
     "./mail": "./src/mail/index.js",
     "./screen": "./src/screen/index.js",
     "./screen/capture": "./src/screen/capture/index.js",
     "./screen/control": "./src/screen/control/index.js",
     "./screen/queue": "./src/screen/queue.js",
-    "./imessage": "./src/imessage/index.js"
+    "./imessage": "./src/imessage/index.js",
+    "./contacts": "./src/contacts/index.js",
+    "./shortcuts": "./src/shortcuts/index.js",
+    "./music": "./src/music/index.js",
+    "./calendar": "./src/calendar/index.js",
+    "./reminders": "./src/reminders/index.js"
   },
   "publishConfig": {
     "access": "public",

@@ -34,6 +34,10 @@ vi.mock('fs', () => ({
 }))
 
 vi.mock('child_process', () => ({
+  exec: vi.fn((...args) => {
+    const cb = args[args.length - 1]
+    if (typeof cb === 'function') cb(null, '', '')
+  }),
   execSync: vi.fn((cmd) => {
     if (cmd.includes('find')) return '/fake/extract/llama-b8635/llama-server\n'
     if (cmd.includes('--version')) return 'version: 8635\n'
@@ -187,11 +191,19 @@ describe('binary.manager', async () => {
         body: { getReader: () => mockReader }
       })
 
-      const { execSync } = await import('child_process')
+      const { execSync, exec } = await import('child_process')
       execSync.mockImplementation((cmd) => {
         if (cmd.includes('--version')) throw new Error('Killed: SIGABRT')
         if (cmd.includes('find')) return '/fake/extract/llama-b8635/llama-server\n'
         return ''
+      })
+      exec.mockImplementation((...args) => {
+        const cb = args[args.length - 1]
+        const cmd = args[0]
+        if (typeof cb === 'function') {
+          if (cmd.includes('--version')) return cb(new Error('Killed: SIGABRT'))
+          return cb(null, '', '')
+        }
       })
 
       await expect(manager.ensure()).rejects.toThrow('failed validation')
@@ -205,6 +217,10 @@ describe('binary.manager', async () => {
         if (cmd.includes('find')) return '/fake/extract/llama-b8635/llama-server\n'
         if (cmd.includes('--version')) return 'version: 8635\n'
         return ''
+      })
+      exec.mockImplementation((...args) => {
+        const cb = args[args.length - 1]
+        if (typeof cb === 'function') cb(null, '', '')
       })
 
       delete global.fetch

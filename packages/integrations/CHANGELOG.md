@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0] - 2026-04-12
+
+### Added
+
+- **Contacts** — search macOS Contacts with full field extraction (name, emails, phones, organization, title, addresses, notes). Pagination support with configurable limit/offset.
+- **Shortcuts** — list and run macOS Shortcuts with input/output passthrough. Pagination support for listing.
+- **Music** — control Apple Music: play, pause, next, previous, get now playing, set volume.
+- **Calendar** — list, create, update, and delete Calendar events with date-range filtering. Pagination support.
+- **Reminders** — list, create, and complete Reminders with list filtering. Pagination support.
+- **Shared utilities** — `shared/applescript` (AppleScript runner, `esc`, `toAppleDate`), `shared/shortcuts` (Shortcuts CLI runner), `shared/platform` (cross-platform registry with `resolveExecutors` and `makePlatformTools`).
+- Tool definitions (`def.js`) for all five new domains.
+- Pagination on all read-heavy tools: contacts (default 25), calendar (default 25), reminders (default 25), shortcuts (default 100). All capped at 200.
+
+### Changed
+
+- All `tools.js` files now use the `resolveExecutors` / `makePlatformTools` platform registry pattern — ready for cross-platform expansion.
+- `toAppleDate` extracted from calendar into `shared/applescript` for reuse across domains.
+
 ## [1.0.3] - 2026-04-10
 
 ### Fixed

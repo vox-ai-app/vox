@@ -1,1 +1,1 @@
-export { sendEmailMac, searchContactsMac } from './mac/index.js'
+export { sendEmailMac as sendEmail } from './mac/index.js'

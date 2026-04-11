@@ -41,6 +41,11 @@ Say "summarize my unread emails and draft replies to anything urgent." Vox reads
 - **File management** — read, write, edit, search, and organize files
 - **Grep & Glob** — regex search across files and find files by pattern
 - **Email** — send, read, search, and manage Apple Mail (attachments, drafts, flags)
+- **Contacts** — search macOS Contacts (name, emails, phones, organization, addresses, notes)
+- **Calendar** — list, create, update, and delete Calendar events with date-range filtering
+- **Reminders** — list, create, and complete Reminders across lists
+- **Music** — control Apple Music: play, pause, skip, volume, now playing
+- **Shortcuts** — list and run macOS Shortcuts with input/output passthrough
 - **Documents** — create Word, PDF, and PowerPoint files
 - **Web** — fetch and summarize web pages
 - **Knowledge base** — index folders for semantic search across 50+ file types

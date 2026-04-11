@@ -1,1 +1,5 @@
-export { readEmailsMac, getEmailBodyMac, openMailPermissionSettings } from './mac/index.js'
+export {
+  readEmailsMac as readEmails,
+  getEmailBodyMac as getEmailBody,
+  openMailPermissionSettings
+} from './mac/index.js'

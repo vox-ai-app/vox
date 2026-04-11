@@ -39,22 +39,6 @@ export const MAIL_TOOL_DEFINITIONS = [
     }
   },
   {
-    name: 'search_contacts',
-    description:
-      "Search the user's Contacts.app on macOS by name. Returns matching contacts with their name, email address, and where available: phone number, company, and job title. Call this before send_email whenever the user refers to a person by name rather than a full email address.",
-    parameters: {
-      type: 'object',
-      properties: {
-        query: {
-          type: 'string',
-          description:
-            'Name (or partial name) to search for. Case-insensitive. Examples: "Sara", "John Smith".'
-        }
-      },
-      required: ['query']
-    }
-  },
-  {
     name: 'send_email',
     description:
       "Send an email from a specific or the default mail account via Mail.app on macOS. Always call search_contacts first if you only know the recipient's name, not their full email address.",

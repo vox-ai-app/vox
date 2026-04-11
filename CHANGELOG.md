@@ -7,6 +7,28 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.2.0] - 2026-04-12
+
+### Added
+
+- **Contacts integration** — search macOS Contacts with full field extraction (name, emails, phones, organization, title, addresses, notes).
+- **Shortcuts integration** — list and run macOS Shortcuts with input/output passthrough.
+- **Music integration** — control Apple Music: play, pause, next, previous, get now playing, set volume.
+- **Calendar integration** — list, create, update, and delete Calendar events with date-range filtering.
+- **Reminders integration** — list, create, and complete Reminders with list filtering.
+- **Pagination** on all read-heavy integration tools (contacts, calendar, reminders, shortcuts) with `limit`, `offset`, `has_more` response fields.
+- **Platform registry** (`resolveExecutors` / `makePlatformTools`) — cross-platform dispatch for all integration tools, ready for Windows and Linux expansion.
+- Shared AppleScript utilities (`esc`, `toAppleDate`, `runAppleScript`) and Shortcuts CLI runner.
+- macOS entitlements for Calendars, Reminders, and Apple Music.
+
+### Changed
+
+- **`@vox-ai-app/integrations`** 1.0.4 → 1.1.0 — five new domains, pagination, platform registry.
+- Test runner now uses `ELECTRON_RUN_AS_NODE=1` to run Vitest under Electron's Node runtime, eliminating `better-sqlite3` ABI mismatch rebuilds.
+- Postinstall runs `@electron/rebuild` + `patch-onnx.js` in one step; removed separate pretest/dev rebuild scripts.
+
+---
+
 ## [2.1.7] - 2026-04-10
 
 ### Fixed

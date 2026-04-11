@@ -1,6 +1,6 @@
 {
   "name": "vox",
-  "version": "2.1.7",
+  "version": "2.2.0",
   "description": "Open-source local-model desktop app for Vox",
   "main": "./out/main/index.js",
   "author": "Arnav Gupta",
@@ -24,7 +24,7 @@
     "build": "electron-vite build",
     "build:packages": "npm run build --workspaces --if-present",
     "release": "changeset publish",
-    "postinstall": "electron-builder install-app-deps && node scripts/patch-onnx.js",
+    "postinstall": "npx @electron/rebuild && node scripts/patch-onnx.js",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",
@@ -32,8 +32,8 @@
     "prepare": "husky",
     "precommit": "lint-staged",
     "spellcheck": "cspell \"src/**/*.{js,jsx,json,md,css}\" \"*.{json,md,mjs,cjs}\"",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "ELECTRON_RUN_AS_NODE=1 electron ./node_modules/vitest/vitest.mjs run",
+    "test:watch": "ELECTRON_RUN_AS_NODE=1 electron ./node_modules/vitest/vitest.mjs"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
@@ -43,7 +43,7 @@
     "@sentry/electron": "^7.10.0",
     "@vox-ai-app/channels": "^1.0.0",
     "@vox-ai-app/indexing": "^1.0.2",
-    "@vox-ai-app/integrations": "^1.0.4",
+    "@vox-ai-app/integrations": "^1.1.0",
     "@vox-ai-app/mcp": "^1.0.1",
     "@vox-ai-app/scheduler": "^1.0.0",
     "@vox-ai-app/skills": "^1.0.0",

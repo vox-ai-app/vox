@@ -4,8 +4,7 @@ import {
   esc,
   EXEC_TIMEOUT,
   writeTempScript,
-  cleanupTemp,
-  parseTabSeparated
+  cleanupTemp
 } from '@vox-ai-app/tools/exec'
 import { ensureAppleMailConfigured } from '../../shared/index.js'
 export const sendEmailMac = async (
@@ -58,35 +57,6 @@ export const sendEmailMac = async (
       to,
       subject
     }
-  } finally {
-    await cleanupTemp(scriptFile)
-  }
-}
-export const searchContactsMac = async (query, { signal } = {}) => {
-  const script = [
-    `set Q to "${esc(query)}"`,
-    'set output to ""',
-    'tell application "Contacts"',
-    '  set matched to every person whose name contains Q',
-    '  repeat with p in matched',
-    '    set pName to name of p',
-    '    repeat with e in emails of p',
-    '      set output to output & pName & "\\t" & (value of e) & "\\n"',
-    '    end repeat',
-    '  end repeat',
-    'end tell',
-    'return output'
-  ].join('\n')
-  const scriptFile = await writeTempScript(script, 'scpt')
-  try {
-    const { stdout } = await execAbortable(
-      `osascript "${scriptFile}"`,
-      {
-        timeout: EXEC_TIMEOUT
-      },
-      signal
-    )
-    return parseTabSeparated(stdout)
   } finally {
     await cleanupTemp(scriptFile)
   }
