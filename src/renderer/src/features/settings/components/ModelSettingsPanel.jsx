@@ -52,28 +52,32 @@ export default function ModelSettingsPanel() {
       ])
       setModels(list || [])
       setActiveModel(active)
-      // eslint-disable-next-line no-empty
-    } catch {}
+    } catch {
+      // ignore
+    }
   }, [])
 
   useEffect(() => {
-    refresh()
+    async function init() {
+      await refresh()
 
-    // Load inference settings
-    async function loadInferenceSettings() {
       try {
         const storedTemp = await window.api.store.get(TEMPERATURE.key)
         const storedMax = await window.api.store.get(MAX_TOKENS.key)
         if (storedTemp != null) setTemperature(storedTemp)
         if (storedMax != null) setMaxTokens(storedMax)
-      } catch {}
+      } catch {
+        // ignore
+      }
 
       try {
         const ctx = await window.api.models.getContextSize()
         setContextSize(ctx)
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
-    loadInferenceSettings()
+    init()
 
     window.api.models
       .getDownloads?.()
@@ -174,8 +178,9 @@ export default function ModelSettingsPanel() {
     try {
       const result = await window.api.models.pickFile()
       if (result) refresh()
-      // eslint-disable-next-line no-empty
-    } catch {}
+    } catch {
+      // ignore
+    }
   }
 
   const handleDownload = async ({ hfRepo, hfFile }) => {
@@ -216,7 +221,9 @@ export default function ModelSettingsPanel() {
     setTemperature(val)
     try {
       await window.api.store.set(TEMPERATURE.key, val)
-    } catch {}
+    } catch {
+      // ignore
+    }
   }
 
   const handleMaxTokensChange = async (e) => {
@@ -224,7 +231,9 @@ export default function ModelSettingsPanel() {
     setMaxTokens(val)
     try {
       await window.api.store.set(MAX_TOKENS.key, val)
-    } catch {}
+    } catch {
+      // ignore
+    }
   }
 
   return (
@@ -524,7 +533,9 @@ export default function ModelSettingsPanel() {
               marginBottom: '6px'
             }}
           >
-            <span style={{ fontSize: '0.86rem', color: 'var(--vox-text-primary)', fontWeight: 500 }}>
+            <span
+              style={{ fontSize: '0.86rem', color: 'var(--vox-text-primary)', fontWeight: 500 }}
+            >
               Temperature
             </span>
             <span
@@ -574,7 +585,9 @@ export default function ModelSettingsPanel() {
               marginBottom: '6px'
             }}
           >
-            <span style={{ fontSize: '0.86rem', color: 'var(--vox-text-primary)', fontWeight: 500 }}>
+            <span
+              style={{ fontSize: '0.86rem', color: 'var(--vox-text-primary)', fontWeight: 500 }}
+            >
               Max Tokens
             </span>
             <span
@@ -623,7 +636,9 @@ export default function ModelSettingsPanel() {
               alignItems: 'center'
             }}
           >
-            <span style={{ fontSize: '0.86rem', color: 'var(--vox-text-primary)', fontWeight: 500 }}>
+            <span
+              style={{ fontSize: '0.86rem', color: 'var(--vox-text-primary)', fontWeight: 500 }}
+            >
               Context Size
             </span>
             <span

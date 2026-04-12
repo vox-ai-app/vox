@@ -1,8 +1,4 @@
-import { CONTEXT_SIZE } from '../../ai/config.js'
-
-const DEFAULT_THRESHOLD = Math.floor(CONTEXT_SIZE * 3.5 * 0.6)
-const DEFAULT_KEEP_RECENT = Math.floor(DEFAULT_THRESHOLD * 0.5)
-const SUMMARY_CHUNK_LIMIT = Math.floor(CONTEXT_SIZE * 4 * 0.8)
+import { getContextSize } from '../config.js'
 
 function messageChars(msg) {
   let chars = 0
@@ -64,6 +60,11 @@ function splitIntoChunks(messages, charLimit) {
 }
 
 export async function summarizeIfNeeded(messages, opts = {}) {
+  const contextSize = await getContextSize()
+  const DEFAULT_THRESHOLD = Math.floor(contextSize * 3.5 * 0.6)
+  const DEFAULT_KEEP_RECENT = Math.floor(DEFAULT_THRESHOLD * 0.5)
+  const SUMMARY_CHUNK_LIMIT = Math.floor(contextSize * 4 * 0.8)
+
   const {
     threshold = DEFAULT_THRESHOLD,
     keepRecentChars = DEFAULT_KEEP_RECENT,
