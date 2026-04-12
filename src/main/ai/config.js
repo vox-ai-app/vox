@@ -11,4 +11,8 @@ export async function getContextSize() {
   }
 }
 
+const FALLBACK_CONTEXT_SIZE = 32768
+export const CONTEXT_CHAR_THRESHOLD = Math.floor(FALLBACK_CONTEXT_SIZE * 3.5 * 0.6)
+export const CONTEXT_KEEP_RECENT_CHARS = Math.floor(CONTEXT_CHAR_THRESHOLD * 0.5)
+
 export const MAX_CONCURRENT_AGENTS = 2
