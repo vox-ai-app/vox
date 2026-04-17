@@ -69,7 +69,7 @@ jobs:
           fetch-depth: 0
 
       - name: Create Sentry release
-        uses: getsentry/action-release@v3.5.0
+        uses: getsentry/action-release@v3.6.0
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: digiiq
