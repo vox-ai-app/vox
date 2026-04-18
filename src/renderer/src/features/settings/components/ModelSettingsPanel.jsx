@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { TEMPERATURE, MAX_TOKENS } from '../../main/config/settings'
+import { TEMPERATURE, MAX_TOKENS } from '../../../../../shared/inferenceDefaults'
 
 function formatBytes(bytes) {
   if (!bytes) return ''

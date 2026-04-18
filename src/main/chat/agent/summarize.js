@@ -1,4 +1,4 @@
-import { getContextSize } from '../config.js'
+import { getContextSize } from '../../ai/config.js'
 
 function messageChars(msg) {
   let chars = 0

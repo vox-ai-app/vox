@@ -1,5 +1,5 @@
 import { getBaseUrl, isReady } from './server.js'
-import { getSetting, TEMPERATURE, MAX_TOKENS } from '../config/settings.js'
+import { getSetting, TEMPERATURE, MAX_TOKENS } from '../../config/settings.js'
 
 export async function chatCompletion({
   messages,
@@ -13,7 +13,7 @@ export async function chatCompletion({
   if (!isReady()) throw new Error('LLM server not ready')
 
   const resolvedTemperature = temperature ?? getSetting(TEMPERATURE.key) ?? TEMPERATURE.default
-  const resolvedMaxTokens   = maxTokens   ?? getSetting(MAX_TOKENS.key)  ?? MAX_TOKENS.default
+  const resolvedMaxTokens = maxTokens ?? getSetting(MAX_TOKENS.key) ?? MAX_TOKENS.default
 
   const body = {
     model: 'local',
@@ -162,13 +162,7 @@ export async function* streamChat({
   }
 }
 
-export async function nonStreamChat({
-  messages,
-  tools,
-  temperature,
-  maxTokens,
-  signal
-} = {}) {
+export async function nonStreamChat({ messages, tools, temperature, maxTokens, signal } = {}) {
   const result = await chatCompletion({
     messages,
     tools,
