@@ -13,7 +13,7 @@ import { emitAll } from '../../ipc/shared'
 import { logger } from '../../core/logger'
 import { parseTextToolCalls } from './text-tool-parser.js'
 import { executeElectronTool } from './tool-executor.js'
-import { CONTEXT_SIZE } from '../config.js'
+import { getContextSize } from '../config.js'
 import {
   resetStreamState,
   setChatStreamHandlers,
@@ -96,7 +96,7 @@ export async function loadModel(modelPath) {
   })
 
   try {
-    await startServer(modelPath, { contextSize: CONTEXT_SIZE })
+    await startServer(modelPath, { contextSize: await getContextSize() })
     _status = { ready: true, modelPath, loading: false, error: null }
     _restartAttempts = 0
     startHealthCheckLoop()

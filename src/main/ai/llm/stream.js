@@ -1,6 +1,6 @@
 import { emitAll } from '../../ipc/shared'
 import { logger } from '../../core/logger'
-import { CONTEXT_SIZE } from '../config.js'
+import { getContextSize } from '../config.js'
 
 let _activeStreamId = null
 let _voiceTextHandler = null
@@ -134,13 +134,15 @@ export function handleChatEventForRenderer(requestId, event) {
     case 'usage': {
       emitAll('chat:event', { type: 'usage', data: event })
       if (event.inputTokens && event.inputTokens > 0) {
-        const usageRatio = event.inputTokens / CONTEXT_SIZE
-        if (usageRatio > 0.7) {
-          emitAll('chat:event', {
-            type: 'context_warning',
-            data: { ratio: usageRatio, message: 'Context window is getting full.' }
-          })
-        }
+        getContextSize().then((contextSize) => {
+          const usageRatio = event.inputTokens / contextSize
+          if (usageRatio > 0.7) {
+            emitAll('chat:event', {
+              type: 'context_warning',
+              data: { ratio: usageRatio, message: 'Context window is getting full.' }
+            })
+          }
+        })
       }
       break
     }

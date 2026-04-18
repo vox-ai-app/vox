@@ -1,8 +1,11 @@
 import { storeDelete, storeGet, storeSet } from '../storage/store'
+export { TEMPERATURE, MAX_TOKENS } from '../../shared/inferenceDefaults'
 
 export const SETTINGS_KEYS = {
   KEEP_AWAKE: 'vox.settings.keepAwake',
-  IMESSAGE_PASSPHRASE: 'vox.settings.imessagePassphrase'
+  IMESSAGE_PASSPHRASE: 'vox.settings.imessagePassphrase',
+  TEMPERATURE: 'vox.settings.temperature',
+  MAX_TOKENS: 'vox.settings.maxTokens'
 }
 
 const LEGACY_KEYS = {
