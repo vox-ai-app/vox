@@ -13,7 +13,7 @@
 
 Report vulnerabilities privately via one of:
 
-- **Email:** info@vox-ai.chat
+- **Email:** info@arnavgupta.net
 - **GitHub private advisory:** [Report a vulnerability](https://github.com/vox-ai-app/vox/security/advisories/new)
 
 Include:

@@ -24,7 +24,7 @@ Examples of unacceptable behavior:
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to info@vox-ai.chat. All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to info@arnavgupta.net. All complaints will be reviewed and investigated promptly and fairly.
 
 ## Attribution
 
