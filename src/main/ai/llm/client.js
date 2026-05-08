@@ -1,22 +1,26 @@
 import { getBaseUrl, isReady } from './server.js'
+import { getSetting, TEMPERATURE, MAX_TOKENS } from '../../config/settings.js'
 
 export async function chatCompletion({
   messages,
   tools,
   toolChoice,
   stream = true,
-  temperature = 0.7,
-  maxTokens = 4096,
+  temperature,
+  maxTokens,
   signal
 } = {}) {
   if (!isReady()) throw new Error('LLM server not ready')
+
+  const resolvedTemperature = temperature ?? getSetting(TEMPERATURE.key) ?? TEMPERATURE.default
+  const resolvedMaxTokens = maxTokens ?? getSetting(MAX_TOKENS.key) ?? MAX_TOKENS.default
 
   const body = {
     model: 'local',
     messages,
     stream,
-    temperature,
-    max_tokens: maxTokens
+    temperature: resolvedTemperature,
+    max_tokens: resolvedMaxTokens
   }
 
   if (tools?.length > 0) {
@@ -84,8 +88,8 @@ export async function* streamChat({
   messages,
   tools,
   toolChoice,
-  temperature = 0.7,
-  maxTokens = 4096,
+  temperature,
+  maxTokens,
   signal
 } = {}) {
   const chunks = await chatCompletion({
@@ -155,17 +159,10 @@ export async function* streamChat({
       }
       yield { type: 'tool_call', id: tc.id, name: tc.name, args }
     }
-    pendingToolCalls = new Map()
   }
 }
 
-export async function nonStreamChat({
-  messages,
-  tools,
-  temperature = 0.7,
-  maxTokens = 4096,
-  signal
-} = {}) {
+export async function nonStreamChat({ messages, tools, temperature, maxTokens, signal } = {}) {
   const result = await chatCompletion({
     messages,
     tools,

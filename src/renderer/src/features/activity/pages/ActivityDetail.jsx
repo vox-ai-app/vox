@@ -143,13 +143,13 @@ function ActivityDetail({ taskId, liveTask, onBack, onAbort, onResume, taskEvent
               return <StepItem key={step.step_id || i} step={step} isLast={isLastStep} />
             })}
             {timeline.map((item, idx) => (
-                <ActionItem
-                  key={`action-${idx}`}
-                  call={item.call}
-                  result={item.result}
-                  isLast={false}
-                  repeatCount={item.repeatCount}
-                />
+              <ActionItem
+                key={`action-${idx}`}
+                call={item.call}
+                result={item.result}
+                isLast={false}
+                repeatCount={item.repeatCount}
+              />
             ))}
             {isRunning && (
               <TimelineMarker

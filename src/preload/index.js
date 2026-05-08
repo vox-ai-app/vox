@@ -78,7 +78,8 @@ const api = {
     onEngineStatus: (listener) => subscribeToRendererEvent('engine:status', listener),
     onEngineProgress: (listener) => subscribeToRendererEvent('engine:progress', listener),
     onEmbedStatus: (listener) => subscribeToRendererEvent('models:embed-status', listener),
-    onEmbedProgress: (listener) => subscribeToRendererEvent('models:embed-progress', listener)
+    onEmbedProgress: (listener) => subscribeToRendererEvent('models:embed-progress', listener),
+    getContextSize: () => invoke('models:get-context-size')
   },
 
   indexing: {

@@ -138,7 +138,9 @@ function JournalDetails({ argsObj }) {
       )}
       {blockers.length > 0 && (
         <div className="activity-journal-section">
-          <span className="activity-journal-section-label activity-journal-label-blocker">Blockers</span>
+          <span className="activity-journal-section-label activity-journal-label-blocker">
+            Blockers
+          </span>
           <ul className="activity-journal-list">
             {blockers.map((item, i) => (
               <li key={i} className="activity-journal-list-item activity-journal-list-blocker">
@@ -203,7 +205,9 @@ export const ActionItem = memo(function ActionItem({ call, result, isLast, repea
       (primaryEntry
         ? (() => {
             const s =
-              typeof primaryEntry[1] === 'string' ? primaryEntry[1] : JSON.stringify(primaryEntry[1])
+              typeof primaryEntry[1] === 'string'
+                ? primaryEntry[1]
+                : JSON.stringify(primaryEntry[1])
             return s.length > 90 ? `${s.slice(0, 90)}…` : s
           })()
         : null)
