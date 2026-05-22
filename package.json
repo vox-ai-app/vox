@@ -1,6 +1,6 @@
 {
   "name": "vox",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Open-source local-model desktop app for Vox",
   "main": "./out/main/index.js",
   "author": "Arnav Gupta",

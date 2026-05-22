@@ -7,6 +7,15 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.2.1] - 2026-05-22
+
+### Fixed
+
+- **Managed `llama-server` extraction** — replaced shell-based `.tar.gz` extraction with the Node `tar` package so packaged Electron installs no longer fail when `tar` is missing from `PATH`.
+- **Project contact email** — updated security and code of conduct contact addresses to `info@arnavgupta.net`.
+
+---
+
 ## [2.2.0] - 2026-04-12
 
 ### Added
