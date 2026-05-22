@@ -1,6 +1,7 @@
 import { execSync, exec } from 'child_process'
 import { promisify } from 'util'
 import { join, dirname } from 'path'
+import { extract as extractTar } from 'tar'
 
 const execAsync = promisify(exec)
 import {
@@ -155,10 +156,10 @@ async function download(destPath) {
   logger.info(LOG_PREFIX, `Downloaded ${downloaded} bytes`)
 }
 
-function extract(archivePath, destDir) {
+async function extract(archivePath, destDir) {
   const assetName = getAssetName()
   if (assetName.endsWith('.tar.gz')) {
-    execSync(`tar xzf "${archivePath}" -C "${destDir}"`)
+    await extractTar({ file: archivePath, cwd: destDir })
   } else {
     execSync(`unzip -o "${archivePath}" -d "${destDir}"`)
   }
@@ -227,7 +228,7 @@ export async function ensure() {
     await download(tmpArchive)
 
     mkdirSync(tmpExtract, { recursive: true })
-    extract(tmpArchive, tmpExtract)
+    await extract(tmpArchive, tmpExtract)
 
     installFromExtract(tmpExtract, versionDir)
     removeQuarantine(versionDir)

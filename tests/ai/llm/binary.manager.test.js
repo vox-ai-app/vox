@@ -19,6 +19,7 @@ const mockRenameSync = vi.fn()
 const mockRmSync = vi.fn()
 const mockReaddirSync = vi.fn(() => [])
 const mockCopyFileSync = vi.fn()
+const mockExtractTar = vi.fn()
 
 vi.mock('fs', () => ({
   existsSync: (...args) => mockExistsSync(...args),
@@ -43,6 +44,10 @@ vi.mock('child_process', () => ({
     if (cmd.includes('--version')) return 'version: 8635\n'
     return ''
   })
+}))
+
+vi.mock('tar', () => ({
+  extract: (...args) => mockExtractTar(...args)
 }))
 
 vi.mock('electron', () => ({
@@ -70,6 +75,7 @@ describe('binary.manager', async () => {
       throw new Error('ENOENT')
     })
     mockReaddirSync.mockReturnValue([])
+    mockExtractTar.mockResolvedValue()
   })
 
   describe('resolve', () => {
@@ -172,6 +178,10 @@ describe('binary.manager', async () => {
       const result = await manager.ensure()
 
       expect(result).toContain('llama-server')
+      expect(mockExtractTar).toHaveBeenCalledWith({
+        file: expect.stringContaining('.tar.gz.tmp'),
+        cwd: expect.stringContaining('extract-tmp')
+      })
       expect(mockCopyFileSync).toHaveBeenCalled()
       expect(mockWriteFileSync).toHaveBeenCalledWith(expect.stringContaining('version'), 'b8635')
 
