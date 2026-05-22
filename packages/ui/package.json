@@ -59,7 +59,7 @@
     "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
-    "vite": "^8.0.2",
+    "vite": "^8.0.8",
     "@vitejs/plugin-react": "^6.0.1"
   }
 }
