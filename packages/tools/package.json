@@ -33,7 +33,7 @@
     "@vox-ai-app/mcp": "^1.0.1",
     "@vox-ai-app/parser": "^1.0.1",
     "docx": "^9.6.0",
-    "html-to-text": "^9.0.5",
+    "html-to-text": "^10.0.0",
     "pdf-lib": "^1.17.1",
     "pptxgenjs": "^4.0.1"
   }
